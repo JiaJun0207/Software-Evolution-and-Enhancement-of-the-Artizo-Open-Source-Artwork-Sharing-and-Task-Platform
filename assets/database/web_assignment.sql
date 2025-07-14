@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 11, 2025 at 05:18 PM
+-- Generation Time: Jul 14, 2025 at 04:26 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,8 +34,7 @@ CREATE TABLE `artwork` (
   `artwork_image` varchar(255) NOT NULL,
   `user_id` int(11) NOT NULL,
   `release_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `category_id` int(11) NOT NULL,
-  `comment_id` int(11) DEFAULT NULL
+  `category_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -104,8 +103,7 @@ CREATE TABLE `user` (
 ALTER TABLE `artwork`
   ADD PRIMARY KEY (`artwork_id`),
   ADD KEY `fk_artwork_user` (`user_id`),
-  ADD KEY `fk_artwork_category` (`category_id`),
-  ADD KEY `fk_artwork_comment` (`comment_id`);
+  ADD KEY `fk_artwork_category` (`category_id`);
 
 --
 -- Indexes for table `category`
@@ -178,7 +176,6 @@ ALTER TABLE `user`
 --
 ALTER TABLE `artwork`
   ADD CONSTRAINT `fk_artwork_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_artwork_comment` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`comment_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_artwork_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
