@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 14, 2025 at 04:26 PM
+-- Generation Time: Jul 28, 2025 at 08:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,8 +33,8 @@ CREATE TABLE `artwork` (
   `artwork_description` varchar(255) NOT NULL,
   `artwork_image` varchar(255) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `release_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `category_id` int(11) NOT NULL
+  `category_id` int(11) NOT NULL,
+  `release_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -47,6 +47,17 @@ CREATE TABLE `category` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `category`
+--
+
+INSERT INTO `category` (`category_id`, `category_name`) VALUES
+(1, 'Graphic Design'),
+(2, 'Illustration'),
+(3, 'Photography'),
+(4, '3D Art'),
+(5, 'Advertising');
 
 -- --------------------------------------------------------
 
@@ -73,7 +84,9 @@ CREATE TABLE `task` (
   `task_title` varchar(255) NOT NULL,
   `task_description` varchar(255) NOT NULL,
   `task_image` varchar(255) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `task_status` enum('pending','accepted','submitted') DEFAULT 'pending',
+  `post_user_id` int(11) NOT NULL,
+  `accepted_user_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `release_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -90,7 +103,8 @@ CREATE TABLE `user` (
   `user_description` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `profile_image` varchar(255) NOT NULL
+  `profile_image` varchar(255) NOT NULL,
+  `reset_token` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -124,8 +138,9 @@ ALTER TABLE `comment`
 --
 ALTER TABLE `task`
   ADD PRIMARY KEY (`task_id`),
-  ADD KEY `idx_task_user` (`user_id`),
-  ADD KEY `idx_task_category` (`category_id`);
+  ADD KEY `idx_task_user` (`accepted_user_id`),
+  ADD KEY `idx_task_category` (`category_id`),
+  ADD KEY `fk_post_user` (`post_user_id`);
 
 --
 -- Indexes for table `user`
@@ -147,7 +162,7 @@ ALTER TABLE `artwork`
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `comment`
@@ -189,8 +204,9 @@ ALTER TABLE `comment`
 -- Constraints for table `task`
 --
 ALTER TABLE `task`
+  ADD CONSTRAINT `fk_post_user` FOREIGN KEY (`post_user_id`) REFERENCES `user` (`user_id`),
   ADD CONSTRAINT `fk_task_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_task_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_task_user` FOREIGN KEY (`accepted_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
