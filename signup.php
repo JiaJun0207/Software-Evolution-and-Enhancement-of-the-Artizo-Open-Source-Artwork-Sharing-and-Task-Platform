@@ -15,16 +15,15 @@ session_start(); // to start a session
 
 <body>
 
-    <?php
-    include "navbar.php";
-    if (isset($_SESSION["feedback"])) {
+    <?php include "navbar.php"; ?>
+    <?php if (isset($_SESSION["feedback"])) {
         echo $_SESSION["feedback"]; //to show the please fill i the form
     } ?>
 
     <form action="signup_form.php" method="post">
 
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username"> <!-- Added required for front end only -->
+        <label for="user_name">Username</label>
+        <input type="text" name="user_name" id="user_name"> <!-- Added required for front end only -->
         <label for="email">Email address</label>
         <input type="email" id="email" name="email"> <!-- Added required for front end only -->
         <label for="password">Password</label>

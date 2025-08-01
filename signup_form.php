@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") { //prevent users to direct access th
   exit();
 }
 
-include("index.php");
+include("config.php");
 
 $username = $_POST["user_name"];
 $email = $_POST["email"];
@@ -50,7 +50,6 @@ VALUES ('$username','$email','$hashed_password')";
   }
 }
 
-
-
+// Close the database connection
 $conn->close();
 ?>
