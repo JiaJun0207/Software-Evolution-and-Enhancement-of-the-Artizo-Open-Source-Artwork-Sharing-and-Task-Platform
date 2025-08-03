@@ -7,6 +7,8 @@ if (!isset($_SESSION['UID'])) {
   header("Location: login.php"); // Redirect to login if not logged in
   exit();
 }
+
+include("navbar.php"); // Include the navigation bar
 ?>
 
 <html lang="en">

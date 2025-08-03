@@ -1,39 +1,44 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="background-color: #000;">
+  <div class="container-fluid" style="padding: 15px 60px 15px 60px;">
+    <a class="navbar-brand" href="#">
+      <img src="assets/logo/navbar_logo.png" alt="Logo">
+  </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center" style="font-family: 'Inter', sans-serif; font-weight: 200; font-size: 30px; gap: 60px;">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
+          <a class="nav-link active" aria-current="page" href="index.php">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Dropdown
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Action</a></li>
-            <li><a class="dropdown-item" href="#">Another action</a></li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-            <li><a class="dropdown-item" href="#">Something else here</a></li>
-          </ul>
+          <a class="nav-link" href="#">Explore</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+          <a class="nav-link" href="#">Task</a>
+        </li>
+        <li class="nav-item">
+          <?php
+          // Show user profile image from database if logged in
+          $profile_img = "assets/default_user_profile/user_profile.png";
+          if (isset($_SESSION['UID'])) {
+              include_once("config.php");
+              $uid = $_SESSION['UID'];
+              $sql = "SELECT profile_image FROM user WHERE user_id = ?";
+              $stmt = $conn->prepare($sql);
+              $stmt->bind_param("i", $uid);
+              $stmt->execute();
+              $result = $stmt->get_result();
+              if ($row = $result->fetch_assoc()) {
+                  if (!empty($row['profile_image'])) {
+                      $profile_img = $row['profile_image'];
+                  }
+              }
+          }
+          ?>
+          <img src="<?php echo $profile_img; ?>" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
         </li>
       </ul>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-    </div>
   </div>
 </nav>

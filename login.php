@@ -14,7 +14,6 @@ session_start(); // to start a session
 </head>
 
 <body>
-    <?php include "navbar.php" ?>
     <?php
     if (isset($_SESSION["feedback"])) {
         echo $_SESSION["feedback"]; //to show the please fill in the form
