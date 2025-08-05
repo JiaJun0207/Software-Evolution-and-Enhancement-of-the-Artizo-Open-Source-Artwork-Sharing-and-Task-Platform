@@ -39,8 +39,8 @@ if ($result->num_rows > 0) { // the username found in table, login here
   }
   //if username not found,go to sign up
 } else {
-  header("Location: signup.php");
   $_SESSION["feedback"] = "Username not found. Please sign up.";
+  header("Location: signup.php");
   exit();
 }
 

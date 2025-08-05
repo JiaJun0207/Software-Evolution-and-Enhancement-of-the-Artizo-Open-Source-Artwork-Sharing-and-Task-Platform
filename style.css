@@ -8,3 +8,44 @@
   color: #fff !important;
   border-color: #000 !important;
 }
+
+/* Make input borders black */
+.form-control {
+  border-color: #000 !important;
+}
+.form-control:focus {
+  border-color: #000 !important;
+  box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+
+/* Inter Medium 25px font size */
+.inter-medium-25 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 25px;
+}
+
+/* Inter ExtraLight 15px font size */
+.inter-extralight-15 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: 15px;
+  color: #000 !important;
+}
+
+/* Set corner radius for buttons and inputs */
+.btn,
+.form-control {
+  border-radius: 14px !important;
+}
+
+/* Center placeholder text in input fields */
+.form-control::placeholder {
+  text-align: center;
+}
+
+/* Feedback error message styling */
+.feedback-error {
+  color: #d32f2f;
+  font-weight: 500;
+}

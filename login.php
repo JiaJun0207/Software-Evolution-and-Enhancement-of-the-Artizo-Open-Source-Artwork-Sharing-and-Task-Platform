@@ -12,17 +12,7 @@ session_start(); // to start a session
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
-    <style>
-      .btn-outline-black {
-        border-color: #000 !important;
-        color: #000 !important;
-      }
-      .btn-outline-black:hover, .btn-outline-black.active {
-        background-color: #000 !important;
-        color: #fff !important;
-        border-color: #000 !important;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -30,27 +20,38 @@ session_start(); // to start a session
     <div class="container-fluid">
         <div class="row vh-100">
             <div class="col-md-6 d-flex justify-content-center align-items-center bg-white">
-                <div class="text-center" style="width: 100%; max-width: 400px;">
+                <div class="text-center" style="width: 100%; max-width: 550px;">
 
                     <img src="assets/logo/onboarding_logo.png" alt="Logo" class="img-fluid mb-4">
 
-                    <div class="d-grid gap-2 d-md-block mb-4">
-                        <a href="login.php" class="btn btn-outline-black<?php if(basename($_SERVER['PHP_SELF'])=='login.php'){echo ' active';} ?>">Login</a>
-                        <a href="signup.php" class="btn btn-outline-black<?php if(basename($_SERVER['PHP_SELF'])=='signup.php'){echo ' active';} ?>">Sign Up</a>
+                    <div class="d-flex gap-2 mb-3">
+                        <a href="login.php" class="btn form-control btn-outline-black flex-fill inter-medium-25<?php if(basename($_SERVER['PHP_SELF'])=='login.php'){echo ' active';} ?>">Login</a>
+                        <a href="signup.php" class="btn form-control btn-outline-black flex-fill inter-medium-25<?php if(basename($_SERVER['PHP_SELF'])=='signup.php'){echo ' active';} ?>">Sign Up</a>
                     </div>
 
+                    <form action="login_form.php" method="post">
+                        <input type="text" name="user_name" id="user_name" class="form-control mb-3 inter-medium-25" placeholder="Username">
+                        <input type="password" id="password" name="password" class="form-control mb-3 inter-medium-25" placeholder="Password">
+                        <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Login</button>
+                        <a class="inter-extralight-15" href="#">forgot password?</a>
+                    </form>
+
+                    <div id="feedback-message" class="feedback-error">
                     <?php
                     if (isset($_SESSION["feedback"])) {
                         echo $_SESSION["feedback"];
-                    } ?>
-
-
-                    <form action="login_form.php" method="post">
-                        <input type="text" name="user_name" id="user_name" class="form-control mb-3" placeholder="Username">
-                        <input type="password" id="password" name="password" class="form-control mb-3" placeholder="Password">
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
-                        <p>Don't have an account? <a href="signup.php">Sign up</a></p>
-                    </form>
+                        unset($_SESSION["feedback"]);
+                    }
+                    ?>
+                    </div>
+                    <script>
+                      const feedback = document.getElementById('feedback-message');
+                      if (feedback && feedback.textContent.trim() !== "") {
+                        setTimeout(() => {
+                          feedback.style.display = 'none';
+                        }, 3000); // 3 seconds
+                      }
+                    </script>
 
                 </div>
 
