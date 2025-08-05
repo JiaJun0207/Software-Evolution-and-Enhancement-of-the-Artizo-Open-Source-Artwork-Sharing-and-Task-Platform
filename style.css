@@ -1,0 +1,10 @@
+/* Custom button outline for black theme */
+.btn-outline-black {
+  border-color: #000 !important;
+  color: #000 !important;
+}
+.btn-outline-black:hover, .btn-outline-black.active {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+}
