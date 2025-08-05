@@ -33,7 +33,7 @@ session_start(); // to start a session
                         <input type="text" name="user_name" id="user_name" class="form-control mb-3 inter-medium-25" placeholder="Username">
                         <input type="password" id="password" name="password" class="form-control mb-3 inter-medium-25" placeholder="Password">
                         <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Login</button>
-                        <a class="inter-extralight-15" href="#">forgot password?</a>
+                        <a class="inter-extralight-15" href="reset_password.php">forgot password?</a>
                     </form>
 
                     <div id="feedback-message" class="feedback-error">
