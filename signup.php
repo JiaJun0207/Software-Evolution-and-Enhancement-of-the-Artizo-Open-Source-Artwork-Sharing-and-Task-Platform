@@ -20,7 +20,7 @@ session_start(); // to start a session
 <div class="container-fluid">
         <div class="row vh-100">
             <div class="col-md-6 d-flex justify-content-center align-items-center bg-white">
-                <div class="text-center" style="width: 100%; max-width: 550px;">
+                <div class="text-center" style="width: 100%; max-width: 400px;">
 
                     <img src="assets/logo/onboarding_logo.png" alt="Logo" class="img-fluid mb-4">
 
