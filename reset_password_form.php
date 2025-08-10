@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Include database connection details
+require 'config.php'; // Include database connection details
 session_start(); // Start session to manage user authentication
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
