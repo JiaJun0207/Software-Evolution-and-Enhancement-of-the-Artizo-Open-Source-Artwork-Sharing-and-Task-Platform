@@ -56,3 +56,24 @@
   color: #d32f2f;
   font-weight: 500;
 }
+
+
+.homepage-hero {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.homepage-hero img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.homepage-text {
+  z-index: 2;
+  /* Optional: add background for better readability */
+  background: rgba(0,0,0,0.4);
+  padding: 2rem;
+  border-radius: 1rem;
+}

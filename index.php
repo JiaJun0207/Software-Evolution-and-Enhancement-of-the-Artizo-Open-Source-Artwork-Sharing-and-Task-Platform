@@ -14,14 +14,29 @@ include("navbar.php"); // Include the navigation bar
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Homepage</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
+
 <body>
+<div class="row">
+    <div class="homepage-hero position-relative">
+        <img src="assets/homepage/homepage.png" alt="HomePage" class="img-fluid w-100">
+        <div class="homepage-text position-absolute top-50 start-50 translate-middle text-start">
+            <h1 class="inter-bold-44">Where Creativity Meets Opportunity.</h1>
+            <p class="inter-extralight-24">Artizo is a creative showcase and a community-driven job board for artists and clients.</p>
+        </div>
+    </div>
+</div>
+
+
+
   <a href="logout.php" class="btn btn-danger">Logout</a>
 
   <form action="" method="post"> <!-- Form to add a product -->
