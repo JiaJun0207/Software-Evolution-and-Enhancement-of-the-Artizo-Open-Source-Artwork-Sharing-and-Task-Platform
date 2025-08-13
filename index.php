@@ -11,6 +11,7 @@ if (!isset($_SESSION['UID'])) {
 include("navbar.php"); // Include the navigation bar
 ?>
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -28,12 +29,14 @@ include("navbar.php"); // Include the navigation bar
 <div class="row">
     <div class="homepage-hero position-relative">
         <img src="assets/homepage/homepage.png" alt="HomePage" class="img-fluid w-100">
-        <div class="homepage-text position-absolute top-50 start-50 translate-middle text-start">
-            <h1 class="inter-bold-44">Where Creativity Meets Opportunity.</h1>
+        <div class="homepage position-absolute top-50">
+            <h1 class="inter-bold-44 ">Where Creativity Meets Opportunity.</h1>
             <p class="inter-extralight-24">Artizo is a creative showcase and a community-driven job board for artists and clients.</p>
         </div>
     </div>
 </div>
+
+
 
 
 
