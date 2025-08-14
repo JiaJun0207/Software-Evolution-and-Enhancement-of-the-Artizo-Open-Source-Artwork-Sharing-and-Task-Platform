@@ -33,6 +33,13 @@
   color: #000 !important;
 }
 
+.inter-extralight-15-white {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: 15px;
+  color: #fff !important;
+}
+
 /* Inter Bold 32px font size */
 .inter-bold-32 {
   font-family: 'Inter', sans-serif;
