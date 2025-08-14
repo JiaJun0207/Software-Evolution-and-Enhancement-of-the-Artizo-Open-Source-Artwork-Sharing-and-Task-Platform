@@ -19,10 +19,10 @@ if (empty($artwork_title) || empty($artwork_description) || empty($artwork_categ
   exit();
 }
 
-$artwork_image = time() . '_' . $_FILES["pimg"]["name"];
+$artwork_image = time() . '_' . $_FILES["artwork_image"]["name"];
 $path = "uploads/artworks/" . $artwork_image;
 
-if($_FILES['pimg']['size'] > 25000000) { // Check file size
+if($_FILES['artwork_image']['size'] > 25000000) { // Check file size
     header("Location: upload_artwork.php");
     echo "File size exceeds the limit of 25MB.";
     exit();
@@ -35,7 +35,7 @@ if(!in_array($imagefiletype, ['jpg', 'jpeg', 'png'])) { // Check file type
     exit();
 }
 
-move_uploaded_file($_FILES["pimg"]["tmp_name"], $path); // Move the uploaded file to the target directory
+move_uploaded_file($_FILES["artwork_image"]["tmp_name"], $path); // Move the uploaded file to the target directory
 
 $sql = "INSERT INTO `artwork`(`artwork_title`, `artwork_description`, `artwork_image`, `category_id`) VALUES ('$artwork_title','$artwork_description','$artwork_image','$artwork_category')";
 

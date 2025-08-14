@@ -9,6 +9,17 @@
   border-color: #000 !important;
 }
 
+/* Keep category buttons visually focused/active when selected */
+.btn-check:checked + .btn.btn-outline-black {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+  box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+.btn.btn-outline-black:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+
 /* Make input borders black */
 .form-control {
   border-color: #000 !important;
@@ -16,6 +27,12 @@
 .form-control:focus {
   border-color: #000 !important;
   box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+
+.inter-medium-24 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 24px;
 }
 
 /* Inter Medium 25px font size */
@@ -47,6 +64,13 @@
   font-size: 32px;
 }
 
+/* Inter Bold 44px */
+.inter-bold-44 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 44px;
+}
+
 /* Set corner radius for buttons and inputs */
 .btn,
 .form-control {
@@ -58,50 +82,14 @@
   text-align: center;
 }
 
+/* Left-aligned placeholder for specific input */
+.left-placeholder::placeholder {
+  text-align: left;
+  color: #B2B2B2;
+}
+
 /* Feedback error message styling */
 .feedback-error {
   color: #d32f2f;
   font-weight: 500;
-}
-
-
-
-
-
-
-
-.homepage-hero {
-  position: relative;
-  width: 100%;
-  height: auto;
-}
-
-.homepage-hero img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.homepage-text {
-  padding-left: 100px;
-  z-index: 2;
-  color: white; 
-  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  background: transparent !important; /* force remove dark box */
-  padding: 0 !important; /* remove extra space */
-  border-radius: 0 !important;
-}
-
-
-.homepage-text h1,
-.homepage-text p {
-  margin: 0.5rem 0;
-}
-
-
-.homepage-text,
-.homepage-text::before,
-.homepage-text::after {
-  background: transparent !important;
-  box-shadow: none !important;
 }
