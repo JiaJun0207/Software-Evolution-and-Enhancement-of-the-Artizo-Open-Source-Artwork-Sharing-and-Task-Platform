@@ -9,6 +9,17 @@
   border-color: #000 !important;
 }
 
+/* Keep category buttons visually focused/active when selected */
+.btn-check:checked + .btn.btn-outline-black {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+  box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+.btn.btn-outline-black:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+
 /* Make input borders black */
 .form-control {
   border-color: #000 !important;
@@ -16,6 +27,12 @@
 .form-control:focus {
   border-color: #000 !important;
   box-shadow: 0 0 0 0.2rem rgba(0,0,0,.25);
+}
+
+.inter-medium-24 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 24px;
 }
 
 /* Inter Medium 25px font size */
@@ -33,11 +50,25 @@
   color: #000 !important;
 }
 
+.inter-extralight-15-white {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: 15px;
+  color: #fff !important;
+}
+
 /* Inter Bold 32px font size */
 .inter-bold-32 {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 32px;
+}
+
+/* Inter Bold 44px */
+.inter-bold-44 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 44px;
 }
 
 /* Set corner radius for buttons and inputs */
@@ -49,6 +80,12 @@
 /* Center placeholder text in input fields */
 .form-control::placeholder {
   text-align: center;
+}
+
+/* Left-aligned placeholder for specific input */
+.left-placeholder::placeholder {
+  text-align: left;
+  color: #B2B2B2;
 }
 
 /* Feedback error message styling */

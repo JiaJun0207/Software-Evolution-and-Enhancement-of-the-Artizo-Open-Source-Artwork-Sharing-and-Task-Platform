@@ -67,5 +67,7 @@ include("navbar.php"); // Include the navigation bar
     <input type="submit" value="Add Product" class="btn btn-primary">
   </form>
 </body>
-
+<footer>
+    <?php include("footer.php"); // Include the footer ?>
+</footer>
 </html>
