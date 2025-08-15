@@ -26,17 +26,46 @@ include("navbar.php"); // Include the navigation bar
 
 
 <body>
-<div class="row">
-    <div class="homepage-hero position-relative">
-        <img src="assets/homepage/homepage.png" alt="HomePage" class="img-fluid w-100">
-        <div class="homepage position-absolute top-50">
-            <h1 class="inter-bold-44 ">Where Creativity Meets Opportunity.</h1>
-            <p class="inter-extralight-24">Artizo is a creative showcase and a community-driven job board for artists and clients.</p>
-        </div>
-    </div>
+<div class="card text-bg-dark">
+  <img src="assets/homepage/homepage.png" class="card-img" alt="homepageimg">
+  <div class="card-img-overlay">
+    <h1 class="card-title">Where Creativity Meets Opportunity.</h1>
+    <p class="card-text">Artizo is a creative showcase and a community-driven job board for artists and clients.</p>
+  </div>
 </div>
 
+  <a href="logout.php" class="btn btn-danger">Logout</a>
 
+  <form action="" method="post"> <!-- Form to add a product -->
+    <label for="artwork_id">Product Name</label>
+    <input type="text" name="pname">
+    <label for="artwork_title">Artwork Title</label>
+    <input type="text" name="ptitle">
+    <label for="artwork_description">Artwork Description</label>
+    <input type="text" name="pdescription">
+
+    <select class="form-select" aria-label="Default select example">
+      <?php
+      // Fetch categories from the database
+      $sql = "SELECT * FROM `category`";
+      $result = $conn->query($sql);
+
+      if ($result->num_rows > 0) {
+        // output data of each row
+        while ($row = $result->fetch_assoc()) {
+          ?>
+          <option value="<?php echo $row['category_id'] ?>">
+            <?php echo $row['category_name'] ?>
+          </option>
+          <?php
+        }
+      }
+      ?>
+      
+    </select>
+
+    <input type="submit" value="Add Product" class="btn btn-primary">
+  </form>
 </body>
 <footer>
     <?php include("footer.php"); // Include the footer ?>
