@@ -1,4 +1,6 @@
 /* Custom button outline for black theme */
+/* Apply 2px border to all input, textarea, and select elements */
+
 .btn-outline-black {
   border-color: #000 !important;
   color: #000 !important;
@@ -92,4 +94,8 @@
 .feedback-error {
   color: #d32f2f;
   font-weight: 500;
+}
+
+.border_black {
+  border: 2px solid #000 !important;
 }

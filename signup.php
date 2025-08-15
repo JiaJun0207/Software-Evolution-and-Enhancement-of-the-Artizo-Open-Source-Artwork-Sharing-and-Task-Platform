@@ -25,16 +25,16 @@ session_start(); // to start a session
                     <img src="assets/logo/onboarding_logo.png" alt="Logo" class="img-fluid mb-4">
 
                     <div class="d-flex gap-2 mb-3">
-                        <a href="login.php" class="btn form-control btn-outline-black flex-fill inter-medium-25<?php if(basename($_SERVER['PHP_SELF'])=='login.php'){echo ' active';} ?>">Login</a>
-                        <a href="signup.php" class="btn form-control btn-outline-black flex-fill inter-medium-25<?php if(basename($_SERVER['PHP_SELF'])=='signup.php'){echo ' active';} ?>">Sign Up</a>
+                        <a href="login.php" class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black<?php if(basename($_SERVER['PHP_SELF'])=='login.php'){echo ' active';} ?>">Login</a>
+                        <a href="signup.php" class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black<?php if(basename($_SERVER['PHP_SELF'])=='signup.php'){echo ' active';} ?>">Sign Up</a>
                     </div>
 
                     <form action="signup_form.php" method="post">
-                        <input type="text" name="user_name" id="user_name" class="form-control mb-3 inter-medium-25" placeholder="Username">
-                        <input type="email" id="email" name="email" class="form-control mb-3 inter-medium-25" placeholder="Email">
-                        <input type="password" id="password" name="password" class="form-control mb-3 inter-medium-25" placeholder="Password">
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-control mb-3 inter-medium-25" placeholder="Confirm Password">
-                        <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Register</button>
+                        <input type="text" name="user_name" id="user_name" class="form-control mb-3 inter-medium-25 border_black" placeholder="Username">
+                        <input type="email" id="email" name="email" class="form-control mb-3 inter-medium-25 border_black" placeholder="Email">
+                        <input type="password" id="password" name="password" class="form-control mb-3 inter-medium-25 border_black" placeholder="Password">
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control mb-3 inter-medium-25 border_black" placeholder="Confirm Password">
+                        <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25 border_black">Register</button>
                     </form>
 
                     <div id="feedback-message" class="feedback-error">

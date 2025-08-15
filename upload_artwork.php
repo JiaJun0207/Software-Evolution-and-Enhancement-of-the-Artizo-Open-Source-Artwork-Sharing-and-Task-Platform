@@ -30,29 +30,29 @@ include("navbar.php"); // Include the navigation bar
     <form action="upload_artwork.php" method="POST" enctype="multipart/form-data">
         <div class="mb-4">
             <label for="artworkTitle" class="inter-bold-32 mb-3">Title</label>
-            <input type="text" class="form-control inter-medium-25 left-placeholder" id="artwork_title" name="artwork_title" placeholder="Add a title" required>
+                <input type="text" class="form-control inter-medium-25 left-placeholder border_black" id="artwork_title" name="artwork_title" placeholder="Add a title" required>
         </div>
         <div class="mb-4">
             <label for="artworkDescription" class="inter-bold-32 mb-3">Description</label>
-            <textarea class="form-control inter-medium-25 left-placeholder" id="artwork_description" name="artwork_description" rows="3" placeholder="Add a detailed description" required></textarea>
+            <textarea class="form-control inter-medium-25 left-placeholder border_black" id="artwork_description" name="artwork_description" rows="3" placeholder="Add a detailed description" required></textarea>
         </div>
         <div class="mb-4">
             <label class="inter-bold-32 mb-3">Category</label>
             <div class="d-flex gap-2 w-100" role="group" aria-label="artwork_category">
                 <input type="radio" class="btn-check" name="artwork_category" id="graphic_design" value="1" autocomplete="off" required>
-                <label class="btn btn-outline-black flex-fill inter-medium-25" for="graphic_design">Graphic Design</label>
+                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="graphic_design">Graphic Design</label>
 
                 <input type="radio" class="btn-check" name="artwork_category" id="illustration" value="2" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25" for="illustration">Illustration</label>
+                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="illustration">Illustration</label>
 
                 <input type="radio" class="btn-check" name="artwork_category" id="photography" value="3" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25" for="photography">Photography</label>
+                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="photography">Photography</label>
 
                 <input type="radio" class="btn-check" name="artwork_category" id="3d_art" value="4" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25" for="3d_art">3D Art</label>
+                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="3d_art">3D Art</label>
 
                 <input type="radio" class="btn-check" name="artwork_category" id="advertising" value="5" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25" for="advertising">Advertising</label>
+                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="advertising">Advertising</label>
             </div>
         </div>
         <div class="mb-5">
