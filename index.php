@@ -26,19 +26,13 @@ include("navbar.php"); // Include the navigation bar
 
 
 <body>
-<div class="row">
-    <div class="homepage-hero position-relative">
-        <img src="assets/homepage/homepage.png" alt="HomePage" class="img-fluid w-100">
-        <div class="homepage position-absolute top-50">
-            <h1 class="inter-bold-44 ">Where Creativity Meets Opportunity.</h1>
-            <p class="inter-extralight-24">Artizo is a creative showcase and a community-driven job board for artists and clients.</p>
-        </div>
-    </div>
+<div class="card text-bg-dark">
+  <img src="assets/homepage/homepage.png" class="card-img" alt="homepageimg">
+  <div class="card-img-overlay">
+    <h1 class="card-title">Where Creativity Meets Opportunity.</h1>
+    <p class="card-text">Artizo is a creative showcase and a community-driven job board for artists and clients.</p>
+  </div>
 </div>
-
-
-
-
 
   <a href="logout.php" class="btn btn-danger">Logout</a>
 

@@ -62,39 +62,3 @@
 
 
 
-
-.homepage-hero {
-  position: relative;
-  width: 100%;
-  height: auto;
-}
-
-.homepage-hero img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.homepage-text {
-  padding-left: 100px;
-  z-index: 2;
-  color: white; 
-  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  background: transparent !important; /* force remove dark box */
-  padding: 0 !important; /* remove extra space */
-  border-radius: 0 !important;
-}
-
-
-.homepage-text h1,
-.homepage-text p {
-  margin: 0.5rem 0;
-}
-
-
-.homepage-text,
-.homepage-text::before,
-.homepage-text::after {
-  background: transparent !important;
-  box-shadow: none !important;
-}
