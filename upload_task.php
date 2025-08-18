@@ -17,7 +17,7 @@ include("navbar.php"); // Include the navigation bar
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Artwork</title>
+    <title>Upload Task</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
@@ -26,42 +26,42 @@ include("navbar.php"); // Include the navigation bar
 
 <body>
 <div class="container-fluid" style="padding-left: 60px; padding-right: 60px;">
-    <h1 class="inter-bold-44 mb-4" style="margin-top:60px;">Post Artwork</h1>
-    <form action="upload_artwork_form.php" method="POST" enctype="multipart/form-data">
+    <h1 class="inter-bold-44 mb-4" style="margin-top:60px;">Post Task</h1>
+    <form action="upload_task_form.php" method="POST" enctype="multipart/form-data">
         <div class="mb-4">
-            <label for="artworkTitle" class="inter-bold-32 mb-3">Title</label>
-                <input type="text" class="form-control inter-medium-25 left-placeholder border_black" id="artwork_title" name="artwork_title" placeholder="Add a title" required>
+            <label for="taskTitle" class="inter-bold-32 mb-3">Title</label>
+                <input type="text" class="form-control inter-medium-25 left-placeholder border_black" id="task_title" name="task_title" placeholder="Add a title" required>
         </div>
         <div class="mb-4">
-            <label for="artworkDescription" class="inter-bold-32 mb-3">Description</label>
-            <textarea class="form-control inter-medium-25 left-placeholder border_black" id="artwork_description" name="artwork_description" rows="3" placeholder="Add a detailed description" required></textarea>
+            <label for="taskDescription" class="inter-bold-32 mb-3">Description</label>
+            <textarea class="form-control inter-medium-25 left-placeholder border_black" id="task_description" name="task_description" rows="3" placeholder="Add a detailed description" required></textarea>
         </div>
         <div class="mb-4">
             <label class="inter-bold-32 mb-3">Category</label>
-            <div class="d-flex gap-2 w-100" role="group" aria-label="artwork_category">
-                <input type="radio" class="btn-check" name="artwork_category" id="graphic_design" value="1" autocomplete="off" required>
+            <div class="d-flex gap-2 w-100" role="group" aria-label="task_category">
+                <input type="radio" class="btn-check" name="task_category" id="graphic_design" value="1" autocomplete="off" required>
                 <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="graphic_design">Graphic Design</label>
 
-                <input type="radio" class="btn-check" name="artwork_category" id="illustration" value="2" autocomplete="off">
+                <input type="radio" class="btn-check" name="task_category" id="illustration" value="2" autocomplete="off">
                 <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="illustration">Illustration</label>
 
-                <input type="radio" class="btn-check" name="artwork_category" id="photography" value="3" autocomplete="off">
+                <input type="radio" class="btn-check" name="task_category" id="photography" value="3" autocomplete="off">
                 <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="photography">Photography</label>
 
-                <input type="radio" class="btn-check" name="artwork_category" id="3d_art" value="4" autocomplete="off">
+                <input type="radio" class="btn-check" name="task_category" id="3d_art" value="4" autocomplete="off">
                 <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="3d_art">3D Art</label>
 
-                <input type="radio" class="btn-check" name="artwork_category" id="advertising" value="5" autocomplete="off">
+                <input type="radio" class="btn-check" name="task_category" id="advertising" value="5" autocomplete="off">
                 <label class="btn btn-outline-black flex-fill inter-medium-25 border_black" for="advertising">Advertising</label>
             </div>
         </div>
         <div class="mb-5">
-            <label for="artwork_image" class="inter-bold-32 mb-3">Upload Image</label>
+            <label for="task_image" class="inter-bold-32 mb-3">Upload Image</label>
             <div id="drop-area" class="border border-2 border-dark rounded-3 text-center mb-3 d-flex flex-column align-items-center justify-content-center" style="cursor:pointer; background:#fafafa; padding:60px;">
                 <img src="assets/icons/upload.png" alt="Upload Icon" style="width:48px; height:48px; margin-bottom:12px; display:block;">
                 <span id="drop-text" class="inter-medium-24" style="display:block;">Drag & drop image here or click to select</span>
             </div>
-            <input type="file" class="form-control d-none" id="artwork_image" name="artwork_image" accept="image/*" required>
+            <input type="file" class="form-control d-none" id="task_image" name="task_image" accept="image/*" required>
         </div>
         <div class="text-end" style="padding-bottom: 60px;">
             <button type="submit" class="btn btn-outline-black inter-medium-24 active">
@@ -72,7 +72,7 @@ include("navbar.php"); // Include the navigation bar
     </form>
 <script>
 const dropArea = document.getElementById('drop-area');
-const fileInput = document.getElementById('artwork_image');
+const fileInput = document.getElementById('task_image');
 const dropText = document.getElementById('drop-text');
 
 dropArea.addEventListener('click', () => fileInput.click());
