@@ -21,7 +21,7 @@
         <li class="nav-item">
           <?php
           // Show user profile image from database if logged in
-          $profile_img = "assets/default_user_profile/user_profile.png";
+          $profile_img = "assets/profile/user_profile.png";
           if (isset($_SESSION['UID'])) {
               include_once("config.php");
               $uid = $_SESSION['UID'];
@@ -32,13 +32,13 @@
               $result = $stmt->get_result();
               if ($row = $result->fetch_assoc()) {
                   if (!empty($row['profile_image'])) {
-                      $profile_img = $row['profile_image'];
+                      $profile_img = "assets/profile/" . htmlspecialchars($row['profile_image']);
                   }
               }
           }
           ?>
           <a href="user_profile.php">
-            <img src="<?php echo $profile_img; ?>" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
+            <img src="<?php echo htmlspecialchars($profile_img); ?>" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
           </a>
         </li>
       </ul>

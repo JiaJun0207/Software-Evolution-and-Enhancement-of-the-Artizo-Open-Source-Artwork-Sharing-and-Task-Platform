@@ -8,6 +8,21 @@ if (!isset($_SESSION['UID'])) {
     exit();
 }
 
+// Fetch user data
+$uid = $_SESSION['UID'];
+$query = "SELECT `profile_image`, `user_name`, `user_description` FROM `user` WHERE `user_id` = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $uid);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+// Determine profile image path
+$profileImg = "assets/profile/user_profile.png";
+if (!empty($user['profile_image'])) {
+    $profileImg = "assets/profile/" . $user['profile_image'];
+}
+
 include("navbar.php"); // Include the navigation bar
 ?>
 
@@ -25,13 +40,71 @@ include("navbar.php"); // Include the navigation bar
 </head>
 
 <body>
-    <div class="container-fluid" style="padding-left: 60px; padding-right: 60px;">
-        <div class="card profile-card flex-row align-items-center">
-            <div class="card-body d-flex flex-row align-items-center gap-3">
-                <p class="card-text mb-0">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+    <div class="container-fluid" style="padding-left: 60px; padding-right: 60px; margin-top:60px;">
+        <div class="card card_border mb-4">
+            <div class="card-body d-flex flex-row align-items-center gap-3"
+                style="padding-left:40px; padding-right:40px;">
+                <div class="d-inline-block">
+                    <img src="<?php echo htmlspecialchars($profileImg); ?>" alt="Profile Image" class="rounded-circle"
+                        style="width:100px; height:100px; object-fit:cover;">
+                </div>
+                <p class="card-text mb-0 inter-medium-24">
+                    <?php echo htmlspecialchars($user['user_name']); ?>
+                </p>
+                <div class="d-flex flex-row ms-auto align-items-end gap-3">
+                    <a href="edit_profile.php" class="btn btn-outline-black inter-medium-25 border_black"
+                        style="width:234px; height:53px;">Edit Profile</a>
+                    <a href="logout.php" style="text-decoration:none;">
+                        <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center"
+                            style="width:53px; height:53px; padding:0;">
+                            <img src="assets/icons/logout.png" alt="Logout Icon" style="width: 23px; height: 23px;">
+                        </div>
+                    </a>
+                    <a href="support.php" style="text-decoration:none;">
+                    <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center"
+                        style="width:53px; height:53px; padding:0;">
+                        <img src="assets/icons/support.png" alt="Support Icon" style="width: 23px; height: 23px;">
+                    </div>
+                    </a>
+                </div>
             </div>
         </div>
+        <div class="card card_border mb-5">
+            <div class="card-body align-items-center gap-3" style="padding-left:40px; padding-right:40px;">
+                <h5 class="card-title inter-bold-24">Description</h5>
+                <p class="card-text inter-extralight-15">
+                    <?php echo !empty($user['user_description']) ? htmlspecialchars($user['user_description']) : 'No description provided.'; ?>
+                </p>
+            </div>
+        </div>
+
+        <h1 class="inter-bold-24 mb-4" style="padding-left:40px; padding-right:40px;">My Artwork</h1>
+
+        <?php
+
+        $sql = "SELECT * FROM `artwork`";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            //output data of each row
+            while ($row = $result->fetch_assoc()) {
+                ?>
+                <div class="row row-cols-4 g-4" style="padding-bottom: 60px;">
+                    <div class="col">
+                        <a href="artwork_detail.php?artwork_id=<?php echo urlencode($row['artwork_id']); ?>" style="text-decoration:none;">
+                            <div class="card card_artwork h-100 w-100">
+                                <img src="assets/uploads/artworks/<?php echo htmlspecialchars($row['artwork_image']); ?>" alt="Artwork" class="card-img">
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <?php
+            }
+        } else {
+            echo "<p class='inter-extralight-15'>users don't have artworks.</p>";
+        }
+        ?>
+
     </div>
 
 </body>
