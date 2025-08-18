@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 28, 2025 at 08:31 AM
+-- Generation Time: Aug 18, 2025 at 10:29 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,6 +36,13 @@ CREATE TABLE `artwork` (
   `category_id` int(11) NOT NULL,
   `release_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `artwork`
+--
+
+INSERT INTO `artwork` (`artwork_id`, `artwork_title`, `artwork_description`, `artwork_image`, `user_id`, `category_id`, `release_at`) VALUES
+(4, 'Testing', 'gendaiiwdf', '1755504481_1200x630bb.jpg', 2, 1, '2025-08-18 08:08:01');
 
 -- --------------------------------------------------------
 
@@ -86,10 +93,17 @@ CREATE TABLE `task` (
   `task_image` varchar(255) NOT NULL,
   `task_status` enum('pending','accepted','submitted') DEFAULT 'pending',
   `post_user_id` int(11) NOT NULL,
-  `accepted_user_id` int(11) NOT NULL,
+  `accepted_user_id` int(11) DEFAULT NULL,
   `category_id` int(11) NOT NULL,
   `release_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `task`
+--
+
+INSERT INTO `task` (`task_id`, `task_title`, `task_description`, `task_image`, `task_status`, `post_user_id`, `accepted_user_id`, `category_id`, `release_at`) VALUES
+(3, 'testing', 'hello', '1755505585_03cdsaHx_400x400.jpg', 'pending', 2, NULL, 2, '2025-08-18 08:26:25');
 
 -- --------------------------------------------------------
 
@@ -106,6 +120,13 @@ CREATE TABLE `user` (
   `profile_image` varchar(255) NOT NULL,
   `reset_token` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`user_id`, `user_name`, `user_description`, `email`, `password`, `profile_image`, `reset_token`) VALUES
+(2, 'jiajun1', '', 'jiajun1@gmail.com', '$2y$10$ztKMhvw4Yg90VnB32CixaO9fSa2xL5fRX755yr91tizeWDTa/0ZF2', '', '');
 
 --
 -- Indexes for dumped tables
@@ -156,7 +177,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `artwork`
 --
 ALTER TABLE `artwork`
-  MODIFY `artwork_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `artwork_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -174,13 +195,13 @@ ALTER TABLE `comment`
 -- AUTO_INCREMENT for table `task`
 --
 ALTER TABLE `task`
-  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
