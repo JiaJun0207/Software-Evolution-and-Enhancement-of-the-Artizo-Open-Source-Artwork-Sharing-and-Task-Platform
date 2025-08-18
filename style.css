@@ -99,3 +99,7 @@
 .border_black {
   border: 2px solid #000 !important;
 }
+
+.profile-card {
+    border: 2px solid #000 !important;
+}
