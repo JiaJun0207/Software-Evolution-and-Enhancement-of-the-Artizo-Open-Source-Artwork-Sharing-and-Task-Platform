@@ -61,10 +61,10 @@ include("navbar.php"); // Include the navigation bar
                         </div>
                     </a>
                     <a href="support.php" style="text-decoration:none;">
-                    <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center"
-                        style="width:53px; height:53px; padding:0;">
-                        <img src="assets/icons/support.png" alt="Support Icon" style="width: 23px; height: 23px;">
-                    </div>
+                        <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center"
+                            style="width:53px; height:53px; padding:0;">
+                            <img src="assets/icons/support.png" alt="Support Icon" style="width: 23px; height: 23px;">
+                        </div>
                     </a>
                 </div>
             </div>
@@ -72,7 +72,7 @@ include("navbar.php"); // Include the navigation bar
         <div class="card card_border mb-5">
             <div class="card-body align-items-center gap-3" style="padding-left:40px; padding-right:40px;">
                 <h5 class="card-title inter-bold-24">Description</h5>
-                <p class="card-text inter-extralight-15" >
+                <p class="card-text inter-extralight-15">
                     <?php echo !empty($user['user_description']) ? htmlspecialchars($user['user_description']) : 'No description provided.'; ?>
                 </p>
             </div>
@@ -91,9 +91,11 @@ include("navbar.php"); // Include the navigation bar
                 ?>
                 <div class="row row-cols-4 g-4" style="padding-bottom: 60px;">
                     <div class="col">
-                        <a href="artwork_detail.php?artwork_id=<?php echo urlencode($row['artwork_id']); ?>" style="text-decoration:none;">
+                        <a href="artwork_detail.php?artwork_id=<?php echo urlencode($row['artwork_id']); ?>"
+                            style="text-decoration:none;">
                             <div class="card card_artwork h-100 w-100">
-                                <img src="assets/uploads/artworks/<?php echo htmlspecialchars($row['artwork_image']); ?>" alt="Artwork" class="card-img">
+                                <img src="assets/uploads/artworks/<?php echo htmlspecialchars($row['artwork_image']); ?>"
+                                    alt="Artwork" class="card-img">
                             </div>
                         </a>
                     </div>
@@ -101,7 +103,10 @@ include("navbar.php"); // Include the navigation bar
                 <?php
             }
         } else {
-            echo "<p  class='inter-extralight-15'>users don't have artworks.</p>";
+            ?>
+            <p class="inter-extralight-15" style="padding-left: 40px;">users don't have artworks.</p>
+            <?php
+
         }
         ?>
 
