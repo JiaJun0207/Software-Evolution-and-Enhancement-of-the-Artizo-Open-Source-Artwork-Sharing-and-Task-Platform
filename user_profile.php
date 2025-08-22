@@ -72,7 +72,7 @@ include("navbar.php"); // Include the navigation bar
         <div class="card card_border mb-5">
             <div class="card-body align-items-center gap-3" style="padding-left:40px; padding-right:40px;">
                 <h5 class="card-title inter-bold-24">Description</h5>
-                <p class="card-text inter-extralight-15">
+                <p class="card-text inter-extralight-15" >
                     <?php echo !empty($user['user_description']) ? htmlspecialchars($user['user_description']) : 'No description provided.'; ?>
                 </p>
             </div>
@@ -101,7 +101,7 @@ include("navbar.php"); // Include the navigation bar
                 <?php
             }
         } else {
-            echo "<p class='inter-extralight-15'>users don't have artworks.</p>";
+            echo "<p  class='inter-extralight-15'>users don't have artworks.</p>";
         }
         ?>
 

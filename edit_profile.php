@@ -77,11 +77,11 @@ include("navbar.php"); // Include the navigation bar
                     <div class="card-body d-flex flex-column justify-content-center align-items-center"
                         style="padding-left:40px; padding-right:40px;">
                         <div class="mb-3 w-100 d-flex justify-content-center">
-                            <a href="#" class="btn btn-outline-black inter-medium-25 border_black"
+                            <a href="update_password.php" class="btn btn-outline-black inter-medium-25 border_black"
                                 style="width:266px; height:53px;">Reset Password</a>
                         </div>
                         <div class="w-100 d-flex justify-content-center" style="margin-bottom: 44px;">
-                            <a href="#" class="btn btn-outline-black inter-medium-25 border_black"
+                            <a href="support.php" class="btn btn-outline-black inter-medium-25 border_black"
                                 style="width:266px; height:53px;">Support</a>
                         </div>
                     </div>
