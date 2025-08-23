@@ -30,22 +30,24 @@ include("navbar.php"); // Include the navigation bar
         <div class="row">
             <div class="col">
                 <div class="mb-3">
-                    <form action="support_form.php" method="POST" enctype="multipart/form-data">
+                    <form id="supportForm">
                         <div class=" align-items-center gap-3 mb-3" style="padding-left:40px; padding-right:40px;">
                             <div class="mb-4">
-                                <label for="support_email" class="inter-bold-32 mb-3">Email</label>
-                                <input type="email" class="form-control inter-medium-25 left-placeholder border_black"
-                                    id="support_email" name="support_email" placeholder="Add a email" required>
+                                <label class="inter-bold-32 mb-3">Email</label>
+                                <input type="email" id="userEmail" name="from_email"
+                                    class="form-control inter-medium-25 left-placeholder border_black"
+                                    placeholder="Add a email" required>
                             </div>
                             <div class="mb-4">
-                                <label for="support_phone" class="inter-bold-32 mb-3">Phone Number</label>
-                                <input type="tel" class="form-control inter-medium-25 left-placeholder border_black"
-                                    id="support_phone" name="support_phone" placeholder="Add a phone number" required>
+                                <label class="inter-bold-32 mb-3">Phone Number</label>
+                                <input type="tel" id="userPhone" name="phone"
+                                    class="form-control inter-medium-25 left-placeholder border_black"
+                                    placeholder="Add a phone number" required>
                             </div>
                             <div class="mb-4">
-                                <label for="support_description" class="inter-bold-32 mb-3">Message</label>
-                                <textarea class="form-control inter-medium-25 left-placeholder border_black"
-                                    id="support_description" name="support_description" rows="3"
+                                <label class="inter-bold-32 mb-3">Message</label>
+                                <textarea id="userMessage" name="message"
+                                    class="form-control inter-medium-25 left-placeholder border_black" rows="3"
                                     placeholder="Add a message" required></textarea>
                             </div>
                             <div style="padding-bottom: 60px;">
@@ -57,6 +59,26 @@ include("navbar.php"); // Include the navigation bar
                             </div>
                         </div>
                     </form>
+
+                    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+                    <script>
+                        (function () {
+                            emailjs.init("V_v7cog5I1e4iA4Ms"); // My Public Key
+                        })();
+
+                        document.getElementById("supportForm").addEventListener("submit", function (event) {
+                            event.preventDefault();
+
+                            emailjs.sendForm("service_5tj98vi", "template_9hhv7nu", this)
+                                .then(function (response) {
+                                    alert("Message sent successfully!");
+                                }, function (error) {
+                                    alert("Failed to send message: " + JSON.stringify(error));
+                                    window.location.href = "support.php";
+                                });
+                        });
+                    </script>
+
                 </div>
             </div>
             <div class="col">
@@ -71,21 +93,21 @@ include("navbar.php"); // Include the navigation bar
                             <div class="d-flex">
                                 <a type="hidden" href="mailto:cs-artizo@gmail.com">
                                     <img src="assets/icons/email.png" alt="Support Icon"
-                                    style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
-                                    <p class="inter-extralight-24">cs-artizo@gmail.com</p>
-                                </div>
-                                <div class="d-flex">
-                                    <a type="hidden" href="tel:+60169125204">
-                                        <img src="assets/icons/phone.png" alt="Support Icon"
-                                            style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
-                                        <p class="inter-extralight-24">+60 16-9125204</p>
-                                </div>
-                                <div class="d-flex">
-                                    <a type="hidden" href="http://wa.link/y4xnnz">
-                                        <img src="assets/icons/whatsapp.png" alt="Support Icon"
-                                            style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
-                                        <p class="inter-extralight-24">http://wa.link/y4xnnz</p>
-                                </div>
+                                        style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
+                                <p class="inter-extralight-24">cs-artizo@gmail.com</p>
+                            </div>
+                            <div class="d-flex">
+                                <a type="hidden" href="tel:+60169125204">
+                                    <img src="assets/icons/phone.png" alt="Support Icon"
+                                        style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
+                                <p class="inter-extralight-24">+60 16-9125204</p>
+                            </div>
+                            <div class="d-flex">
+                                <a type="hidden" href="http://wa.link/y4xnnz">
+                                    <img src="assets/icons/whatsapp.png" alt="Support Icon"
+                                        style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
+                                <p class="inter-extralight-24">http://wa.link/y4xnnz</p>
+                            </div>
                         </div>
                     </div>
                 </div>

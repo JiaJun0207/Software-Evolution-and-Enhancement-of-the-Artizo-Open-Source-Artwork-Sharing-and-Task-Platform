@@ -91,7 +91,7 @@ include("navbar.php"); // Include the navigation bar
                 ?>
                 <div class="row row-cols-4 g-4" style="padding-bottom: 60px;">
                     <div class="col">
-                        <a href="artwork_detail.php?artwork_id=<?php echo urlencode($row['artwork_id']); ?>"
+                        <a href="artwork_detail.php?id=<?php echo urlencode($row['artwork_id']); ?>"
                             style="text-decoration:none;">
                             <div class="card card_artwork h-100 w-100">
                                 <img src="assets/uploads/artworks/<?php echo htmlspecialchars($row['artwork_image']); ?>"
