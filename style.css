@@ -45,6 +45,12 @@
   font-size: 25px;
 }
 
+.inter-medium-32 {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 32px;
+}
+
 /* Inter ExtraLight 15px font size */
 .inter-extralight-15 {
   font-family: "Inter", sans-serif;
