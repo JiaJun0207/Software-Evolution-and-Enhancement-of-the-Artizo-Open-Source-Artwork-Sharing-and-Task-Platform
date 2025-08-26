@@ -120,7 +120,7 @@ include("navbar.php"); // Include the navigation bar
                 FROM task t 
                 JOIN user u ON t.post_user_id = u.user_id 
                 JOIN category c ON t.category_id = c.category_id";
-        $where = ["t.task_status = 'pending'"];
+        $where = ["t.task_status = 'accept'"];
         if (isset($_GET['search']) && $_GET['search'] !== '') {
             $search = $conn->real_escape_string($_GET['search']);
             $where[] = "(t.task_title LIKE '%$search%' OR t.task_description LIKE '%$search%')";

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 18, 2025 at 10:29 AM
+-- Generation Time: Aug 26, 2025 at 08:54 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -91,7 +91,8 @@ CREATE TABLE `task` (
   `task_title` varchar(255) NOT NULL,
   `task_description` varchar(255) NOT NULL,
   `task_image` varchar(255) NOT NULL,
-  `task_status` enum('pending','accepted','submitted') DEFAULT 'pending',
+  `task_solution` varchar(255) NOT NULL,
+  `task_status` enum('accept','accepted','submitted','') DEFAULT 'accept',
   `post_user_id` int(11) NOT NULL,
   `accepted_user_id` int(11) DEFAULT NULL,
   `category_id` int(11) NOT NULL,
@@ -102,8 +103,9 @@ CREATE TABLE `task` (
 -- Dumping data for table `task`
 --
 
-INSERT INTO `task` (`task_id`, `task_title`, `task_description`, `task_image`, `task_status`, `post_user_id`, `accepted_user_id`, `category_id`, `release_at`) VALUES
-(3, 'testing', 'hello', '1755505585_03cdsaHx_400x400.jpg', 'pending', 2, NULL, 2, '2025-08-18 08:26:25');
+INSERT INTO `task` (`task_id`, `task_title`, `task_description`, `task_image`, `task_solution`, `task_status`, `post_user_id`, `accepted_user_id`, `category_id`, `release_at`) VALUES
+(4, 'gay', '1234', '1756233516_CHONG JIA HAO - HOMEPAGE.jpg', 'solution_4_1756234171.jpeg', 'submitted', 2, 3, 2, '2025-08-26 18:38:36'),
+(5, 'testing', '123456', '1756234427_WhatsApp Image 2025-08-23 at 10.30.29 AM (1).jpeg', 'solution_5_1756234454.jpeg', 'submitted', 3, 2, 1, '2025-08-26 18:53:47');
 
 -- --------------------------------------------------------
 
@@ -126,7 +128,8 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `user_name`, `user_description`, `email`, `password`, `profile_image`, `reset_token`) VALUES
-(2, 'jiajun1', '', 'jiajun1@gmail.com', '$2y$10$ztKMhvw4Yg90VnB32CixaO9fSa2xL5fRX755yr91tizeWDTa/0ZF2', '', '');
+(2, 'jiajun1', 'gay', 'jiajun1@gmail.com', '$2y$10$ztKMhvw4Yg90VnB32CixaO9fSa2xL5fRX755yr91tizeWDTa/0ZF2', 'user_2_1756230761.jpg', ''),
+(3, 'TEST!', '', 'test@gmail.com', '$2y$10$PtJVsXfAJxbgPSwpBNw9AeOU37RtOJjbriifmLzx0EsH3.p2ZQexy', '', '');
 
 --
 -- Indexes for dumped tables
@@ -195,13 +198,13 @@ ALTER TABLE `comment`
 -- AUTO_INCREMENT for table `task`
 --
 ALTER TABLE `task`
-  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables

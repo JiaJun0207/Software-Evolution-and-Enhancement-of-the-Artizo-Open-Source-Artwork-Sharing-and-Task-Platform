@@ -16,7 +16,7 @@
           <a class="nav-link" href="#">Explore</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Task</a>
+          <a class="nav-link" href="task.php">Task</a>
         </li>
         <li class="nav-item">
           <?php
