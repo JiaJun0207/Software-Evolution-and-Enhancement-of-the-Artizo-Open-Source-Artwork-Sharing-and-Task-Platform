@@ -1,0 +1,143 @@
+<?php
+include("config.php");// Include the database connection file
+
+session_start(); // Start the session
+
+if (!isset($_SESSION['UID'])) {
+    header("Location: login.php"); // Redirect to login if not logged in
+    exit();
+}
+
+include("navbar.php"); // Include the navigation bar
+?>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container-fluid"
+        style="padding-left: 60px; padding-right: 60px; padding-bottom: 60px; margin-top:60px;">
+        <div class="row" style="margin-bottom: 60px;">
+            <div class="col-8">
+                <?php
+                $uid = $_SESSION['UID'];
+
+                // Build SQL for accepted tasks and search
+                $sql = "SELECT t.*, u.user_name, u.profile_image 
+                        FROM task t
+                        JOIN user u ON t.post_user_id = u.user_id
+                        WHERE t.accepted_user_id = ? AND (t.task_status = 'accepted' OR t.task_status = 'submitted')";
+
+                $params = [$uid];
+                $types = "i";
+
+                if (isset($_GET['search']) && $_GET['search'] !== '') {
+                    $search = "%" . $_GET['search'] . "%";
+                    $sql .= " AND (t.task_title LIKE ? OR t.task_description LIKE ?)";
+                    $params[] = $search;
+                    $params[] = $search;
+                    $types .= "ss";
+                }
+
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param($types, ...$params);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                ?>
+
+                <form action="" method="get">
+                    <div id="searchBarWrapper" style="position:relative; background:#000; border-radius:14px;">
+                        <input type="text" class="form-control inter-medium-25 left-placeholder border_black"
+                            id="searchInput" name="search"
+                            value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>"
+                            style="padding-right:40px; background:#000; color:#fff;">
+                        <span id="searchIcon"
+                            style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none;">
+                            <img src="assets/Icons/search-white.svg" alt="Search Icon" id="searchImg">
+                        </span>
+                    </div>
+                </form>
+                <script>
+                    const searchInput = document.getElementById('searchInput');
+                    const searchBarWrapper = document.getElementById('searchBarWrapper');
+                    const searchImg = document.getElementById('searchImg');
+
+                    searchInput.addEventListener('focus', function () {
+                        searchBarWrapper.style.background = "#fff";
+                        searchInput.style.background = "#fff";
+                        searchInput.style.color = "#000";
+                        searchImg.src = "assets/Icons/search-black.svg";
+                    });
+                    searchInput.addEventListener('blur', function () {
+                        searchBarWrapper.style.background = "#000";
+                        searchInput.style.background = "#000";
+                        searchInput.style.color = "#fff";
+                        searchImg.src = "assets/Icons/search-white.svg";
+                    });
+                </script>
+
+            </div>
+            <div class="col-2">
+                <a href="upload_task.php"
+                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Post Task</a>
+            </div>
+            <div class="col-2">
+                <a href="accepted_task.php"
+                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Accepted Task</a>
+            </div>
+        </div>
+        <div class="card_border" style="padding: 68px 100px;">
+            <div class="row align-items-center mb-4">
+
+                <div class="col d-flex align-items-center">
+                    <a href="user_profile.php">
+                        <img src="assets/profile/user_profile.png" alt="Profile Image" class="rounded-circle"
+                            style="width:113px; height:113px; object-fit:cover;">
+                    </a>
+                    <a href="user_profile.php" style="text-decoration:none;">
+                        <p class="mb-0 inter-bold-32 ms-4" style="color:#000;">Username</p>
+                    </a>
+                </div>
+
+
+                <div class="col-auto">
+                    <a href="task_detail.php" class="btn form-control btn-outline-black inter-medium-25 border_black"
+                        style="width:200px; height:53px;">
+                        View task
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <p class="mb-0 inter-bold-32">Task Title</p>
+                    <p class="mb-0 inter-extralight-24">description place here</p>
+                </div>
+
+                <div class="col-auto">
+                    <img src="assets/uploads/task/1756233516_CHONG JIA HAO - HOMEPAGE.jpg" alt="Task Image"
+                        style="width:310px; height:231px; border-radius:12px; object-fit:cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+</body>
+<footer>
+    <?php include("footer.php"); // Include the footer ?>
+</footer>
+
+</html>
