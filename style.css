@@ -80,18 +80,22 @@
   font-size: 32px;
 }
 
-
 .inter-bold-24 {
   font-family: "Inter", sans-serif;
   font-weight: 700;
   font-size: 24px;
 }
 
-/* Inter Bold 44px */
 .inter-bold-44 {
   font-family: "Inter", sans-serif;
   font-weight: 700;
   font-size: 44px;
+}
+
+.inter-bold-56 {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 56px;
 }
 
 /* Set corner radius for buttons and inputs */
@@ -126,7 +130,7 @@
   border: 2px solid #000 !important;
 }
 
-.card_artwork{
+.card_artwork {
   aspect-ratio: 1 / 1;
   width: 100%;
   border-radius: 14px !important;
@@ -134,16 +138,23 @@
 }
 
 .card_artwork img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .category_box {
   border-radius: 14px !important;
   padding: 12px;
-  padding-left: 52px; padding-right: 52px;
+  padding-left: 52px;
+  padding-right: 52px;
   background-color: #b81149;
   display: inline-block;
+}
+
+.category_description {
+  text-align: center;
+  margin-top: 130px;
+  margin-bottom: 130px;
 }

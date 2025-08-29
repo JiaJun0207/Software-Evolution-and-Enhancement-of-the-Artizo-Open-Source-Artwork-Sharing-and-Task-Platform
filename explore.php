@@ -111,6 +111,40 @@ include("navbar.php"); // Include the navigation bar
         </div>
 
         <?php
+        $categoryDescriptions = [
+            'Graphic Design' => [
+                'title' => 'Graphic Design',
+                'desc' => 'Creative works like posters, logos, and product packaging that focus on visual communication and branding.'
+            ],
+            'Illustration' => [
+                'title' => 'Illustration',
+                'desc' => 'Hand-drawn or digital artworks that express ideas, concepts, or stories through visual creativity and unique styles.'
+            ],
+            'Photography' => [
+                'title' => 'Photography',
+                'desc' => 'Capturing moments, subjects, and environments through the lens to convey mood, narrative, or aesthetic value.'
+            ],
+            '3D Art' => [
+                'title' => '3D Art',
+                'desc' => 'Digital or physical three-dimensional creations such as models, animations, and environments that bring designs to life with depth and realism.'
+            ],
+            'Advertising' => [
+                'title' => 'Advertising',
+                'desc' => 'Creative visuals and campaigns designed to promote products, services, or brands by capturing audience attention and driving engagement.'
+            ]
+        ];
+        ?>
+
+        <div class="category_description">
+            <?php
+            if (isset($categoryDescriptions[$selectedCategory])) {
+                echo '<p class="inter-bold-56">' . $categoryDescriptions[$selectedCategory]['title'] . '</p>';
+                echo '<p class="inter-extralight-24">' . $categoryDescriptions[$selectedCategory]['desc'] . '</p>';
+            }
+            ?>
+        </div>
+
+        <?php
         // Build SQL for category and search
         $sql = "SELECT a.*, u.user_name, u.profile_image, c.category_name 
         FROM artwork a
