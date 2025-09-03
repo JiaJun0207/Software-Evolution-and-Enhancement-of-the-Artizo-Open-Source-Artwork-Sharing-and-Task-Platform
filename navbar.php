@@ -10,13 +10,13 @@
     <div class="collapse navbar-collapse" id="navbarText">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center" style="font-family: 'Inter', sans-serif; font-weight: 200; font-size: 30px; gap: 60px;">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="index.php">Home</a>
+          <a class="nav-link<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? ' active' : ''; ?>" href="index.php">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="explore.php">Explore</a>
+          <a class="nav-link<?php echo basename($_SERVER['PHP_SELF']) == 'explore.php' ? ' active' : ''; ?>" href="explore.php">Explore</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="task.php">Task</a>
+          <a class="nav-link<?php echo basename($_SERVER['PHP_SELF']) == 'task.php' ? ' active' : ''; ?>" href="task.php">Task</a>
         </li>
         <li class="nav-item">
           <?php
