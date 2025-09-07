@@ -32,11 +32,11 @@ include("navbar.php"); // Include the navigation bar
                 <?php
                 $uid = $_SESSION['UID'];
 
-                // Build SQL for accepted tasks and search
+                // Fetch accepted tasks for this user
                 $sql = "SELECT t.*, u.user_name, u.profile_image 
                         FROM task t
                         JOIN user u ON t.post_user_id = u.user_id
-                        WHERE t.accepted_user_id = ? AND (t.task_status = 'accepted' OR t.task_status = 'submitted')";
+                        WHERE t.accepted_user_id = ?";
 
                 $params = [$uid];
                 $types = "i";
@@ -96,48 +96,46 @@ include("navbar.php"); // Include the navigation bar
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Accepted Task</a>
             </div>
         </div>
+        <?php while ($row = $result->fetch_assoc()):
+            $profileImg = !empty($row['profile_image']) ? "assets/profile/" . $row['profile_image'] : "assets/profile/user_profile.png";
+            $userName = $row['user_name'];
+            $taskTitle = $row['task_title'];
+            $taskDesc = $row['task_description'];
+            $taskImg = !empty($row['task_image']) ? "assets/uploads/task/" . $row['task_image'] : "assets/uploads/task/default_task.jpeg";
+        ?>
         <div class="card_border" style="padding: 68px 100px;">
             <div class="row align-items-center mb-4">
-
                 <div class="col d-flex align-items-center">
-                    <a href="user_profile.php">
-                        <img src="assets/profile/user_profile.png" alt="Profile Image" class="rounded-circle"
+                    <a href="user_profile.php?id=<?php echo $row['post_user_id']; ?>">
+                        <img src="<?php echo htmlspecialchars($profileImg); ?>" alt="Profile Image" class="rounded-circle"
                             style="width:113px; height:113px; object-fit:cover;">
                     </a>
-                    <a href="user_profile.php" style="text-decoration:none;">
-                        <p class="mb-0 inter-bold-32 ms-4" style="color:#000;">Username</p>
+                    <a href="user_profile.php?id=<?php echo $row['post_user_id']; ?>" style="text-decoration:none;">
+                        <p class="mb-0 inter-bold-32 ms-4" style="color:#000;"><?php echo htmlspecialchars($userName); ?></p>
                     </a>
                 </div>
-
-
                 <div class="col-auto">
-                    <a href="task_detail.php" class="btn form-control btn-outline-black inter-medium-25 border_black"
+                    <a href="task_detail.php?id=<?php echo $row['task_id']; ?>" class="btn form-control btn-outline-black inter-medium-25 border_black"
                         style="width:200px; height:53px;">
                         View task
                     </a>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col">
-                    <p class="mb-0 inter-bold-32">Task Title</p>
-                    <p class="mb-0 inter-extralight-24">description place here</p>
+                    <p class="mb-0 inter-bold-32"><?php echo htmlspecialchars($taskTitle); ?></p>
+                    <p class="mb-0 inter-extralight-24"><?php echo htmlspecialchars($taskDesc); ?></p>
                 </div>
-
                 <div class="col-auto">
-                    <img src="assets/uploads/task/1756233516_CHONG JIA HAO - HOMEPAGE.jpg" alt="Task Image"
+                    <img src="<?php echo htmlspecialchars($taskImg); ?>" alt="Task Image"
                         style="width:310px; height:231px; border-radius:12px; object-fit:cover;">
                 </div>
             </div>
         </div>
+        <?php endwhile; ?>
     </div>
-    </div>
-    </div>
-    </div>
-    </div>
+    <footer>
+        <?php include("footer.php"); // Include the footer ?>
+    </footer>
 </body>
-<footer>
-    <?php include("footer.php"); // Include the footer ?>
-</footer>
-
 </html>
