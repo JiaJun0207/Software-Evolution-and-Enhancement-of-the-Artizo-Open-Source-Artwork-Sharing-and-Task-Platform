@@ -3,12 +3,12 @@
   <div class="container-fluid" style="padding: 15px 60px 15px 60px;">
     <a class="navbar-brand" href="index.php">
       <img src="assets/logo/navbar_logo.png" alt="Logo">
-  </a>
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarText">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center" style="font-family: 'Inter', sans-serif; font-weight: 200; font-size: 30px; gap: 60px;">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center navbar-main-list">
         <li class="nav-item">
           <a class="nav-link<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? ' active' : ''; ?>" href="index.php">Home</a>
         </li>
@@ -20,7 +20,6 @@
         </li>
         <li class="nav-item">
           <?php
-          // Show user profile image from database if logged in
           $profile_img = "assets/profile/user_profile.png";
           if (isset($_SESSION['UID'])) {
               include_once("config.php");
@@ -42,5 +41,25 @@
           </a>
         </li>
       </ul>
+    </div>
   </div>
 </nav>
+<style>
+@media (max-width: 991.98px) {
+  .navbar-main-list {
+    font-family: 'Inter', sans-serif;
+    gap: 20px !important;
+    font-weight: 200 !important;
+    font-size: 20px !important;
+  }
+}
+@media (min-width: 992px) {
+  .navbar-main-list {
+    font-family: 'Inter', sans-serif;
+    gap: 60px !important;
+    font-weight: 200 !important;
+    font-size: 30px !important;
+  }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
