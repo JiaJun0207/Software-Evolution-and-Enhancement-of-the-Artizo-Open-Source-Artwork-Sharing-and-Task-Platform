@@ -162,15 +162,15 @@
 .banner {
   position: relative;
   width: 100%;
-  height: 80vh; /* Adjust height */
+  height: 80vh; 
   overflow: hidden;
 }
 
 .banner-img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Keeps image filling area */
-  filter: brightness(60%); /* Darken image for readable text */
+  object-fit: cover;
+  filter: brightness(60%); 
 }
 
 .banner-text {
@@ -185,13 +185,13 @@
 
 .banner-text h1 {
   font-family: 'Inter', sans-serif;
-  font-weight: 700; /* Bold */
+  font-weight: 700; 
   font-size: 44px;
 }
 
 .banner-text p {
   font-family: 'Inter', sans-serif;
-  font-weight: 200; /* Extra Light */
+  font-weight: 200; 
   font-size: 24px;
 }
 
@@ -217,6 +217,11 @@
   text-align: center;
   text-shadow: 0px 2px 6px rgba(0,0,0,0.6); 
   pointer-events: none;
+}
+
+.top {
+  background-color: #F7822A !important;
+  padding: 50px !important;
 }
 
 @media (max-width: 1024px) {
