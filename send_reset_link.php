@@ -9,17 +9,18 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Function to send reset email using PHPMailer
-function sendResetEmail($email, $resetLink) {
+function sendResetEmail($email, $resetLink)
+{
     $mail = new PHPMailer(true);
     try {
         // Server settings
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com'; // Use your email provider's SMTP server
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'chongjh-wk22@student.tarc.edu.my'; // Your email
-        $mail->Password   = 'gdsw spjn cxgm sgdw'; // Your email password
+        $mail->Host = 'smtp.gmail.com'; // Use your email provider's SMTP server
+        $mail->SMTPAuth = true;
+        $mail->Username = 'chongjh-wk22@student.tarc.edu.my'; // Your email
+        $mail->Password = 'gdsw spjn cxgm sgdw'; // Your email password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->Port = 587;
 
         // Recipients
         $mail->setFrom('chongjh-wk22@student.tarc.edu.my', 'Artizo');
@@ -28,7 +29,7 @@ function sendResetEmail($email, $resetLink) {
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Password Reset Request';
-        $mail->Body    = "
+        $mail->Body = "
             <h1>Password Reset Request</h1>
             <p>Click the link below to reset your password:</p>
             <a href='$resetLink'>$resetLink</a>
@@ -64,14 +65,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // Send the reset link via email
-        $resetLink = "http://localhost/Web-Assignment/reset_password_form.php?token=$resetToken";
+        $resetLink = "http://localhost/Web-Assignment/reset_password.php?token=$resetToken";
         if (sendResetEmail($email, $resetLink)) {
-            echo "Password reset link sent to your email.";
+            
+            $_SESSION["feedback"] = "Password reset link sent to your email.";
+            header('Location: forgot_password.php');
+            
+            exit();
         } else {
-            echo "Failed to send reset email.";
+            header('Location: forgot_password.php');
+            $_SESSION["feedback"] = "Failed to send reset email.";
+            
+            exit();
         }
     } else {
-        echo "Email not found.";
+        header('Location: forgot_password.php');
+        $_SESSION["feedback"] = "Email not found.";
+        
+        exit();
     }
 }
 ?>

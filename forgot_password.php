@@ -1,6 +1,5 @@
-<?php
-session_start(); // to start a session
-?>
+<?php include("config.php"); ?>
+<?php session_start(); ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,16 +23,14 @@ session_start(); // to start a session
 
                     <img src="assets/logo/onboarding_logo.png" alt="Logo" class="img-fluid mb-4">
 
-                    <div class="d-flex gap-2 mb-3">
-                        <a href="login.php" class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black<?php if(basename($_SERVER['PHP_SELF'])=='login.php'){echo ' active';} ?>">Login</a>
-                        <a href="signup.php" class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black<?php if(basename($_SERVER['PHP_SELF'])=='signup.php'){echo ' active';} ?>">Sign Up</a>
-                    </div>
+                   
 
-                    <form action="login_form.php" method="post">
-                        <input type="text" name="user_name" id="user_name" class="form-control mb-3 inter-medium-25 border_black" placeholder="Username">
-                        <input type="password" id="password" name="password" class="form-control mb-3 inter-medium-25 border_black" placeholder="Password">
-                        <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25 border_black">Login</button>
-                        <a class="inter-extralight-15" href="forgot_password.php">forgot password?</a>
+                    <form action="send_reset_link.php" method="post">
+                        <h2 class="inter-bold-32 mb-3">Reset Password</h2>
+                        <p class="inter-extralight-15 mb-3">Enter your email address to receive a password reset link.</p>
+                        <input type="email" id="email" name="email" class="form-control mb-3 inter-medium-25"
+                            placeholder="Email">
+                        <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Send</button>
                     </form>
 
                     <div id="feedback-message" class="feedback-error">

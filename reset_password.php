@@ -22,15 +22,20 @@
 
                     <img src="assets/logo/onboarding_logo.png" alt="Logo" class="img-fluid mb-4">
 
-                   
 
-                    <form action="send_reset_link.php" method="post">
+
+                    <form action="reset_password_form.php" method="post">
                         <h2 class="inter-bold-32 mb-3">Reset Password</h2>
-                        <p class="inter-extralight-15 mb-3">Enter your email address to receive a password reset link.</p>
-                        <input type="email" id="email" name="email" class="form-control mb-3 inter-medium-25"
-                            placeholder="Email">
+                        <p class="inter-extralight-15 mb-3">Enter a new password for your account.
+                        </p>
+                        <input type="hidden" name="token" value="<?php echo isset($_GET['token']) ? htmlspecialchars($_GET['token']) : ''; ?>">
+                        <input type="password" id="new_password" name="new_password" class="form-control mb-3 inter-medium-25"
+                            placeholder="New Password">
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control mb-3 inter-medium-25"
+                            placeholder="Confirm Password">
                         <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Send</button>
                     </form>
+
 
                 </div>
 
