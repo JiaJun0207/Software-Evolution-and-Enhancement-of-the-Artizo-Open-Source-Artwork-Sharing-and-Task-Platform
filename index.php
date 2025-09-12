@@ -47,50 +47,66 @@ $result = $conn->query($sql);
     <h1 class="centered-header inter-bold-44 mb-4 fs-2 fs-md-1">Featured Artworks</h1>
     <div class="row align-items-stretch g-3 g-md-4">
       <div class="col-12 col-md-5 d-flex flex-column gap-3 gap-md-4 mb-3 mb-md-0">
-        <div class="flex-fill ratio-6 position-relative">
-          <img src="assets/homepage/graphicdesign.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 1">
-          <div class="overlay-text">Graphic Design</div>
-        </div>
-        <div class="flex-fill ratio-4 position-relative">
-          <img src="assets/homepage/photograph.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 2">
-          <div class="overlay-text">Photography</div>
-        </div>
+        <a href="explore.php?category=Graphic+Design">
+          <div class="flex-fill ratio-6 position-relative">
+            <img src="assets/homepage/graphicdesign.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 1">
+            <div class="overlay-text">Graphic Design</div>
+          </div>
+        </a>
+        <a href="explore.php?category=Photography">
+          <div class="flex-fill ratio-4 position-relative">
+            <img src="assets/homepage/photograph.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 2">
+            <div class="overlay-text">Photography</div>
+          </div>
+        </a>
       </div>
+
       <div class="col-12 col-md-7 d-flex flex-column gap-3 gap-md-4">
-        <div class="flex-fill ratio-6 position-relative">
-          <img src="assets/homepage/illustration.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 3">
-          <div class="overlay-text">Illustration</div>
-        </div>
+        <a href="explore.php?category=Illustration">
+          <div class="flex-fill ratio-6 position-relative">
+            <img src="assets/homepage/illustration.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 3">
+            <div class="overlay-text">Illustration</div>
+          </div>
+        </a>
+
         <div class="d-flex flex-fill gap-3 gap-md-4">
-          <div class="col position-relative">
-            <img src="assets/homepage/3ddesign.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 4">
-            <div class="overlay-text">3D Art</div>
-          </div>
-          <div class="col position-relative">
-            <img src="assets/homepage/advertising.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 5">
-            <div class="overlay-text">Advertising</div>
-          </div>
+          <a href="explore.php?category=3D+Art">
+            <div class="col position-relative">
+              <img src="assets/homepage/3ddesign.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 4">
+              <div class="overlay-text">3D Art</div>
+            </div>
+          </a>
+          <a href="explore.php?category=Advertising">
+            <div class="col position-relative">
+              <img src="assets/homepage/advertising.png" class="img-fluid w-100 h-100 custom-img" alt="Artwork 5">
+              <div class="overlay-text">Advertising</div>
+            </div>
+          </a>
         </div>
       </div>
     </div>
   </div>
   <h1 class="centered-header inter-bold-44 mb-4 fs-2 fs-md-1">Top Artists</h1>
-  <div class="position-relative w-100" style="left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; width: 100vw;">
+  <div class="position-relative w-100"
+    style="left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; width: 100vw;">
     <div id="topArtistsCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
       <div class="carousel-indicators">
-        <button type="button" data-bs-target="#topArtistsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Leonardo"></button>
+        <button type="button" data-bs-target="#topArtistsCarousel" data-bs-slide-to="0" class="active"
+          aria-current="true" aria-label="Leonardo"></button>
         <button type="button" data-bs-target="#topArtistsCarousel" data-bs-slide-to="1" aria-label="Hafiz"></button>
         <button type="button" data-bs-target="#topArtistsCarousel" data-bs-slide-to="2" aria-label="Lily"></button>
       </div>
       <div class="carousel-inner">
         <div class="carousel-item active">
-          <div class="d-flex flex-column align-items-center justify-content-center" style="background-color: #F7822A !important; padding: 50px !important; width: 100vw; min-height: 600px;">
+          <div class="d-flex flex-column align-items-center justify-content-center"
+            style="background-color: #F7822A !important; padding: 50px !important; width: 100vw; min-height: 600px;">
             <div class="mb-4">
               <img src="assets/profile/top1.png" alt="Top Artists" class="mx-auto d-block">
             </div>
             <h1 class="inter-medium-32 mb-4">Leonardo</h1>
             <p class="inter-extralight-24 text-center px-3 px-md-5 mb-4" style="max-width:800px;">
-              10 years in creative advertising, Leonard's bold and eye-catching campaigns have helped brands across Malaysia grow.
+              10 years in creative advertising, Leonard's bold and eye-catching campaigns have helped brands across
+              Malaysia grow.
             </p>
             <div class="d-flex justify-content-center gap-5">
               <div class="d-flex align-items-center">
@@ -105,13 +121,15 @@ $result = $conn->query($sql);
           </div>
         </div>
         <div class="carousel-item">
-          <div class="d-flex flex-column align-items-center justify-content-center" style="background-color: #8DE45B !important; padding: 50px !important; width: 100vw; min-height: 600px;">
+          <div class="d-flex flex-column align-items-center justify-content-center"
+            style="background-color: #8DE45B !important; padding: 50px !important; width: 100vw; min-height: 600px;">
             <div class="mb-4">
               <img src="assets/profile/top2.png" alt="Top Artists" class="mx-auto d-block">
             </div>
             <h1 class="inter-medium-32 mb-4">Hafiz</h1>
             <p class="inter-extralight-24 text-center px-3 px-md-5 mb-4" style="max-width:800px;">
-              A 3D artist for over 10 years, Hafiz specializes in architectural visualization and product modeling, bringing concepts to life in realistic detail.
+              A 3D artist for over 10 years, Hafiz specializes in architectural visualization and product modeling,
+              bringing concepts to life in realistic detail.
             </p>
             <div class="d-flex justify-content-center gap-5">
               <div class="d-flex align-items-center">
@@ -126,13 +144,15 @@ $result = $conn->query($sql);
           </div>
         </div>
         <div class="carousel-item">
-          <div class="d-flex flex-column align-items-center justify-content-center" style="background-color: #FD399D !important; padding: 50px !important; width: 100vw; min-height: 600px;">
+          <div class="d-flex flex-column align-items-center justify-content-center"
+            style="background-color: #FD399D !important; padding: 50px !important; width: 100vw; min-height: 600px;">
             <div class="mb-4">
               <img src="assets/profile/top3.png" alt="Top Artists" class="mx-auto d-block">
             </div>
             <h1 class="inter-medium-32 mb-4">Lily</h1>
             <p class="inter-extralight-24 text-center px-3 px-md-5 mb-4" style="max-width:800px;">
-              A photographer with 12 years of professional experience, Lily captures powerful visual narratives that blend emotion and precision.
+              A photographer with 12 years of professional experience, Lily captures powerful visual narratives that
+              blend emotion and precision.
             </p>
             <div class="d-flex justify-content-center gap-5">
               <div class="d-flex align-items-center">
