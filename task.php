@@ -171,7 +171,7 @@ include("navbar.php"); // Include the navigation bar
                     <div class="text-end">
                         <a href="task_detail.php?id=<?php echo urlencode($taskId); ?>">
                             <div class="card_border" style="padding: 17px; display:inline-block;">
-                                <img src="assets/icons/bag.png" alt="Arrow Right Icon" style="width:49px; height:49px;">
+                                <img src="assets/icons/bag.png" alt="Arrow Right Icon" class="bag-icon-responsive">
                             </div>
                         </a>
                     </div>
