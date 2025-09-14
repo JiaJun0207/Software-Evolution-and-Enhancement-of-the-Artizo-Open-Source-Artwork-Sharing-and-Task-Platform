@@ -59,8 +59,56 @@ include("admin_navbar.php");
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Responsive tweaks for admin_edit_task.php */
+        @media (max-width: 991.98px) {
+            .container-fluid[style*="padding-left: 60px"] {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+            }
+            .row > .col-8, .row > .col-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            .mb-5 { margin-bottom: 2rem !important; }
+            .mb-4 { margin-bottom: 1rem !important; }
+        }
+        @media (max-width: 767.98px) {
+            .inter-bold-44 { font-size: 1.5rem !important; }
+            .inter-bold-24 { font-size: 1.1rem !important; }
+            .inter-medium-25 { font-size: 1rem !important; }
+            .category-btn-responsive {
+                padding-left: 18px !important;
+                padding-right: 18px !important;
+                font-size: 0.95rem !important;
+            }
+            .mb-5 { margin-bottom: 1rem !important; }
+            .mb-4 { margin-bottom: 0.75rem !important; }
+            .rounded-circle {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            .icon-1-1 {
+                width: 23px !important;
+                height: 23px !important;
+                aspect-ratio: 1 / 1 !important;
+                object-fit: contain !important;
+                display: inline-block;
+            }
+        }
+        @media (max-width: 425px) {
+            .category-btn-responsive {
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+                font-size: 0.9rem !important;
+            }
+            .icon-1-1 {
+                width: 18px !important;
+                height: 18px !important;
+            }
+        }
+    </style>
 </head>
-
 <body>
     <div class="container-fluid" style="padding-left: 60px; padding-right: 60px; margin-bottom: 60px;">
         <h1 class="inter-bold-44 mb-4" style="margin-top:60px;">Edit Task</h1>
@@ -83,7 +131,7 @@ include("admin_navbar.php");
                             name="task_title" rows="3"><?php echo htmlspecialchars($taskTitle); ?></textarea>
                         <button type="submit" class="btn border_black d-flex justify-content-center align-items-center"
                             style="width:53px; height:53px; padding:0;">
-                            <img src="assets/icons/edit.png" alt="Edit Icon" style="width: 23px; height: 23px;">
+                            <img src="assets/icons/edit.png" alt="Edit Icon" class="icon-1-1" style="width: 23px; height: 23px;">
                         </button>
                     </div>
                 </form>
@@ -135,13 +183,13 @@ include("admin_navbar.php");
                             <input type="radio" class="btn-check" name="category_id" id="graphic_design" value="1"
                                 autocomplete="off" <?php if ($categoryId == 1) echo 'checked'; ?>
                                 onchange="document.getElementById('categoryForm').submit();">
-                            <label class="btn btn-outline-black inter-medium-25 border_black" for="graphic_design"
+                            <label class="btn btn-outline-black inter-medium-25 border_black category-btn-responsive" for="graphic_design"
                                 style="padding-left:53px; padding-right:53px;">Graphic Design</label>
 
                             <input type="radio" class="btn-check" name="category_id" id="3d_art" value="4"
                                 autocomplete="off" <?php if ($categoryId == 4) echo 'checked'; ?>
                                 onchange="document.getElementById('categoryForm').submit();">
-                            <label class="btn btn-outline-black inter-medium-25 border_black" for="3d_art"
+                            <label class="btn btn-outline-black inter-medium-25 border_black category-btn-responsive" for="3d_art"
                                 style="padding-left:53px; padding-right:53px;">3D Art</label>
                         </div>
 
@@ -149,13 +197,13 @@ include("admin_navbar.php");
                             <input type="radio" class="btn-check" name="category_id" id="illustration" value="2"
                                 autocomplete="off" <?php if ($categoryId == 2) echo 'checked'; ?>
                                 onchange="document.getElementById('categoryForm').submit();">
-                            <label class="btn btn-outline-black inter-medium-25 border_black" for="illustration"
+                            <label class="btn btn-outline-black inter-medium-25 border_black category-btn-responsive" for="illustration"
                                 style="padding-left:53px; padding-right:53px;">Illustration</label>
 
                             <input type="radio" class="btn-check" name="category_id" id="advertising" value="5"
                                 autocomplete="off" <?php if ($categoryId == 5) echo 'checked'; ?>
                                 onchange="document.getElementById('categoryForm').submit();">
-                            <label class="btn btn-outline-black inter-medium-25 border_black" for="advertising"
+                            <label class="btn btn-outline-black inter-medium-25 border_black category-btn-responsive" for="advertising"
                                 style="padding-left:53px; padding-right:53px;">Advertising</label>
                         </div>
 
@@ -163,7 +211,7 @@ include("admin_navbar.php");
                             <input type="radio" class="btn-check" name="category_id" id="photography" value="3"
                                 autocomplete="off" <?php if ($categoryId == 3) echo 'checked'; ?>
                                 onchange="document.getElementById('categoryForm').submit();">
-                            <label class="btn btn-outline-black inter-medium-25 border_black" for="photography"
+                            <label class="btn btn-outline-black inter-medium-25 border_black category-btn-responsive" for="photography"
                                 style="padding-left:53px; padding-right:53px;">Photography</label>
                         </div>
                     </div>
