@@ -343,6 +343,48 @@
   .row > .col-8, .row > .col-10 {
     margin-bottom: 10px;
   }
+  /* Responsive adjustments for user_profile.php */
+  .card_border {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .card-body {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .inter-medium-24,
+  .inter-bold-24,
+  .inter-medium-25 {
+    font-size: 1.1rem !important;
+  }
+  .inter-extralight-15 {
+    font-size: 0.95rem !important;
+  }
+  .card_artwork .card-img {
+    height: 180px !important;
+    object-fit: cover;
+  }
+  .btn-outline-black,
+  .border_black {
+    width: 100% !important;
+    min-width: unset !important;
+    height: 45px !important;
+  }
+  .card_artwork {
+    min-width: 0 !important;
+  }
+  .rounded-circle {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  h1.inter-bold-24 {
+    font-size: 1.3rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .gap-3 {
+    gap: 1rem !important;
+  }
 }
 @media (min-width: 768px) {
   .inter-bold-44 { font-size: 2.75rem !important; }
@@ -417,4 +459,160 @@
     max-width: 100%;
     height: auto;
   }
+}
+
+/* 2 artworks per row for screens <= 425px */
+@media (max-width: 425px) {
+    .row-cols-art-xs-2 > * {
+        flex: 0 0 auto;
+        width: 50%;
+        max-width: 50%;
+    }
+}
+
+/* Make artwork image always fill the card */
+.card_artwork .artwork-img-full,
+.card_artwork .card-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block;
+    border-radius: 0 !important;
+    min-height: 120px;
+}
+
+.aspect-1-1 {
+    aspect-ratio: 1 / 1;
+    width: 53px !important;
+    height: 53px !important;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 991.98px) {
+    .inter-bold-44 {
+        font-size: 2rem !important;
+    }
+    .inter-bold-32,
+    .inter-bold-24,
+    .inter-extralight-24,
+    .inter-medium-25,
+    .inter-medium-24 {
+        font-size: 1.1rem !important;
+    }
+    .px-md-5 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    #content_card {
+        padding: 1rem !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .inter-bold-44 {
+        font-size: 1.5rem !important;
+    }
+    .inter-bold-32,
+    .inter-bold-24,
+    .inter-extralight-24,
+    .inter-medium-25,
+    .inter-medium-24 {
+        font-size: 1rem !important;
+    }
+    .rounded-circle {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    #content_card {
+        padding: 0.5rem !important;
+    }
+    .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center > .flex-fill {
+        margin-bottom: 0.75rem !important;
+    }
+}
+
+/* Ensure comment row never wraps, keeping image, username, and comment text in a single line */
+.comment-row-nowrap {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+}
+        margin-top: 2rem !important;
+    }
+    .mb-5 {
+        margin-bottom: 2rem !important;
+    }
+    .gx-0 {
+        --bs-gutter-x: 0 !important;
+    }
+    .gy-4 {
+        --bs-gutter-y: 1.5rem !important;
+    }
+    .gy-lg-0 {
+        --bs-gutter-y: 0 !important;
+    }
+}
+@media (max-width: 767.98px) {
+    .inter-bold-44 {
+        font-size: 1.5rem !important;
+    }
+    .inter-bold-32,
+    .inter-bold-24,
+    .inter-extralight-24,
+    .inter-medium-25,
+    .inter-medium-24 {
+        font-size: 1rem !important;
+    }
+    .rounded-circle {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    .mt-4 {
+        margin-top: 1rem !important;
+    }
+    .pb-4 {
+        padding-bottom: 1rem !important;
+    }
+    .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    .col-lg-7,
+    .col-lg-5 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    .d-flex.align-items-center.flex-column.flex-sm-row > .d-inline-block {
+        margin-bottom: 0.5rem !important;
+    }
+    .d-flex.align-items-center.flex-column.flex-sm-row > p {
+        margin-left: 0 !important;
+        margin-top: 0.5rem !important;
+    }
+}
+
+/* Ensure comment row never wraps, keeping image, username, and comment text in a single line */
+.comment-row-nowrap {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
 }

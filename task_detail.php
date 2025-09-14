@@ -133,21 +133,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
             }
         }
         ?>
-        <div class="container-fluid"
-            style="padding-left: 60px; padding-right: 60px; padding-bottom: 60px; margin-top:60px;">
-            <div class="d-flex align-items-center">
-                <div class="d-inline-block">
+        <div class="container-fluid px-3 px-md-5 pb-4 pb-md-5" style="margin-top:60px;">
+            <div class="d-flex align-items-center flex-column flex-sm-row">
+                <div class="d-inline-block mb-3 mb-sm-0">
                     <img src="<?php echo htmlspecialchars($posterImg); ?>" alt="Profile Image" class="rounded-circle"
                         style="width:65px; height:65px; object-fit:cover;">
                 </div>
-                <p class="mb-0 inter-medium-24 ms-4">
+                <p class="mb-0 inter-medium-24 ms-0 ms-sm-4 mt-2 mt-sm-0 text-center text-sm-start">
                     <?php echo htmlspecialchars($posterName); ?>
                 </p>
             </div>
             <div class="row mb-4">
-                <div class="col-7" style="padding-right: 0px ;">
-                    <div class="d-flex align-items-center justify-content-between" style="margin-top:60px;">
-                        <h1 class="inter-bold-44 mb-0">
+                <div class="col-12 col-lg-7" style="padding-right: 0px;">
+                    <div class="d-flex align-items-center justify-content-between flex-column flex-md-row" style="margin-top:60px;">
+                        <h1 class="inter-bold-44 mb-3 mb-md-0 text-center text-md-start">
                             <?php echo htmlspecialchars($task['task_title']); ?>
                         </h1>
                         <?php
@@ -173,13 +172,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
                 </div>
 
             </div>
-            <div class="row mb-5" style="padding-left: 10px;">
-                <div class="col-7 d-flex justify-content-center align-items-center"
+            <div class="row mb-5 gx-0 gy-4 gy-lg-0" style="padding-left: 0;">
+                <div class="col-12 col-lg-7 d-flex justify-content-center align-items-center"
                     style="background-color:#f0f0f0; max-height:700px; min-height:300px;">
                     <img src="assets/uploads/task/<?php echo htmlspecialchars($task['task_image']); ?>" alt="task_image"
                         style="max-width:100%; max-height:700px; width:auto; height:auto; display:block;">
                 </div>
-                <div class="col-5" style="padding-left: 20px;">
+                <div class="col-12 col-lg-5 mt-4 mt-lg-0" style="padding-left: 20px;">
                     <h5 class="inter-bold-24 mb-4">Category</h5>
                     <div class="category_box inter-medium-25 mb-4"
                         style="color: #fff; background-color: <?php echo $categoryColor; ?>;">

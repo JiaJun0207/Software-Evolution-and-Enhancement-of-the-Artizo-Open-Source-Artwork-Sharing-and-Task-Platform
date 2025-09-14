@@ -39,19 +39,18 @@ include("admin_navbar.php"); // Include the navigation bar
 </head>
 
 <body>
-    <div class="container-fluid" style="padding-left: 60px; padding-right: 60px;">
+    <div class="container-fluid px-3 px-md-5">
         <h1 class="inter-bold-44 mb-4" style="margin-top:60px;">Post Preview</h1>
         <div class="row mb-4">
-            <div class="col-2">
+            <div class="col-12 col-sm-2 mb-2 mb-sm-0">
                 <a href="admin_index.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black <?php if(basename($_SERVER['PHP_SELF'])=='admin_index.php'){echo ' active';} ?>">Artwork</a>
             </div>
-            <div class="col-2">
+            <div class="col-12 col-sm-2 mb-2 mb-sm-0">
                 <a href="admin_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black <?php if(basename($_SERVER['PHP_SELF'])=='admin_task.php'){echo ' active';} ?>">Task</a>
             </div>
-
-            <div class="col-8">
+            <div class="col-12 col-sm-8">
                 <?php
                 // Search for task
                 $sql = "SELECT t.*, u.user_name, u.profile_image FROM task t JOIN user u ON t.post_user_id = u.user_id";
@@ -114,7 +113,7 @@ include("admin_navbar.php"); // Include the navigation bar
             </div>
         </div>
 
-        <div class="d-flex mb-3 px-3">
+        <div class="d-none d-md-flex mb-3 px-3">
             <div class="flex-fill d-flex align-items-center justify-content-center">
                 <p class="mb-0 inter-bold-24">User</p>
             </div>
@@ -136,21 +135,21 @@ include("admin_navbar.php"); // Include the navigation bar
             $taskTitle = $row['task_title'];
             $uploadTime = isset($row['release_at']) ? $row['release_at'] : '';
         ?>
-        <div id="content_card" class="card_border mb-3" style="padding:30px;">
-            <div class="d-flex align-items-center">
-                <div class="flex-fill d-flex align-items-center">
+        <div id="content_card" class="card_border mb-3 px-2 px-md-4 py-3" style="padding:30px;">
+            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
+                <div class="flex-fill d-flex align-items-center mb-3 mb-md-0">
                     <img src="<?php echo htmlspecialchars($profileImg); ?>" alt="Profile Image" class="rounded-circle"
                         style="width:100px; height:100px; object-fit:cover;">
                     <p class="card-text mb-0 inter-medium-24 ms-3">
                         <?php echo htmlspecialchars($userName); ?>
                     </p>
                 </div>
-                <div class="flex-fill d-flex align-items-center justify-content-center">
+                <div class="flex-fill d-flex align-items-center justify-content-center mb-3 mb-md-0">
                     <p class="card-text mb-0 inter-medium-24 ms-3">
                         <?php echo htmlspecialchars($taskTitle); ?>
                     </p>
                 </div>
-                <div class="flex-fill d-flex align-items-center justify-content-center">
+                <div class="flex-fill d-flex align-items-center justify-content-center mb-3 mb-md-0">
                     <p class="card-text mb-0 inter-medium-24 ms-3">
                         <?php echo htmlspecialchars($uploadTime); ?>
                     </p>
@@ -158,7 +157,7 @@ include("admin_navbar.php"); // Include the navigation bar
                 <div class="flex-fill d-flex align-items-center justify-content-end gap-2">
                     <div class="d-flex gap-2">
                         <a href="admin_edit_task.php?id=<?php echo $row['task_id']; ?>" style="text-decoration:none;">
-                            <button type="button" class="btn border_black d-flex justify-content-center align-items-center"
+                            <button type="button" class="btn border_black d-flex justify-content-center align-items-center aspect-1-1"
                                 style="width:53px; height:53px; padding:0;">
                                 <img src="assets/icons/edit.png" alt="Edit Icon" style="width: 23px; height: 23px;">
                             </button>
@@ -166,7 +165,7 @@ include("admin_navbar.php"); // Include the navigation bar
                         <form method="post" action="delete_form.php" style="display:inline;">
                             <input type="hidden" name="type" value="task">
                             <input type="hidden" name="id" value="<?php echo $row['task_id']; ?>">
-                            <button type="submit" class="btn border_black d-flex justify-content-center align-items-center"
+                            <button type="submit" class="btn border_black d-flex justify-content-center align-items-center aspect-1-1"
                                 style="width:53px; height:53px; padding:0;">
                                 <img src="assets/icons/delete.png" alt="Delete Icon" style="width: 23px; height: 23px;">
                             </button>

@@ -23,7 +23,7 @@ if (!empty($user['profile_image'])) {
     $profileImg = "assets/profile/" . $user['profile_image'];
 }
 
-include("navbar.php"); // Include the navigation bar
+include("admin_navbar.php"); // Include the navigation bar
 ?>
 
 <!DOCTYPE html>

@@ -38,7 +38,7 @@
             }
           }
           ?>
-          <a href="user_profile.php">
+          <a href="admin_user_profile.php">
             <img src="<?php echo htmlspecialchars($profile_img); ?>" alt="Profile"
               style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
           </a>
@@ -46,3 +46,22 @@
       </ul>
     </div>
 </nav>
+<style>
+@media (max-width: 991.98px) {
+  .navbar-main-list {
+    font-family: 'Inter', sans-serif;
+    gap: 20px !important;
+    font-weight: 200 !important;
+    font-size: 20px !important;
+  }
+}
+@media (min-width: 992px) {
+  .navbar-main-list {
+    font-family: 'Inter', sans-serif;
+    gap: 60px !important;
+    font-weight: 200 !important;
+    font-size: 30px !important;
+  }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>

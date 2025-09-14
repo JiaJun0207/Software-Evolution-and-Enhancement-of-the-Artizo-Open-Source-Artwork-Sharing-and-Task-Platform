@@ -25,13 +25,13 @@ include("navbar.php"); // Include the navigation bar
 </head>
 
 <body>
-    <div class="container-fluid" style="padding-left: 60px; padding-right: 60px; margin-top:60px;">
-        <h1 class="inter-bold-44 mb-4" style="margin-top:60px;">Support</h1>
-        <div class="row">
-            <div class="col">
+    <div class="container-fluid px-3 px-md-5" style="margin-top:60px;">
+        <h1 class="inter-bold-44 mb-4 mt-4 mt-md-5">Support</h1>
+        <div class="row flex-column flex-md-row">
+            <div class="col-12 col-md-6 mb-4 mb-md-0">
                 <div class="mb-3">
                     <form id="supportForm">
-                        <div class=" align-items-center gap-3 mb-3" style="padding-left:40px; padding-right:40px;">
+                        <div class="align-items-center gap-3 mb-3 px-3 px-md-5">
                             <div class="mb-4">
                                 <label class="inter-bold-32 mb-3">Email</label>
                                 <input type="email" id="userEmail" name="from_email"
@@ -50,7 +50,7 @@ include("navbar.php"); // Include the navigation bar
                                     class="form-control inter-medium-25 left-placeholder border_black" rows="3"
                                     placeholder="Add a message" required></textarea>
                             </div>
-                            <div style="padding-bottom: 60px;">
+                            <div class="pb-4 pb-md-5">
                                 <button type="submit" class="btn btn-outline-black inter-medium-24 active">
                                     <img src="assets/icons/post.png" alt="post Icon"
                                         style="width:20px; height:20px; margin-right:8px; vertical-align:middle;">
@@ -81,32 +81,32 @@ include("navbar.php"); // Include the navigation bar
 
                 </div>
             </div>
-            <div class="col">
+            <div class="col-12 col-md-6">
                 <div class="mb-3">
-                    <div class=" align-items-center gap-3 mb-3" style="padding-left:40px; padding-right:40px;">
+                    <div class="align-items-center gap-3 mb-3 px-3 px-md-5">
                         <div class="mb-4">
                             <label for="support_email" class="inter-bold-32 mb-3">Contact</label>
                             <p class="inter-extralight-24">Contact us questions, technical assistance, or collaboration
                                 opportunities via the contact information provided.</p>
                         </div>
                         <div class="mb-4">
-                            <div class="d-flex">
-                                <a type="hidden" href="mailto:cs-artizo@gmail.com">
+                            <div class="d-flex align-items-center mb-2">
+                                <a href="mailto:cs-artizo@gmail.com">
                                     <img src="assets/icons/email.png" alt="Support Icon"
                                         style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
-                                <p class="inter-extralight-24">cs-artizo@gmail.com</p>
+                                <p class="inter-extralight-24 mb-0">cs-artizo@gmail.com</p>
                             </div>
-                            <div class="d-flex">
-                                <a type="hidden" href="tel:+60169125204">
+                            <div class="d-flex align-items-center mb-2">
+                                <a href="tel:+60169125204">
                                     <img src="assets/icons/phone.png" alt="Support Icon"
                                         style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
-                                <p class="inter-extralight-24">+60 16-9125204</p>
+                                <p class="inter-extralight-24 mb-0">+60 16-9125204</p>
                             </div>
-                            <div class="d-flex">
-                                <a type="hidden" href="http://wa.link/y4xnnz">
+                            <div class="d-flex align-items-center">
+                                <a href="http://wa.link/y4xnnz">
                                     <img src="assets/icons/whatsapp.png" alt="Support Icon"
                                         style="width:30px; height:30px; display:block; margin-right: 10px;"></a>
-                                <p class="inter-extralight-24">http://wa.link/y4xnnz</p>
+                                <p class="inter-extralight-24 mb-0">http://wa.link/y4xnnz</p>
                             </div>
                         </div>
                     </div>
@@ -114,8 +114,6 @@ include("navbar.php"); // Include the navigation bar
             </div>
         </div>
     </div>
-    </div>
-
 </body>
 <footer>
     <?php include("footer.php"); // Include the footer ?>
