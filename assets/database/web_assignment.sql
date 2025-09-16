@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 26, 2025 at 08:54 PM
+-- Generation Time: Sep 14, 2025 at 12:20 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,13 +36,6 @@ CREATE TABLE `artwork` (
   `category_id` int(11) NOT NULL,
   `release_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `artwork`
---
-
-INSERT INTO `artwork` (`artwork_id`, `artwork_title`, `artwork_description`, `artwork_image`, `user_id`, `category_id`, `release_at`) VALUES
-(4, 'Testing', 'gendaiiwdf', '1755504481_1200x630bb.jpg', 2, 1, '2025-08-18 08:08:01');
 
 -- --------------------------------------------------------
 
@@ -99,14 +92,6 @@ CREATE TABLE `task` (
   `release_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `task`
---
-
-INSERT INTO `task` (`task_id`, `task_title`, `task_description`, `task_image`, `task_solution`, `task_status`, `post_user_id`, `accepted_user_id`, `category_id`, `release_at`) VALUES
-(4, 'gay', '1234', '1756233516_CHONG JIA HAO - HOMEPAGE.jpg', 'solution_4_1756234171.jpeg', 'submitted', 2, 3, 2, '2025-08-26 18:38:36'),
-(5, 'testing', '123456', '1756234427_WhatsApp Image 2025-08-23 at 10.30.29 AM (1).jpeg', 'solution_5_1756234454.jpeg', 'submitted', 3, 2, 1, '2025-08-26 18:53:47');
-
 -- --------------------------------------------------------
 
 --
@@ -122,14 +107,6 @@ CREATE TABLE `user` (
   `profile_image` varchar(255) NOT NULL,
   `reset_token` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `user`
---
-
-INSERT INTO `user` (`user_id`, `user_name`, `user_description`, `email`, `password`, `profile_image`, `reset_token`) VALUES
-(2, 'jiajun1', 'gay', 'jiajun1@gmail.com', '$2y$10$ztKMhvw4Yg90VnB32CixaO9fSa2xL5fRX755yr91tizeWDTa/0ZF2', 'user_2_1756230761.jpg', ''),
-(3, 'TEST!', '', 'test@gmail.com', '$2y$10$PtJVsXfAJxbgPSwpBNw9AeOU37RtOJjbriifmLzx0EsH3.p2ZQexy', '', '');
 
 --
 -- Indexes for dumped tables
@@ -180,7 +157,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `artwork`
 --
 ALTER TABLE `artwork`
-  MODIFY `artwork_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `artwork_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -192,19 +169,19 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `comment`
 --
 ALTER TABLE `comment`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `task`
 --
 ALTER TABLE `task`
-  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
