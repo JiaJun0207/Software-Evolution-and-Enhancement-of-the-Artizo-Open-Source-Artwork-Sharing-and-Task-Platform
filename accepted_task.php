@@ -103,7 +103,7 @@ include("navbar.php"); // Include the navigation bar
             $taskDesc = $row['task_description'];
             $taskImg = !empty($row['task_image']) ? "assets/uploads/task/" . $row['task_image'] : "assets/uploads/task/default_task.jpeg";
         ?>
-        <div class="card_border" style="padding: 68px 100px;">
+        <div class="card_border" style="padding: 68px 100px; margin-bottom:48px;">
             <div class="row align-items-center mb-4">
                 <div class="col d-flex align-items-center">
                     <a href="user_profile.php?id=<?php echo $row['post_user_id']; ?>">

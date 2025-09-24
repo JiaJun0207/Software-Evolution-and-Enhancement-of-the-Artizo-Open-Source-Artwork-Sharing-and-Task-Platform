@@ -1,3 +1,6 @@
+/* Custom button outline for black theme */
+/* Apply 2px border to all input, textarea, and select elements */
+
 .btn-outline-black {
   border-color: #000 !important;
   color: #000 !important;
@@ -9,7 +12,7 @@
   border-color: #000 !important;
 }
 
-
+/* Keep category buttons visually focused/active when selected */
 .btn-check:checked + .btn.btn-outline-black {
   background-color: #000 !important;
   color: #fff !important;
@@ -568,10 +571,9 @@
     }
 }
 
+/* Ensure comment row never wraps, keeping image, username, and comment text in a single line */
 .comment-row-nowrap {
     flex-wrap: nowrap !important;
-    overflow-x: auto;
-}
     overflow-x: auto;
 }
         margin-top: 2rem !important;
@@ -631,6 +633,7 @@
     }
 }
 
+/* Ensure comment row never wraps, keeping image, username, and comment text in a single line */
 .comment-row-nowrap {
     flex-wrap: nowrap !important;
     overflow-x: auto;

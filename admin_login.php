@@ -62,7 +62,4 @@ session_start(); // to start a session
     </div>
 
 </body>
-<footer>
-    <?php include("footer.php"); // Include the footer ?>
-</footer>
 </html>

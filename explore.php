@@ -185,7 +185,8 @@ include("navbar.php"); // Include the navigation bar
                 </div>
                 <a href="artwork_detail.php?id=<?php echo urlencode($artworkId); ?>">
                     <div class="artwork-img-responsive">
-                        <img src="<?php echo htmlspecialchars($artworkImg); ?>" alt="artwork_image">
+                        <img src="<?php echo htmlspecialchars($artworkImg); ?>" alt="artwork_image"
+                            style="width:100%; height:100%; object-fit:cover; aspect-ratio:1/1;">
                     </div>
                 </a>
                 <div>
