@@ -321,6 +321,42 @@ a:focus {
   cursor: wait;
 }
 
+.task-filter-bar {
+  flex-wrap: wrap;
+  gap: 1rem !important;
+}
+
+.task-filter-btn {
+  appearance: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--artizo-black);
+  margin: 0;
+  padding: 0 0 8px;
+  cursor: pointer;
+}
+
+.task-filter-btn.active,
+.task-filter-btn:hover,
+.task-filter-btn:focus {
+  border-bottom-color: var(--artizo-black);
+}
+
+.task-category-chip {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  border: 2px solid var(--artizo-border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  color: var(--artizo-text);
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .top {
   background-color: #F7822A !important;
   padding: 50px !important;

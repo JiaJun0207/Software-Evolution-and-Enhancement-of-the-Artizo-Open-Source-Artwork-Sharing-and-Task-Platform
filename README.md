@@ -161,3 +161,31 @@ Manual testing notes:
 6. Click `Saved` on the saved task page and confirm the task is removed from the list.
 7. Verify duplicate saves are prevented by the unique key on `(user_id, task_id)`.
 8. Log in as a different user and confirm saved tasks are user-specific.
+
+## Task Categorization and Filtering Feature
+
+The task categorization feature uses `task_categories` and the task-specific `task.task_category_id` column. This keeps the older shared `task.category_id` field available for existing project behavior.
+
+Before testing this feature on an existing database, apply:
+
+`assets/database/task_category_filter_migration.sql`
+
+Files:
+
+- `upload_task.php`: Loads task categories from `task_categories` and displays them in a dropdown.
+- `upload_task_form.php`: Validates the selected task category and stores it with the new task using prepared statements.
+- `task.php`: Shows task category labels and category filter buttons.
+- `task_filter.php`: AJAX endpoint for category/search filtering.
+
+Budget filtering is not implemented because the current schema does not contain budget, price, or amount fields for tasks.
+
+Manual testing notes:
+
+1. Apply `assets/database/task_category_filter_migration.sql`.
+2. Log in and open `upload_task.php`.
+3. Confirm the category dropdown shows task categories.
+4. Create a task with a selected category.
+5. Open `task.php` and confirm the task card shows the category label.
+6. Click a category filter button and confirm the task board updates without a full page reload.
+7. Combine search text with a category filter.
+8. Confirm existing task card links, Save buttons, and Accepted Task navigation still work.

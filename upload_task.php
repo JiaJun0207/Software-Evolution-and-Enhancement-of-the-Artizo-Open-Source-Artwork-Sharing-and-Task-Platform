@@ -9,6 +9,16 @@ if (!isset($_SESSION['UID'])) {
 }
 
 include("navbar.php"); // Include the navigation bar
+
+$taskCategories = [];
+$categoryStmt = $conn->prepare("SELECT task_category_id, category_name FROM task_categories ORDER BY category_name ASC");
+if ($categoryStmt) {
+    $categoryStmt->execute();
+    $categoryResult = $categoryStmt->get_result();
+    while ($categoryRow = $categoryResult->fetch_assoc()) {
+        $taskCategories[] = $categoryRow;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -37,25 +47,15 @@ include("navbar.php"); // Include the navigation bar
             <textarea class="form-control inter-medium-25 left-placeholder border_black" id="task_description" name="task_description" rows="3" placeholder="Add a detailed description" required></textarea>
         </div>
         <div class="mb-4">
-            <label class="inter-bold-32 mb-3">Category</label>
-            <div class="category-scroll">
-              <div class="d-flex gap-2 flex-wrap" role="group" aria-label="task_category">
-                  <input type="radio" class="btn-check" name="task_category" id="graphic_design" value="1" autocomplete="off" required>
-                  <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="graphic_design">Graphic Design</label>
-
-                  <input type="radio" class="btn-check" name="task_category" id="illustration" value="2" autocomplete="off">
-                  <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="illustration">Illustration</label>
-
-                  <input type="radio" class="btn-check" name="task_category" id="photography" value="3" autocomplete="off">
-                  <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="photography">Photography</label>
-
-                  <input type="radio" class="btn-check" name="task_category" id="3d_art" value="4" autocomplete="off">
-                  <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="3d_art">3D Art</label>
-
-                  <input type="radio" class="btn-check" name="task_category" id="advertising" value="5" autocomplete="off">
-                  <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="advertising">Advertising</label>
-              </div>
-            </div>
+            <label for="task_category_id" class="inter-bold-32 mb-3">Category</label>
+            <select class="form-control inter-medium-25 border_black" id="task_category_id" name="task_category_id" required>
+                <option value="">Select a category</option>
+                <?php foreach ($taskCategories as $category): ?>
+                    <option value="<?php echo htmlspecialchars($category['task_category_id']); ?>">
+                        <?php echo htmlspecialchars($category['category_name']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         </div>
         <div class="mb-5">
             <label for="task_image" class="inter-bold-32 mb-3">Upload Image</label>

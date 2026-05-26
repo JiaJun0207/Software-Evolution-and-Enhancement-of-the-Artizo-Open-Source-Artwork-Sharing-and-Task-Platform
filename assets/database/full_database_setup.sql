@@ -49,39 +49,6 @@ CREATE TABLE IF NOT EXISTS `artwork` (
   CONSTRAINT `fk_artwork_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `task` (
-  `task_id` int(11) NOT NULL AUTO_INCREMENT,
-  `task_title` varchar(255) NOT NULL,
-  `task_description` varchar(255) NOT NULL,
-  `task_image` varchar(255) NOT NULL,
-  `task_solution` varchar(255) NOT NULL DEFAULT '',
-  `task_status` enum('accept','accepted','submitted','') DEFAULT 'accept',
-  `post_user_id` int(11) NOT NULL,
-  `accepted_user_id` int(11) DEFAULT NULL,
-  `category_id` int(11) NOT NULL,
-  `release_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`task_id`),
-  KEY `idx_task_user` (`accepted_user_id`),
-  KEY `idx_task_category` (`category_id`),
-  KEY `fk_post_user` (`post_user_id`),
-  CONSTRAINT `fk_post_user` FOREIGN KEY (`post_user_id`) REFERENCES `user` (`user_id`),
-  CONSTRAINT `fk_task_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_task_user` FOREIGN KEY (`accepted_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE IF NOT EXISTS `comment` (
-  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
-  `artwork_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `comment_text` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`comment_id`),
-  KEY `idx_comment_artwork` (`artwork_id`),
-  KEY `idx_comment_user` (`user_id`),
-  CONSTRAINT `fk_comment_artwork` FOREIGN KEY (`artwork_id`) REFERENCES `artwork` (`artwork_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 CREATE TABLE IF NOT EXISTS `task_categories` (
   `task_category_id` int(11) NOT NULL AUTO_INCREMENT,
   `category_name` varchar(100) NOT NULL,
@@ -99,6 +66,42 @@ INSERT IGNORE INTO `task_categories` (`category_name`) VALUES
 ('UI/UX Design'),
 ('Photography'),
 ('Other');
+
+CREATE TABLE IF NOT EXISTS `task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_title` varchar(255) NOT NULL,
+  `task_description` varchar(255) NOT NULL,
+  `task_image` varchar(255) NOT NULL,
+  `task_solution` varchar(255) NOT NULL DEFAULT '',
+  `task_status` enum('accept','accepted','submitted','') DEFAULT 'accept',
+  `post_user_id` int(11) NOT NULL,
+  `accepted_user_id` int(11) DEFAULT NULL,
+  `category_id` int(11) NOT NULL,
+  `task_category_id` int(11) DEFAULT NULL,
+  `release_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`task_id`),
+  KEY `idx_task_user` (`accepted_user_id`),
+  KEY `idx_task_category` (`category_id`),
+  KEY `idx_task_task_category` (`task_category_id`),
+  KEY `fk_post_user` (`post_user_id`),
+  CONSTRAINT `fk_post_user` FOREIGN KEY (`post_user_id`) REFERENCES `user` (`user_id`),
+  CONSTRAINT `fk_task_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_task_task_category` FOREIGN KEY (`task_category_id`) REFERENCES `task_categories` (`task_category_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_task_user` FOREIGN KEY (`accepted_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artwork_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment_text` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`comment_id`),
+  KEY `idx_comment_artwork` (`artwork_id`),
+  KEY `idx_comment_user` (`user_id`),
+  CONSTRAINT `fk_comment_artwork` FOREIGN KEY (`artwork_id`) REFERENCES `artwork` (`artwork_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS `saved_tasks` (
   `saved_task_id` int(11) NOT NULL AUTO_INCREMENT,
