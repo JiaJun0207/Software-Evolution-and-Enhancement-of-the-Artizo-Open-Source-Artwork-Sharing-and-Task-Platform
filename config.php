@@ -2,13 +2,38 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "web_assignment";
+$dbCandidates = [];
+
+if (getenv("ARTIZO_DB_NAME")) {
+    $dbCandidates[] = getenv("ARTIZO_DB_NAME");
+}
+
+$dbCandidates[] = "web_assignment";
+$dbCandidates[] = "software_evo_assignment";
+$dbCandidates = array_values(array_unique($dbCandidates));
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = null;
+$lastConnectionError = "";
+
+foreach ($dbCandidates as $dbname) {
+    try {
+        $conn = new mysqli($servername, $username, $password, $dbname);
+
+        if (!$conn->connect_error) {
+            break;
+        }
+
+        $lastConnectionError = $conn->connect_error;
+        $conn = null;
+    } catch (mysqli_sql_exception $exception) {
+        $lastConnectionError = $exception->getMessage();
+        $conn = null;
+    }
+}
 
 // Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn === null || $conn->connect_error) {
+    die("Connection failed: " . $lastConnectionError);
 }
 ?>

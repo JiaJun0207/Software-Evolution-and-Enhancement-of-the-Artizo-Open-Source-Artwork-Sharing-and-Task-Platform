@@ -16,13 +16,15 @@ The current database connection is configured in `config.php`:
 - Host: `localhost`
 - User: `root`
 - Password: empty string
-- Database: `web_assignment`
+- Database: `web_assignment` by default, with a fallback to `software_evo_assignment`
+
+If you want to force a specific database name, set the `ARTIZO_DB_NAME` environment variable before running the project.
 
 ## Database Setup
 
 1. Start Apache and MySQL in XAMPP.
 2. Open phpMyAdmin.
-3. Create a database named `web_assignment` if it does not already exist.
+3. Create a database named `web_assignment` if it does not already exist. If your local assignment database is already named `software_evo_assignment`, the updated `config.php` can use that as a fallback.
 
 For an empty database, import this all-in-one setup file:
 
@@ -74,7 +76,7 @@ Use `assets/database/full_database_setup.sql` if your selected database is empty
 Use `assets/database/phase1_database_migration.sql` only when the base Artizo schema already exists.
 
 1. Open phpMyAdmin.
-2. Select the `web_assignment` database.
+2. Select the `web_assignment` database, or `software_evo_assignment` if that is the database you imported earlier.
 3. Click the `Import` tab.
 4. Choose the correct SQL file:
    - Empty database: `assets/database/full_database_setup.sql`
@@ -87,7 +89,7 @@ If your selected database does not yet contain the base Artizo tables (`user`, `
 
 Alternative:
 
-1. Select the `web_assignment` database.
+1. Select the `web_assignment` database, or `software_evo_assignment` if that is your local database name.
 2. Click the `SQL` tab.
 3. Paste the contents of `assets/database/phase1_database_migration.sql`.
 4. Click `Go`.
@@ -129,7 +131,7 @@ Confirm foreign keys:
 ```sql
 SELECT TABLE_NAME, CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
 FROM information_schema.KEY_COLUMN_USAGE
-WHERE TABLE_SCHEMA = 'web_assignment'
+WHERE TABLE_SCHEMA = DATABASE()
   AND TABLE_NAME IN ('saved_tasks', 'artwork_likes', 'task');
 ```
 

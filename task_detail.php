@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
 <body>
     <?php
     if (isset($_GET['id'])) {
-        $task_id = $_GET['id'];
+        $task_id = intval($_GET['id']);
     } else {
         $task_id = 0; // Default or error value
     }
@@ -121,17 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
                 $categoryColor = "#333";
         }
 
-        // Handle comment submission (AJAX)
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_text'])) {
-            $commentText = trim($_POST['comment_text']);
-            if ($commentText !== '') {
-                $insertComment = $conn->prepare("INSERT INTO comment (task_id, user_id, comment_text, created_at) VALUES (?, ?, ?, NOW())");
-                $insertComment->bind_param("iis", $task_id, $uid, $commentText);
-                $insertComment->execute();
-                echo "success";
-                exit();
-            }
-        }
         ?>
         <div class="container-fluid px-3 px-md-5 pb-4 pb-md-5" style="margin-top:60px;">
             <div class="d-flex align-items-center flex-column flex-sm-row">
@@ -207,6 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
             </form>
             <?php endif; ?>
         </div>
+        <?php if (strtolower($task['task_status']) === 'accepted'): ?>
         <script>
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('artwork_image');
@@ -254,6 +244,7 @@ dropArea.addEventListener('keydown', (e) => {
   }
 });
 </script>
+        <?php endif; ?>
         <?php
     } else {
         echo "Task not found.";

@@ -1,11 +1,10 @@
--- Phase 1 database migration for CSE6364 Artizo enhancements
+-- Phase 1 database migration for CSE6364 Artizo enhancements.
 -- Compatible with MySQL/MariaDB in XAMPP/phpMyAdmin.
 --
--- Assumptions from the existing schema:
--- 1. The project database is `web_assignment`.
--- 2. Existing core tables use singular names: `user`, `task`, `artwork`, `category`.
--- 3. The existing `task` table already has `category_id` referencing `category(category_id)`.
--- 4. This migration keeps existing tables and data intact.
+-- Use this after the base Artizo schema exists. If a local database is
+-- partially imported, this migration avoids hard failures by creating the new
+-- feature tables first and adding compatibility data/foreign keys only when
+-- the referenced base tables are present.
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -13,10 +12,7 @@ SET time_zone = "+00:00";
 START TRANSACTION;
 
 -- --------------------------------------------------------
--- Task-specific category lookup for the approved task filtering work.
--- The current application already uses `category` for both artwork and task.
--- This table is additive and allows future task UI to use task-specific labels
--- without removing the existing `task.category_id` relationship.
+-- Task-specific category lookup.
 -- --------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `task_categories` (
@@ -38,45 +34,48 @@ INSERT IGNORE INTO `task_categories` (`category_name`) VALUES
 ('Other');
 
 -- --------------------------------------------------------
--- Compatibility seed for the existing shared `category` table.
--- Because the current `task.category_id` foreign key points to `category`,
--- add missing approved task category names there too. Existing rows are kept.
+-- Optional compatibility seed for the shared artwork/category table.
 -- --------------------------------------------------------
 
-INSERT INTO `category` (`category_name`)
-SELECT 'Illustration'
-WHERE NOT EXISTS (SELECT 1 FROM `category` WHERE `category_name` = 'Illustration');
+SET @category_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'category'
+);
 
-INSERT INTO `category` (`category_name`)
-SELECT 'Graphic Design'
-WHERE NOT EXISTS (SELECT 1 FROM `category` WHERE `category_name` = 'Graphic Design');
-
-INSERT INTO `category` (`category_name`)
-SELECT 'Animation'
-WHERE NOT EXISTS (SELECT 1 FROM `category` WHERE `category_name` = 'Animation');
-
-INSERT INTO `category` (`category_name`)
-SELECT 'Digital Painting'
-WHERE NOT EXISTS (SELECT 1 FROM `category` WHERE `category_name` = 'Digital Painting');
-
-INSERT INTO `category` (`category_name`)
-SELECT 'UI/UX Design'
-WHERE NOT EXISTS (SELECT 1 FROM `category` WHERE `category_name` = 'UI/UX Design');
-
-INSERT INTO `category` (`category_name`)
-SELECT 'Photography'
-WHERE NOT EXISTS (SELECT 1 FROM `category` WHERE `category_name` = 'Photography');
-
-INSERT INTO `category` (`category_name`)
-SELECT 'Other'
-WHERE NOT EXISTS (SELECT 1 FROM `category` WHERE `category_name` = 'Other');
+SET @sql := IF(
+  @category_table_exists > 0,
+  'INSERT INTO `category` (`category_name`)
+   SELECT seed.category_name
+   FROM (
+     SELECT ''Illustration'' AS category_name
+     UNION SELECT ''Graphic Design''
+     UNION SELECT ''Animation''
+     UNION SELECT ''Digital Painting''
+     UNION SELECT ''UI/UX Design''
+     UNION SELECT ''Photography''
+     UNION SELECT ''Other''
+   ) seed
+   WHERE NOT EXISTS (
+     SELECT 1 FROM `category` c WHERE c.category_name = seed.category_name
+   )',
+  'SELECT ''category table not found; skipped shared category seed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- --------------------------------------------------------
--- Ensure `task.category_id` exists for task categorization.
--- The current repository schema already has this column, so this normally
--- reports that no change was needed. It is nullable only when added to an
--- older database to avoid breaking existing task rows during migration.
+-- Optional legacy task.category_id compatibility check.
 -- --------------------------------------------------------
+
+SET @task_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task'
+);
 
 SET @task_category_column_exists := (
   SELECT COUNT(*)
@@ -87,9 +86,9 @@ SET @task_category_column_exists := (
 );
 
 SET @sql := IF(
-  @task_category_column_exists = 0,
+  @task_table_exists > 0 AND @task_category_column_exists = 0,
   'ALTER TABLE `task` ADD COLUMN `category_id` int(11) NULL AFTER `accepted_user_id`',
-  'SELECT ''task.category_id already exists; no ALTER TABLE needed'' AS migration_note'
+  'SELECT ''task table missing or task.category_id already exists; no ALTER TABLE needed.'' AS migration_note'
 );
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
@@ -100,13 +99,13 @@ SET @task_category_index_exists := (
   FROM information_schema.STATISTICS
   WHERE TABLE_SCHEMA = DATABASE()
     AND TABLE_NAME = 'task'
-    AND COLUMN_NAME = 'category_id'
+    AND INDEX_NAME = 'idx_task_category'
 );
 
 SET @sql := IF(
-  @task_category_index_exists = 0,
+  @task_table_exists > 0 AND @task_category_index_exists = 0,
   'ALTER TABLE `task` ADD KEY `idx_task_category` (`category_id`)',
-  'SELECT ''task.category_id is already indexed; no index needed'' AS migration_note'
+  'SELECT ''task table missing or task.category_id index already exists; no index needed.'' AS migration_note'
 );
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
@@ -114,26 +113,23 @@ DEALLOCATE PREPARE stmt;
 
 SET @task_category_fk_exists := (
   SELECT COUNT(*)
-  FROM information_schema.KEY_COLUMN_USAGE
+  FROM information_schema.TABLE_CONSTRAINTS
   WHERE TABLE_SCHEMA = DATABASE()
     AND TABLE_NAME = 'task'
-    AND COLUMN_NAME = 'category_id'
-    AND REFERENCED_TABLE_NAME = 'category'
-    AND REFERENCED_COLUMN_NAME = 'category_id'
+    AND CONSTRAINT_NAME = 'fk_task_category'
 );
 
 SET @sql := IF(
-  @task_category_fk_exists = 0,
+  @task_table_exists > 0 AND @category_table_exists > 0 AND @task_category_fk_exists = 0,
   'ALTER TABLE `task` ADD CONSTRAINT `fk_task_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE',
-  'SELECT ''task.category_id already has a category foreign key; no FK needed'' AS migration_note'
+  'SELECT ''task/category table missing or task.category_id foreign key already exists; no FK needed.'' AS migration_note'
 );
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
 -- --------------------------------------------------------
--- Saved tasks: one user can save many tasks, and a task can be saved by many users.
--- Duplicate saves are prevented by the unique user/task key.
+-- Saved tasks.
 -- --------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `saved_tasks` (
@@ -145,14 +141,52 @@ CREATE TABLE IF NOT EXISTS `saved_tasks` (
   PRIMARY KEY (`saved_task_id`),
   UNIQUE KEY `uniq_saved_tasks_user_task` (`user_id`, `task_id`),
   KEY `idx_saved_tasks_user` (`user_id`),
-  KEY `idx_saved_tasks_task` (`task_id`),
-  CONSTRAINT `fk_saved_tasks_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_saved_tasks_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `idx_saved_tasks_task` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+SET @user_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'user'
+);
+
+SET @saved_tasks_user_fk_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'saved_tasks'
+    AND CONSTRAINT_NAME = 'fk_saved_tasks_user'
+);
+
+SET @sql := IF(
+  @user_table_exists > 0 AND @saved_tasks_user_fk_exists = 0,
+  'ALTER TABLE `saved_tasks` ADD CONSTRAINT `fk_saved_tasks_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''user table missing or saved_tasks user foreign key already exists; no FK needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @saved_tasks_task_fk_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'saved_tasks'
+    AND CONSTRAINT_NAME = 'fk_saved_tasks_task'
+);
+
+SET @sql := IF(
+  @task_table_exists > 0 AND @saved_tasks_task_fk_exists = 0,
+  'ALTER TABLE `saved_tasks` ADD CONSTRAINT `fk_saved_tasks_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''task table missing or saved_tasks task foreign key already exists; no FK needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- --------------------------------------------------------
--- Artwork likes: one user can like many artworks, and an artwork can be liked
--- by many users. Duplicate likes are prevented by the unique user/artwork key.
+-- Artwork likes.
 -- --------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `artwork_likes` (
@@ -163,9 +197,48 @@ CREATE TABLE IF NOT EXISTS `artwork_likes` (
   PRIMARY KEY (`artwork_like_id`),
   UNIQUE KEY `uniq_artwork_likes_user_artwork` (`user_id`, `artwork_id`),
   KEY `idx_artwork_likes_user` (`user_id`),
-  KEY `idx_artwork_likes_artwork` (`artwork_id`),
-  CONSTRAINT `fk_artwork_likes_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_artwork_likes_artwork` FOREIGN KEY (`artwork_id`) REFERENCES `artwork` (`artwork_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `idx_artwork_likes_artwork` (`artwork_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+SET @artwork_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'artwork'
+);
+
+SET @artwork_likes_user_fk_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'artwork_likes'
+    AND CONSTRAINT_NAME = 'fk_artwork_likes_user'
+);
+
+SET @sql := IF(
+  @user_table_exists > 0 AND @artwork_likes_user_fk_exists = 0,
+  'ALTER TABLE `artwork_likes` ADD CONSTRAINT `fk_artwork_likes_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''user table missing or artwork_likes user foreign key already exists; no FK needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @artwork_likes_artwork_fk_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'artwork_likes'
+    AND CONSTRAINT_NAME = 'fk_artwork_likes_artwork'
+);
+
+SET @sql := IF(
+  @artwork_table_exists > 0 AND @artwork_likes_artwork_fk_exists = 0,
+  'ALTER TABLE `artwork_likes` ADD CONSTRAINT `fk_artwork_likes_artwork` FOREIGN KEY (`artwork_id`) REFERENCES `artwork` (`artwork_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''artwork table missing or artwork_likes artwork foreign key already exists; no FK needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 COMMIT;
