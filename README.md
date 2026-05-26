@@ -211,3 +211,29 @@ Manual testing notes:
 5. Click `Unlike` and confirm the count decreases by one.
 6. Refresh the page and confirm the liked/unliked state persists.
 7. Open `user_profile.php` and confirm artwork card like buttons behave consistently.
+
+## AJAX Comment Submission and Refresh
+
+The AJAX comment feature uses the existing `comment` table. The current schema stores comments for artworks through `comment.artwork_id`, so this implementation supports artwork comments only.
+
+Files:
+
+- `submit_comment.php`: JSON endpoint for validating and inserting a new artwork comment.
+- `fetch_comments.php`: JSON endpoint for fetching comments newer than a provided comment ID.
+- `artwork_detail.php`: Submits comments with `fetch()`, appends new comments without a page reload, and polls every 5 seconds.
+
+JSON response examples:
+
+- Submit success: `{ "success": true, "message": "Comment submitted.", "comment": { ... } }`
+- Fetch success: `{ "success": true, "comments": [ ... ], "latest_comment_id": 12 }`
+- Error: `{ "success": false, "message": "..." }`
+
+Manual testing notes:
+
+1. Log in and open `artwork_detail.php?id=<existing artwork id>`.
+2. Type a comment and press Enter or click `Submit Comment`.
+3. Confirm the new comment appears immediately without a full page reload.
+4. Refresh the page and confirm the comment was preserved in the database.
+5. Open the same artwork in another browser/session, add a comment, and confirm the first page shows it within 5 seconds.
+6. Confirm duplicate comments are not appended when polling runs after a local submission.
+7. Try an invalid artwork ID and confirm the endpoint returns an error response.

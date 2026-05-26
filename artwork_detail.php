@@ -108,17 +108,6 @@ include("navbar.php");
             $comments[] = $row;
         }
 
-        // Handle comment submission (AJAX)
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_text'])) {
-            $commentText = trim($_POST['comment_text']);
-            if ($commentText !== '') {
-                $insertComment = $conn->prepare("INSERT INTO comment (artwork_id, user_id, comment_text, created_at) VALUES (?, ?, ?, NOW())");
-                $insertComment->bind_param("iis", $artwork_id, $uid, $commentText);
-                $insertComment->execute();
-                echo "success";
-                exit();
-            }
-        }
         ?>
         <div class="container-fluid px-3 px-md-5 pb-4 pb-md-5" style="margin-top:60px;">
             <div class="d-flex align-items-center flex-column flex-sm-row">
@@ -168,7 +157,8 @@ include("navbar.php");
                         $commenterName = $comment['user_name'];
                         $commenterId = $comment['user_id'];
                     ?>
-                        <div class="d-flex align-items-center mb-4 flex-row comment-row-nowrap">
+                        <div class="d-flex align-items-center mb-4 flex-row comment-row-nowrap"
+                            data-comment-id="<?php echo htmlspecialchars($comment['comment_id']); ?>">
                             <a href="user_profile.php?uid=<?php echo urlencode($commenterId); ?>">
                                 <img src="<?php echo htmlspecialchars($commenterImg); ?>" alt="Profile Image" class="rounded-circle"
                                     style="width:65px; height:65px; object-fit:cover;">
@@ -183,32 +173,162 @@ include("navbar.php");
                             </p>
                         </div>
                     <?php endforeach; ?>
-                    <!-- Comment input -->
-                    <div class="mb-4">
+                </div>
+                <form id="commentForm" class="mb-4">
+                    <input type="hidden" id="commentArtworkId" value="<?php echo htmlspecialchars($artwork_id); ?>">
+                    <div class="mb-3">
                         <textarea class="form-control inter-medium-25 left-placeholder border_black" id="commentInput"
                             name="comment" rows="3" placeholder="Add a comment" required></textarea>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-outline-black border_black inter-medium-24 comment-submit-btn">
+                        Submit Comment
+                    </button>
+                </form>
             </div>
         </div>
         <script>
-        document.getElementById('commentInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                var commentText = this.value.trim();
-                if (commentText !== '') {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '', true);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    xhr.onload = function() {
-                        if (xhr.responseText === 'success') {
-                            location.reload();
-                        }
-                    };
-                    xhr.send('comment_text=' + encodeURIComponent(commentText));
+        const commentsSection = document.getElementById('commentsSection');
+        const commentForm = document.getElementById('commentForm');
+        const commentInput = document.getElementById('commentInput');
+        const commentArtworkId = document.getElementById('commentArtworkId').value;
+        const renderedCommentIds = new Set();
+        let latestCommentId = 0;
+
+        commentsSection.querySelectorAll('[data-comment-id]').forEach(function (commentNode) {
+            const commentId = Number(commentNode.dataset.commentId);
+            if (commentId > 0) {
+                renderedCommentIds.add(commentId);
+                latestCommentId = Math.max(latestCommentId, commentId);
+            }
+        });
+
+        function appendComment(comment) {
+            const commentId = Number(comment.comment_id);
+            if (!commentId || renderedCommentIds.has(commentId)) {
+                return;
+            }
+
+            renderedCommentIds.add(commentId);
+            latestCommentId = Math.max(latestCommentId, commentId);
+
+            const row = document.createElement('div');
+            row.className = 'd-flex align-items-center mb-4 flex-row comment-row-nowrap';
+            row.dataset.commentId = String(commentId);
+
+            const profileLink = document.createElement('a');
+            profileLink.href = 'user_profile.php?uid=' + encodeURIComponent(comment.user_id);
+
+            const profileImage = document.createElement('img');
+            profileImage.src = comment.profile_image_path || 'assets/profile/user_profile.png';
+            profileImage.alt = 'Profile Image';
+            profileImage.className = 'rounded-circle';
+            profileImage.style.width = '65px';
+            profileImage.style.height = '65px';
+            profileImage.style.objectFit = 'cover';
+            profileLink.appendChild(profileImage);
+
+            const nameLink = document.createElement('a');
+            nameLink.href = 'user_profile.php?uid=' + encodeURIComponent(comment.user_id);
+            nameLink.style.textDecoration = 'none';
+
+            const name = document.createElement('p');
+            name.className = 'mb-0 inter-medium-24 ms-4';
+            name.style.color = '#000';
+            name.textContent = comment.user_name;
+            nameLink.appendChild(name);
+
+            const text = document.createElement('p');
+            text.className = 'mb-0 inter-extralight-24 ms-5';
+            text.textContent = comment.comment_text;
+
+            row.appendChild(profileLink);
+            row.appendChild(nameLink);
+            row.appendChild(text);
+            commentsSection.appendChild(row);
+        }
+
+        async function fetchNewComments() {
+            const params = new URLSearchParams({
+                target_type: 'artwork',
+                artwork_id: commentArtworkId,
+                since_id: String(latestCommentId)
+            });
+
+            const response = await fetch('fetch_comments.php?' + params.toString(), {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                if (response.status === 401) {
+                    window.location.href = 'login.php';
+                    return;
+                }
+                throw new Error(data.message || 'Unable to fetch comments.');
+            }
+
+            data.comments.forEach(appendComment);
+        }
+
+        commentForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const commentText = commentInput.value.trim();
+
+            if (commentText === '') {
+                return;
+            }
+
+            const submitButton = commentForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch('submit_comment.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        target_type: 'artwork',
+                        artwork_id: commentArtworkId,
+                        comment_text: commentText
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    if (response.status === 401) {
+                        window.location.href = 'login.php';
+                        return;
+                    }
+                    throw new Error(data.message || 'Unable to submit comment.');
+                }
+
+                appendComment(data.comment);
+                commentInput.value = '';
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        commentInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                if (commentForm.requestSubmit) {
+                    commentForm.requestSubmit();
+                } else {
+                    commentForm.dispatchEvent(new Event('submit', { cancelable: true }));
                 }
             }
         });
+
+        setInterval(function () {
+            fetchNewComments().catch(function () {
+                // Keep polling quiet so temporary network issues do not interrupt reading.
+            });
+        }, 5000);
         </script>
         <script src="artwork_like.js"></script>
         <?php
