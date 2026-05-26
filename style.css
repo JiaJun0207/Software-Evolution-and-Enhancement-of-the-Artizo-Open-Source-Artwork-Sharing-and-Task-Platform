@@ -321,6 +321,34 @@ a:focus {
   cursor: wait;
 }
 
+.artwork-like-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px !important;
+  color: var(--artizo-text) !important;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.artwork-like-btn.liked {
+  background-color: var(--artizo-black) !important;
+  color: #fff !important;
+}
+
+.artwork-like-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.artwork-like-btn-detail {
+  min-width: 130px;
+}
+
 .task-filter-bar {
   flex-wrap: wrap;
   gap: 1rem !important;

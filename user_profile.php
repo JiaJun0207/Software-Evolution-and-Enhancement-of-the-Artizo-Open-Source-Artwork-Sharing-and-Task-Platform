@@ -36,6 +36,7 @@ include("navbar.php"); // Include the navigation bar
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -83,8 +84,21 @@ include("navbar.php"); // Include the navigation bar
 
         <?php
 
-        $sql = "SELECT * FROM `artwork`";
-        $result = $conn->query($sql);
+        $sql = "SELECT a.*,
+                       COALESCE(lc.like_count, 0) AS like_count,
+                       CASE WHEN ul.artwork_like_id IS NULL THEN 0 ELSE 1 END AS is_liked
+                FROM artwork a
+                LEFT JOIN (
+                    SELECT artwork_id, COUNT(*) AS like_count
+                    FROM artwork_likes
+                    GROUP BY artwork_id
+                ) lc ON a.artwork_id = lc.artwork_id
+                LEFT JOIN artwork_likes ul ON a.artwork_id = ul.artwork_id AND ul.user_id = ?
+                ORDER BY a.release_at DESC";
+        $artwork_stmt = $conn->prepare($sql);
+        $artwork_stmt->bind_param("i", $uid);
+        $artwork_stmt->execute();
+        $result = $artwork_stmt->get_result();
 
         if ($result->num_rows > 0) {
             ?>
@@ -92,6 +106,9 @@ include("navbar.php"); // Include the navigation bar
             <?php
             //output data of each row
             while ($row = $result->fetch_assoc()) {
+                $artworkId = intval($row['artwork_id']);
+                $likeCount = intval($row['like_count']);
+                $isLiked = intval($row['is_liked']) === 1;
                 ?>
                     <div class="col">
                         <a href="artwork_detail.php?id=<?php echo urlencode($row['artwork_id']); ?>"
@@ -101,6 +118,15 @@ include("navbar.php"); // Include the navigation bar
                                     alt="Artwork" class="card-img artwork-img-full">
                             </div>
                         </a>
+                        <button type="button"
+                            class="btn btn-outline-black border_black artwork-like-btn mt-3 <?php echo $isLiked ? 'liked' : ''; ?>"
+                            data-artwork-id="<?php echo htmlspecialchars($artworkId); ?>"
+                            data-liked="<?php echo $isLiked ? '1' : '0'; ?>"
+                            aria-pressed="<?php echo $isLiked ? 'true' : 'false'; ?>">
+                            <i class="<?php echo $isLiked ? 'fa-solid' : 'fa-regular'; ?> fa-heart" aria-hidden="true"></i>
+                            <span class="artwork-like-label"><?php echo $isLiked ? 'Unlike' : 'Like'; ?></span>
+                            <span class="artwork-like-count"><?php echo $likeCount; ?></span>
+                        </button>
                     </div>
                 <?php
             }
@@ -117,6 +143,7 @@ include("navbar.php"); // Include the navigation bar
 
     </div>
 
+<script src="artwork_like.js"></script>
 </body>
 <footer>
     <?php include("footer.php"); // Include the footer ?>

@@ -30,20 +30,13 @@ include("navbar.php"); // Include the navigation bar
         <div class="row">
             <div class="col-10">
                 <?php
-                $sql = "SELECT * FROM artwork";
-                if (isset($_GET['search'])) {
-                    $search = $_GET['search'];
-                    $sql .= " WHERE `artwork_title` LIKE '%$search%'
-                    OR `artwork_description` LIKE '%$search%'";
-                } else {
-                    $_GET['search'] = '';
-                }
+                $searchValue = $_GET['search'] ?? '';
                 ?>
                 <form action="" method="get">
                     <div id="searchBarWrapper" style="position:relative; background:#000; border-radius:14px;">
                         <input type="text" class="form-control inter-medium-25 left-placeholder border_black"
                             id="searchInput" name="search"
-                            value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>"
+                            value="<?php echo htmlspecialchars($searchValue); ?>"
                             style="padding-right:40px; background:#000; color:#fff;">
                         <span id="searchIcon"
                             style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none;">
@@ -146,23 +139,41 @@ include("navbar.php"); // Include the navigation bar
 
         <?php
         // Build SQL for category and search
-        $sql = "SELECT a.*, u.user_name, u.profile_image, c.category_name 
+        $sql = "SELECT a.*, u.user_name, u.profile_image, c.category_name,
+                COALESCE(lc.like_count, 0) AS like_count,
+                CASE WHEN ul.artwork_like_id IS NULL THEN 0 ELSE 1 END AS is_liked
         FROM artwork a
         JOIN user u ON a.user_id = u.user_id
-        JOIN category c ON a.category_id = c.category_id";
+        JOIN category c ON a.category_id = c.category_id
+        LEFT JOIN (
+            SELECT artwork_id, COUNT(*) AS like_count
+            FROM artwork_likes
+            GROUP BY artwork_id
+        ) lc ON a.artwork_id = lc.artwork_id
+        LEFT JOIN artwork_likes ul ON a.artwork_id = ul.artwork_id AND ul.user_id = ?";
         $where = [];
+        $params = [intval($_SESSION['UID'])];
+        $types = "i";
         if (isset($_GET['search']) && $_GET['search'] !== '') {
-            $search = $conn->real_escape_string($_GET['search']);
-            $where[] = "(a.artwork_title LIKE '%$search%' OR a.artwork_description LIKE '%$search%')";
+            $search = "%" . $_GET['search'] . "%";
+            $where[] = "(a.artwork_title LIKE ? OR a.artwork_description LIKE ?)";
+            $params[] = $search;
+            $params[] = $search;
+            $types .= "ss";
         }
         if (isset($_GET['category']) && $_GET['category'] !== '' && $_GET['category'] !== 'ALL') {
-            $category = $conn->real_escape_string($_GET['category']);
-            $where[] = "c.category_name = '$category'";
+            $where[] = "c.category_name = ?";
+            $params[] = $_GET['category'];
+            $types .= "s";
         }
         if ($where) {
             $sql .= " WHERE " . implode(' AND ', $where);
         }
-        $result = $conn->query($sql);
+        $sql .= " ORDER BY a.release_at DESC";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
         ?>
 
         <div class="row row-cols-3 gx-4" style="--bs-gutter-y: 90px;">
@@ -172,6 +183,8 @@ include("navbar.php"); // Include the navigation bar
                 $artworkImg = !empty($row['artwork_image']) ? "assets/uploads/artworks/" . $row['artwork_image'] : "assets/uploads/artworks/default_artwork.jpeg";
                 $artworkTitle = $row['artwork_title'];
                 $artworkId = $row['artwork_id'];
+                $likeCount = intval($row['like_count']);
+                $isLiked = intval($row['is_liked']) === 1;
             ?>
             <div class="col">
                 <div class="d-flex align-items-center mb-3">
@@ -191,11 +204,21 @@ include("navbar.php"); // Include the navigation bar
                 </a>
                 <div>
                     <p class="mb-0 inter-medium-24 mt-3"><?php echo htmlspecialchars($artworkTitle); ?></p>
+                    <button type="button"
+                        class="btn btn-outline-black border_black artwork-like-btn mt-2 <?php echo $isLiked ? 'liked' : ''; ?>"
+                        data-artwork-id="<?php echo htmlspecialchars($artworkId); ?>"
+                        data-liked="<?php echo $isLiked ? '1' : '0'; ?>"
+                        aria-pressed="<?php echo $isLiked ? 'true' : 'false'; ?>">
+                        <i class="<?php echo $isLiked ? 'fa-solid' : 'fa-regular'; ?> fa-heart" aria-hidden="true"></i>
+                        <span class="artwork-like-label"><?php echo $isLiked ? 'Unlike' : 'Like'; ?></span>
+                        <span class="artwork-like-count"><?php echo $likeCount; ?></span>
+                    </button>
                 </div>
             </div>
             <?php endwhile; ?>
         </div>
 </div>
+<script src="artwork_like.js"></script>
 </body>
 <footer>
     <?php include("footer.php"); ?>

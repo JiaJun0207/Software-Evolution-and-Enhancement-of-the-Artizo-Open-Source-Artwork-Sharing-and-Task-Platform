@@ -189,3 +189,25 @@ Manual testing notes:
 6. Click a category filter button and confirm the task board updates without a full page reload.
 7. Combine search text with a category filter.
 8. Confirm existing task card links, Save buttons, and Accepted Task navigation still work.
+
+## Artwork Like Feature
+
+The artwork like feature uses the existing `artwork_likes` table from the Phase 1 migration. Each row stores one user/artwork like, and the unique `(user_id, artwork_id)` key prevents duplicate likes.
+
+Files:
+
+- `artwork_like_toggle.php`: JSON endpoint for liking and unliking artworks.
+- `artwork_like.js`: Shared AJAX handler for artwork like buttons.
+- `explore.php`: Shows Like/Unlike buttons and like counts on artwork cards.
+- `artwork_detail.php`: Shows Like/Unlike button and count on the artwork detail page.
+- `user_profile.php`: Shows Like/Unlike buttons and counts on profile artwork cards.
+
+Manual testing notes:
+
+1. Confirm `artwork_likes` exists by running `SHOW TABLES LIKE 'artwork_likes';`.
+2. Log in and open `explore.php`.
+3. Click `Like` on an artwork and confirm the button changes to `Unlike` and the count updates without a page reload.
+4. Open the same artwork in `artwork_detail.php` and confirm the liked state is active.
+5. Click `Unlike` and confirm the count decreases by one.
+6. Refresh the page and confirm the liked/unliked state persists.
+7. Open `user_profile.php` and confirm artwork card like buttons behave consistently.

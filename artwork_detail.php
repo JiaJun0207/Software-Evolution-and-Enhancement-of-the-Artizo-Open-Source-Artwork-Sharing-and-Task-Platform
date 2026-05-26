@@ -35,25 +35,34 @@ include("navbar.php");
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <?php
     if (isset($_GET['id'])) {
-        $artwork_id = $_GET['id'];
+        $artwork_id = intval($_GET['id']);
     } else {
         $artwork_id = 0; // Default or error value
     }
 
     // Fetch artwork and uploader info
-    $sql = "SELECT a.*, u.user_name, u.profile_image, c.category_name 
+    $sql = "SELECT a.*, u.user_name, u.profile_image, c.category_name,
+                   COALESCE(lc.like_count, 0) AS like_count,
+                   CASE WHEN ul.artwork_like_id IS NULL THEN 0 ELSE 1 END AS is_liked
             FROM artwork a
             JOIN user u ON a.user_id = u.user_id
             JOIN category c ON a.category_id = c.category_id
+            LEFT JOIN (
+                SELECT artwork_id, COUNT(*) AS like_count
+                FROM artwork_likes
+                GROUP BY artwork_id
+            ) lc ON a.artwork_id = lc.artwork_id
+            LEFT JOIN artwork_likes ul ON a.artwork_id = ul.artwork_id AND ul.user_id = ?
             WHERE a.artwork_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $artwork_id);
+    $stmt->bind_param("ii", $uid, $artwork_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -62,6 +71,8 @@ include("navbar.php");
         $uploaderImg = !empty($artwork['profile_image']) ? "assets/profile/" . $artwork['profile_image'] : "assets/profile/user_profile.png";
         $uploaderName = $artwork['user_name'];
         $categoryName = $artwork['category_name'];
+        $likeCount = intval($artwork['like_count']);
+        $isLiked = intval($artwork['is_liked']) === 1;
 
         // Set category color based on category name
         $categoryColor = "#333"; // default color
@@ -122,6 +133,15 @@ include("navbar.php");
             <h1 class="inter-bold-44 mb-4 mt-4 mt-md-5 text-center text-md-start">
                 <?php echo htmlspecialchars($artwork['artwork_title']); ?>
             </h1>
+            <button type="button"
+                class="btn btn-outline-black border_black artwork-like-btn artwork-like-btn-detail mb-4 <?php echo $isLiked ? 'liked' : ''; ?>"
+                data-artwork-id="<?php echo htmlspecialchars($artwork_id); ?>"
+                data-liked="<?php echo $isLiked ? '1' : '0'; ?>"
+                aria-pressed="<?php echo $isLiked ? 'true' : 'false'; ?>">
+                <i class="<?php echo $isLiked ? 'fa-solid' : 'fa-regular'; ?> fa-heart" aria-hidden="true"></i>
+                <span class="artwork-like-label"><?php echo $isLiked ? 'Unlike' : 'Like'; ?></span>
+                <span class="artwork-like-count"><?php echo $likeCount; ?></span>
+            </button>
             <div class="row mb-5 gx-0 gy-4 gy-lg-0" style="padding-left: 0;">
                 <div class="col-12 col-lg-7 d-flex justify-content-center align-items-center"
                     style="background-color:#f0f0f0; max-height:700px; min-height:300px;">
@@ -190,6 +210,7 @@ include("navbar.php");
             }
         });
         </script>
+        <script src="artwork_like.js"></script>
         <?php
     } else {
         echo "Artwork not found.";
