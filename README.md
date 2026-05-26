@@ -1,59 +1,142 @@
-# Software Evolution and Enhancement of the Artizo Open-Source Artwork Sharing and Task Platform
+# Artizo Software Evolution and Enhancement
 
-This repository contains the Artizo PHP/MySQL project for the CSE6364 Software Evolution and Maintenance assignment.
+This repository contains the CSE6364 Software Evolution and Maintenance assignment project: **Software Evolution and Enhancement of the Artizo Open-Source Artwork Sharing and Task Platform**.
 
-## Local Environment
+Artizo is a PHP/MySQL web application for sharing artwork and posting creative tasks. The goal of this implementation branch is not to rewrite the system, but to evolve the existing codebase through focused, maintainable improvements that preserve current behavior.
 
-- XAMPP
+## Original System
+
+The original Artizo system provides:
+
+- User registration, login, logout, and profile management.
+- Artwork upload and gallery browsing by category.
+- Artwork detail pages with descriptions and comments.
+- Task posting and task board browsing.
+- Task detail pages and task acceptance/submission flow.
+- Admin pages for managing users, artworks, tasks, and comments.
+
+The project uses a traditional XAMPP stack with PHP pages, MySQL tables, Bootstrap 5, shared CSS, and vanilla JavaScript.
+
+## Technology Stack
+
 - PHP
 - MySQL/MariaDB
-- phpMyAdmin
-- Bootstrap 5 from CDN
+- HTML
+- CSS
+- Bootstrap 5
 - Vanilla JavaScript
+- XAMPP local environment
+- phpMyAdmin for database import and inspection
 
-The current database connection is configured in `config.php`:
+## Enhancement Summary
+
+Six approved proposal improvements were implemented:
+
+1. **Responsive layout fix for 1920x1080**
+   - Large-screen container widths, card sizing, and gallery/task spacing were adjusted so the interface does not stretch too widely on 1920x1080 displays.
+
+2. **Text contrast and readability improvement**
+   - Weak text contrast was improved for labels, descriptions, captions, buttons, links, and placeholder-style content while preserving the original visual style.
+
+3. **Save Task feature**
+   - Logged-in users can save and unsave tasks from task cards.
+   - Saved tasks are stored in the `saved_tasks` table.
+   - Duplicate saves are prevented by a unique `(user_id, task_id)` key.
+   - Users can view saved tasks on `saved_tasks.php`.
+
+4. **Task categorization and filtering**
+   - Task creation now includes a category dropdown loaded from `task_categories`.
+   - The selected category is stored on the task record.
+   - Task cards display category labels.
+   - Task board filtering is performed with AJAX through `task_filter.php`.
+
+5. **Artwork Like feature**
+   - Users can like and unlike artwork from gallery/profile cards and artwork detail pages.
+   - Likes are stored in `artwork_likes`.
+   - Like counts and active states update immediately through AJAX.
+
+6. **AJAX comment submission and near-real-time refresh**
+   - Artwork comments can be submitted without a full page reload.
+   - New comments are appended immediately.
+   - The artwork detail page polls every 5 seconds for newer comments.
+   - Duplicate comments are avoided by tracking `comment_id` values in the DOM.
+
+## Installation with XAMPP
+
+1. Install XAMPP.
+2. Copy or clone this repository into the XAMPP `htdocs` directory.
+   - Example path: `C:\xampp\htdocs\Software-Evolution-and-Enhancement-of-the-Artizo-Open-Source-Artwork-Sharing-and-Task-Platform`
+3. Start **Apache** and **MySQL** from the XAMPP Control Panel.
+4. Open phpMyAdmin at `http://localhost/phpmyadmin`.
+5. Create a database for the project.
+   - Recommended name: `web_assignment`
+   - Existing local assignment name also supported: `software_evo_assignment`
+
+The database connection is configured in `config.php`.
+
+Default connection values:
 
 - Host: `localhost`
 - User: `root`
 - Password: empty string
-- Database: `web_assignment` by default, with a fallback to `software_evo_assignment`
+- Database: `web_assignment`, with fallback to `software_evo_assignment`
 
-If you want to force a specific database name, set the `ARTIZO_DB_NAME` environment variable before running the project.
+To force a specific database name, set the `ARTIZO_DB_NAME` environment variable before running the project.
 
 ## Database Setup
 
-1. Start Apache and MySQL in XAMPP.
-2. Open phpMyAdmin.
-3. Create a database named `web_assignment` if it does not already exist. If your local assignment database is already named `software_evo_assignment`, the updated `config.php` can use that as a fallback.
+Use one of the following setup paths.
 
-For an empty database, import this all-in-one setup file:
+### Option A: Empty Database
 
-   `assets/database/full_database_setup.sql`
+If the selected database is empty, import:
 
-This file includes the original base tables and the Phase 1 enhancement tables.
+```text
+assets/database/full_database_setup.sql
+```
 
-For a database that already has the original Artizo tables, import the base schema first if needed:
+This file creates the original base tables and the enhancement tables.
 
-   `assets/database/web_assignment.sql`
+### Option B: Existing Artizo Database
 
-Then apply the Phase 1 migration from:
+If the original Artizo schema is already present, import:
 
-   `assets/database/phase1_database_migration.sql`
+```text
+assets/database/phase1_database_migration.sql
+```
 
-## Phase 1 Database Migration
+This migration adds the new enhancement tables and safely adds foreign keys when the referenced base tables exist.
 
-The Phase 1 migration prepares the database for the approved proposal features without changing frontend behavior yet.
+### Option C: Base SQL Then Migration
 
-It adds:
+If the database does not have the original tables yet, first import:
+
+```text
+assets/database/web_assignment.sql
+```
+
+Then import:
+
+```text
+assets/database/phase1_database_migration.sql
+```
+
+For task categorization on an existing database, also apply:
+
+```text
+assets/database/task_category_filter_migration.sql
+```
+
+## Database Objects Added
 
 - `saved_tasks`
-  - Stores tasks saved by users.
-  - Uses `user_id` and `task_id` foreign keys.
-  - Prevents duplicate saves with a unique key on `(user_id, task_id)`.
+  - Stores saved task records.
+  - Uses `user_id` and `task_id`.
+  - Prevents duplicates with `UNIQUE (user_id, task_id)`.
 
 - `task_categories`
-  - Stores task-specific category labels for the approved task categorization feature.
-  - Seeded with:
+  - Stores task category labels.
+  - Seed values:
     - Illustration
     - Graphic Design
     - Animation
@@ -63,40 +146,17 @@ It adds:
     - Other
 
 - `artwork_likes`
-  - Stores artwork likes by users.
-  - Uses `user_id` and `artwork_id` foreign keys.
-  - Prevents duplicate likes with a unique key on `(user_id, artwork_id)`.
+  - Stores artwork likes.
+  - Uses `user_id` and `artwork_id`.
+  - Prevents duplicates with `UNIQUE (user_id, artwork_id)`.
 
-It also checks whether `task.category_id` exists. In the repository schema, this column already exists and references the shared `category` table, so no destructive change is needed. Some local databases may not have a shared `category` table; in that case, the migration skips the compatibility seed safely and keeps the new `task_categories` table as the task-specific category source.
+- `task.task_category_id`
+  - Stores the selected task-specific category when the task category migration is applied.
+  - The existing `task.category_id` field is preserved for compatibility with the original system.
 
-## Applying the Migration in phpMyAdmin
+## Verifying the Database
 
-Use `assets/database/full_database_setup.sql` if your selected database is empty or missing base tables such as `user`, `task`, `artwork`, or `category`.
-
-Use `assets/database/phase1_database_migration.sql` only when the base Artizo schema already exists.
-
-1. Open phpMyAdmin.
-2. Select the `web_assignment` database, or `software_evo_assignment` if that is the database you imported earlier.
-3. Click the `Import` tab.
-4. Choose the correct SQL file:
-   - Empty database: `assets/database/full_database_setup.sql`
-   - Existing base database: `assets/database/phase1_database_migration.sql`
-5. Click `Import`.
-
-If an earlier import stopped with an error after creating `task_categories` or `saved_tasks`, import the same migration again after pulling the fixed file. The migration uses `CREATE TABLE IF NOT EXISTS`, duplicate-safe seed statements, and conditional foreign-key creation.
-
-If your selected database does not yet contain the base Artizo tables (`user`, `task`, `artwork`, or `category`), the migration now creates the new feature tables and skips unavailable foreign keys. Import the base schema first, then rerun this migration to add the foreign keys.
-
-Alternative:
-
-1. Select the `web_assignment` database, or `software_evo_assignment` if that is your local database name.
-2. Click the `SQL` tab.
-3. Paste the contents of `assets/database/phase1_database_migration.sql`.
-4. Click `Go`.
-
-## Verifying the Database Setup
-
-After applying the migration, run these SQL checks in phpMyAdmin:
+Run these SQL checks in phpMyAdmin:
 
 ```sql
 SHOW TABLES LIKE 'saved_tasks';
@@ -104,29 +164,22 @@ SHOW TABLES LIKE 'task_categories';
 SHOW TABLES LIKE 'artwork_likes';
 ```
 
-Confirm the new table structures:
+Check table structures:
 
 ```sql
 DESCRIBE saved_tasks;
 DESCRIBE task_categories;
 DESCRIBE artwork_likes;
+DESCRIBE task;
 ```
 
-Confirm task category seed data:
+Check task category seed data:
 
 ```sql
 SELECT * FROM task_categories ORDER BY task_category_id;
 ```
 
-Confirm the existing task table has category support:
-
-```sql
-DESCRIBE task;
-```
-
-Look for the `category_id` column.
-
-Confirm foreign keys:
+Check foreign keys:
 
 ```sql
 SELECT TABLE_NAME, CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
@@ -135,107 +188,79 @@ WHERE TABLE_SCHEMA = DATABASE()
   AND TABLE_NAME IN ('saved_tasks', 'artwork_likes', 'task');
 ```
 
-## Phase 1 Assumptions
+## Running Locally
 
-- Existing project tables use singular names: `user`, `task`, `artwork`, and `category`.
-- The existing `task` table already includes `category_id`.
-- Existing data must be preserved.
-- No frontend or PHP feature behavior is implemented in Phase 1.
-- Future implementation phases should use prepared statements for all new SQL queries.
+1. Start Apache and MySQL in XAMPP.
+2. Confirm the database has been imported.
+3. Open the project in a browser:
 
-## Save Task Feature
+```text
+http://localhost/Software-Evolution-and-Enhancement-of-the-Artizo-Open-Source-Artwork-Sharing-and-Task-Platform/
+```
 
-The Save Task feature uses the `saved_tasks` table from the Phase 1 migration.
+4. Register a user or log in with an existing user from the imported database.
+5. Use the navigation bar to access artwork, task, profile, and support pages.
 
-Files:
+## Testing the New Features
 
-- `task.php`: Shows Save/Saved bookmark buttons on task cards and toggles state with `fetch()`.
-- `save_task_toggle.php`: JSON endpoint for saving and unsaving tasks.
-- `saved_tasks.php`: Lists tasks saved by the current logged-in user.
+Detailed test cases are provided in `TESTING.md`. The summary below can be used for quick manual verification.
 
-Manual testing notes:
+### Responsive Layout
 
-1. Log in as a user.
+1. Open the homepage, explore page, task board, artwork detail page, and profile page.
+2. Test at 1366x768, 1440x900, 1600x900, and 1920x1080.
+3. Confirm cards and containers do not stretch too wide and text does not overlap.
+
+### Text Contrast
+
+1. Review category labels, artwork captions, task descriptions, card subtitles, buttons, links, and placeholders.
+2. Confirm text is readable against its background.
+3. Confirm hover/focus states remain visible.
+
+### Save Task
+
+1. Log in.
 2. Open `task.php`.
-3. Click `Save` on a task card and confirm the button changes to `Saved` without a page reload.
-4. Refresh `task.php` and confirm the same task still shows `Saved`.
-5. Open `saved_tasks.php` and confirm the saved task appears.
-6. Click `Saved` on the saved task page and confirm the task is removed from the list.
-7. Verify duplicate saves are prevented by the unique key on `(user_id, task_id)`.
-8. Log in as a different user and confirm saved tasks are user-specific.
+3. Click `Save` on a task card.
+4. Confirm the button changes to `Saved` without a page reload.
+5. Refresh the page and confirm the saved state remains.
+6. Open `saved_tasks.php` and confirm the saved task is listed.
 
-## Task Categorization and Filtering Feature
+### Task Categorization and Filtering
 
-The task categorization feature uses `task_categories` and the task-specific `task.task_category_id` column. This keeps the older shared `task.category_id` field available for existing project behavior.
+1. Open `upload_task.php`.
+2. Confirm the category dropdown is populated.
+3. Create a task with a selected category.
+4. Open `task.php`.
+5. Confirm the category label appears on the task card.
+6. Click a category filter and confirm the task list updates without a full page reload.
 
-Before testing this feature on an existing database, apply:
+### Artwork Like
 
-`assets/database/task_category_filter_migration.sql`
+1. Open `explore.php`.
+2. Click `Like` on an artwork.
+3. Confirm the button state and count update immediately.
+4. Open the same artwork detail page.
+5. Confirm the liked state and count are still correct.
+6. Click `Unlike` and confirm the count decreases.
 
-Files:
+### AJAX Comments
 
-- `upload_task.php`: Loads task categories from `task_categories` and displays them in a dropdown.
-- `upload_task_form.php`: Validates the selected task category and stores it with the new task using prepared statements.
-- `task.php`: Shows task category labels and category filter buttons.
-- `task_filter.php`: AJAX endpoint for category/search filtering.
+1. Open `artwork_detail.php?id=<existing artwork id>`.
+2. Enter a comment and submit it.
+3. Confirm the comment appears immediately without a full page reload.
+4. Open the same page in another browser or session.
+5. Confirm new comments appear within approximately 5 seconds.
 
-Budget filtering is not implemented because the current schema does not contain budget, price, or amount fields for tasks.
+## Related Documentation
 
-Manual testing notes:
+- `TESTING.md`: Final report testing plan and checklists.
+- `CHANGELOG.md`: Summary of implemented changes.
+- `docs/user-guide.md`: User-facing guide for the new features.
+- `docs/developer-notes.md`: Technical notes for maintainers.
 
-1. Apply `assets/database/task_category_filter_migration.sql`.
-2. Log in and open `upload_task.php`.
-3. Confirm the category dropdown shows task categories.
-4. Create a task with a selected category.
-5. Open `task.php` and confirm the task card shows the category label.
-6. Click a category filter button and confirm the task board updates without a full page reload.
-7. Combine search text with a category filter.
-8. Confirm existing task card links, Save buttons, and Accepted Task navigation still work.
+## Known Limitations
 
-## Artwork Like Feature
-
-The artwork like feature uses the existing `artwork_likes` table from the Phase 1 migration. Each row stores one user/artwork like, and the unique `(user_id, artwork_id)` key prevents duplicate likes.
-
-Files:
-
-- `artwork_like_toggle.php`: JSON endpoint for liking and unliking artworks.
-- `artwork_like.js`: Shared AJAX handler for artwork like buttons.
-- `explore.php`: Shows Like/Unlike buttons and like counts on artwork cards.
-- `artwork_detail.php`: Shows Like/Unlike button and count on the artwork detail page.
-- `user_profile.php`: Shows Like/Unlike buttons and counts on profile artwork cards.
-
-Manual testing notes:
-
-1. Confirm `artwork_likes` exists by running `SHOW TABLES LIKE 'artwork_likes';`.
-2. Log in and open `explore.php`.
-3. Click `Like` on an artwork and confirm the button changes to `Unlike` and the count updates without a page reload.
-4. Open the same artwork in `artwork_detail.php` and confirm the liked state is active.
-5. Click `Unlike` and confirm the count decreases by one.
-6. Refresh the page and confirm the liked/unliked state persists.
-7. Open `user_profile.php` and confirm artwork card like buttons behave consistently.
-
-## AJAX Comment Submission and Refresh
-
-The AJAX comment feature uses the existing `comment` table. The current schema stores comments for artworks through `comment.artwork_id`, so this implementation supports artwork comments only.
-
-Files:
-
-- `submit_comment.php`: JSON endpoint for validating and inserting a new artwork comment.
-- `fetch_comments.php`: JSON endpoint for fetching comments newer than a provided comment ID.
-- `artwork_detail.php`: Submits comments with `fetch()`, appends new comments without a page reload, and polls every 5 seconds.
-
-JSON response examples:
-
-- Submit success: `{ "success": true, "message": "Comment submitted.", "comment": { ... } }`
-- Fetch success: `{ "success": true, "comments": [ ... ], "latest_comment_id": 12 }`
-- Error: `{ "success": false, "message": "..." }`
-
-Manual testing notes:
-
-1. Log in and open `artwork_detail.php?id=<existing artwork id>`.
-2. Type a comment and press Enter or click `Submit Comment`.
-3. Confirm the new comment appears immediately without a full page reload.
-4. Refresh the page and confirm the comment was preserved in the database.
-5. Open the same artwork in another browser/session, add a comment, and confirm the first page shows it within 5 seconds.
-6. Confirm duplicate comments are not appended when polling runs after a local submission.
-7. Try an invalid artwork ID and confirm the endpoint returns an error response.
+- AJAX comments are implemented for artwork comments because the current database schema stores comments with `comment.artwork_id`. Task comments are not part of the current schema.
+- Budget filtering was not implemented because the task table does not include budget, price, or amount fields.
+- Some older legacy/admin code still follows the original project style. The approved feature work uses prepared statements for new SQL paths.
