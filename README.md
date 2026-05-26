@@ -23,11 +23,18 @@ The current database connection is configured in `config.php`:
 1. Start Apache and MySQL in XAMPP.
 2. Open phpMyAdmin.
 3. Create a database named `web_assignment` if it does not already exist.
-4. Import the base schema from:
+
+For an empty database, import this all-in-one setup file:
+
+   `assets/database/full_database_setup.sql`
+
+This file includes the original base tables and the Phase 1 enhancement tables.
+
+For a database that already has the original Artizo tables, import the base schema first if needed:
 
    `assets/database/web_assignment.sql`
 
-5. Apply the Phase 1 migration from:
+Then apply the Phase 1 migration from:
 
    `assets/database/phase1_database_migration.sql`
 
@@ -58,15 +65,25 @@ It adds:
   - Uses `user_id` and `artwork_id` foreign keys.
   - Prevents duplicate likes with a unique key on `(user_id, artwork_id)`.
 
-It also checks whether `task.category_id` exists. In the current schema, this column already exists and references the shared `category` table, so no destructive change is needed. For compatibility with the existing code, the migration also inserts any missing approved task category names into the existing `category` table.
+It also checks whether `task.category_id` exists. In the repository schema, this column already exists and references the shared `category` table, so no destructive change is needed. Some local databases may not have a shared `category` table; in that case, the migration skips the compatibility seed safely and keeps the new `task_categories` table as the task-specific category source.
 
 ## Applying the Migration in phpMyAdmin
+
+Use `assets/database/full_database_setup.sql` if your selected database is empty or missing base tables such as `user`, `task`, `artwork`, or `category`.
+
+Use `assets/database/phase1_database_migration.sql` only when the base Artizo schema already exists.
 
 1. Open phpMyAdmin.
 2. Select the `web_assignment` database.
 3. Click the `Import` tab.
-4. Choose `assets/database/phase1_database_migration.sql`.
+4. Choose the correct SQL file:
+   - Empty database: `assets/database/full_database_setup.sql`
+   - Existing base database: `assets/database/phase1_database_migration.sql`
 5. Click `Import`.
+
+If an earlier import stopped with an error after creating `task_categories` or `saved_tasks`, import the same migration again after pulling the fixed file. The migration uses `CREATE TABLE IF NOT EXISTS`, duplicate-safe seed statements, and conditional foreign-key creation.
+
+If your selected database does not yet contain the base Artizo tables (`user`, `task`, `artwork`, or `category`), the migration now creates the new feature tables and skips unavailable foreign keys. Import the base schema first, then rerun this migration to add the foreign keys.
 
 Alternative:
 
