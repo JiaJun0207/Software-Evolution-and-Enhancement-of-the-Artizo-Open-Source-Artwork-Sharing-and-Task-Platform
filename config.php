@@ -34,6 +34,9 @@ foreach ($dbCandidates as $dbname) {
 
 // Check connection
 if ($conn === null || $conn->connect_error) {
-    die("Connection failed: " . $lastConnectionError);
+    http_response_code(500);
+    error_log("Database connection failed: " . $lastConnectionError);
+    echo "Database connection failed. Please start MySQL in XAMPP and verify the database configuration.";
+    exit();
 }
 ?>
