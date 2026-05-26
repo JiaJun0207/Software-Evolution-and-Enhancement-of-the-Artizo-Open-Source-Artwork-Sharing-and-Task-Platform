@@ -123,3 +123,24 @@ WHERE TABLE_SCHEMA = 'web_assignment'
 - Existing data must be preserved.
 - No frontend or PHP feature behavior is implemented in Phase 1.
 - Future implementation phases should use prepared statements for all new SQL queries.
+
+## Save Task Feature
+
+The Save Task feature uses the `saved_tasks` table from the Phase 1 migration.
+
+Files:
+
+- `task.php`: Shows Save/Saved bookmark buttons on task cards and toggles state with `fetch()`.
+- `save_task_toggle.php`: JSON endpoint for saving and unsaving tasks.
+- `saved_tasks.php`: Lists tasks saved by the current logged-in user.
+
+Manual testing notes:
+
+1. Log in as a user.
+2. Open `task.php`.
+3. Click `Save` on a task card and confirm the button changes to `Saved` without a page reload.
+4. Refresh `task.php` and confirm the same task still shows `Saved`.
+5. Open `saved_tasks.php` and confirm the saved task appears.
+6. Click `Saved` on the saved task page and confirm the task is removed from the list.
+7. Verify duplicate saves are prevented by the unique key on `(user_id, task_id)`.
+8. Log in as a different user and confirm saved tasks are user-specific.

@@ -8,6 +8,8 @@ if (!isset($_SESSION['UID'])) {
     exit();
 }
 
+$uid = intval($_SESSION['UID']);
+
 include("navbar.php"); // Include the navigation bar
 ?>
 
@@ -27,8 +29,8 @@ include("navbar.php"); // Include the navigation bar
 <body>
     <div class="container-fluid"
         style="padding-left: 60px; padding-right: 60px; padding-bottom: 60px; margin-top:60px;">
-        <div class="row">
-            <div class="col-8">
+        <div class="row g-3 align-items-stretch">
+            <div class="col-12 col-lg-6">
                 <?php
                 $sql = "SELECT * FROM task";
                 if (isset($_GET['search'])) {
@@ -71,13 +73,17 @@ include("navbar.php"); // Include the navigation bar
                 </script>
 
             </div>
-            <div class="col-2">
+            <div class="col-12 col-sm-4 col-lg-2">
                 <a href="upload_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Post Task</a>
             </div>
-            <div class="col-2">
+            <div class="col-12 col-sm-4 col-lg-2">
                 <a href="accepted_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Accepted Task</a>
+            </div>
+            <div class="col-12 col-sm-4 col-lg-2">
+                <a href="saved_tasks.php"
+                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Saved Tasks</a>
             </div>
         </div>
 
@@ -115,6 +121,17 @@ include("navbar.php"); // Include the navigation bar
         </div>
 
         <?php
+        $savedTaskLookup = [];
+        $savedStmt = $conn->prepare("SELECT task_id FROM saved_tasks WHERE user_id = ?");
+        if ($savedStmt) {
+            $savedStmt->bind_param("i", $uid);
+            $savedStmt->execute();
+            $savedResult = $savedStmt->get_result();
+            while ($savedRow = $savedResult->fetch_assoc()) {
+                $savedTaskLookup[intval($savedRow['task_id'])] = true;
+            }
+        }
+
         // Build SQL for category and search
         $sql = "SELECT t.*, u.user_name, u.profile_image, c.category_name 
                 FROM task t 
@@ -142,6 +159,7 @@ include("navbar.php"); // Include the navigation bar
                 $taskId = $row['task_id'];
                 $taskImg = !empty($row['task_image']) ? "assets/uploads/tasks/" . $row['task_image'] : "";
                 $categoryName = $row['category_name'];
+                $isSaved = isset($savedTaskLookup[intval($taskId)]);
             ?>
             <div class="col">
                 <div class="card_border d-flex flex-column justify-content-between"
@@ -167,8 +185,16 @@ include("navbar.php"); // Include the navigation bar
                             </a>
                         </div>
                     </div>
-                    <!-- Bottom right icon -->
-                    <div class="text-end">
+                    <!-- Bottom actions -->
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <button type="button"
+                            class="btn btn-outline-black border_black save-task-btn <?php echo $isSaved ? 'saved' : ''; ?>"
+                            data-task-id="<?php echo htmlspecialchars($taskId); ?>"
+                            data-saved="<?php echo $isSaved ? '1' : '0'; ?>"
+                            aria-pressed="<?php echo $isSaved ? 'true' : 'false'; ?>">
+                            <i class="<?php echo $isSaved ? 'fa-solid' : 'fa-regular'; ?> fa-bookmark" aria-hidden="true"></i>
+                            <span><?php echo $isSaved ? 'Saved' : 'Save'; ?></span>
+                        </button>
                         <a href="task_detail.php?id=<?php echo urlencode($taskId); ?>">
                             <div class="card_border" style="padding: 17px; display:inline-block;">
                                 <img src="assets/icons/bag.png" alt="Arrow Right Icon" class="bag-icon-responsive">
@@ -182,6 +208,45 @@ include("navbar.php"); // Include the navigation bar
     </div>
     </div>
     </div>
+    <script>
+        document.querySelectorAll('.save-task-btn').forEach(function (button) {
+            button.addEventListener('click', async function () {
+                const taskId = this.dataset.taskId;
+                this.disabled = true;
+
+                try {
+                    const response = await fetch('save_task_toggle.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ task_id: taskId })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                        if (response.status === 401) {
+                            window.location.href = 'login.php';
+                            return;
+                        }
+                        throw new Error(data.message || 'Unable to update saved task.');
+                    }
+
+                    this.dataset.saved = data.saved ? '1' : '0';
+                    this.setAttribute('aria-pressed', data.saved ? 'true' : 'false');
+                    this.classList.toggle('saved', data.saved);
+                    this.innerHTML = data.saved
+                        ? '<i class="fa-solid fa-bookmark" aria-hidden="true"></i><span>Saved</span>'
+                        : '<i class="fa-regular fa-bookmark" aria-hidden="true"></i><span>Save</span>';
+                } catch (error) {
+                    alert(error.message);
+                } finally {
+                    this.disabled = false;
+                }
+            });
+        });
+    </script>
 </body>
 <footer>
     <?php include("footer.php"); // Include the footer ?>

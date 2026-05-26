@@ -51,6 +51,8 @@ include("navbar.php"); // Include the navigation bar
                     <?php echo htmlspecialchars($user['user_name']); ?>
                 </p>
                 <div class="d-flex flex-row ms-md-auto align-items-end gap-3 mt-3 mt-md-0 justify-content-center justify-content-md-end w-100 w-md-auto">
+                    <a href="saved_tasks.php" class="btn btn-outline-black inter-medium-25 border_black"
+                        style="width:234px; height:53px;">Saved Tasks</a>
                     <a href="edit_profile.php" class="btn btn-outline-black inter-medium-25 border_black"
                         style="width:234px; height:53px;">Edit Profile</a>
                     <a href="logout.php" style="text-decoration:none;">

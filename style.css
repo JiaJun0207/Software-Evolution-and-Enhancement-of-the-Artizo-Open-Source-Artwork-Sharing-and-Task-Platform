@@ -1,35 +1,52 @@
+:root {
+  --artizo-black: #000;
+  --artizo-text: #151515;
+  --artizo-muted-text: #4f4f4f;
+  --artizo-placeholder: #666;
+  --artizo-border: #000;
+  --artizo-focus: rgba(0, 0, 0, 0.25);
+  --artizo-surface: #fff;
+  --artizo-soft-surface: #f7f7f7;
+  --artizo-content-max: 1560px;
+  --artizo-gallery-max: 1440px;
+  --artizo-artwork-card-max: 440px;
+}
+
 /* Custom button outline for black theme */
 /* Apply 2px border to all input, textarea, and select elements */
 
 .btn-outline-black {
-  border-color: #000 !important;
-  color: #000 !important;
+  border-color: var(--artizo-border) !important;
+  color: var(--artizo-black) !important;
+  background-color: var(--artizo-surface) !important;
+  font-weight: 600;
 }
 .btn-outline-black:hover,
 .btn-outline-black.active {
-  background-color: #000 !important;
+  background-color: var(--artizo-black) !important;
   color: #fff !important;
-  border-color: #000 !important;
+  border-color: var(--artizo-border) !important;
 }
 
 /* Keep category buttons visually focused/active when selected */
 .btn-check:checked + .btn.btn-outline-black {
-  background-color: #000 !important;
+  background-color: var(--artizo-black) !important;
   color: #fff !important;
-  border-color: #000 !important;
-  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+  border-color: var(--artizo-border) !important;
+  box-shadow: 0 0 0 0.2rem var(--artizo-focus);
 }
 .btn.btn-outline-black:focus {
-  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 0 0.2rem var(--artizo-focus);
 }
 
 /* Make input borders black */
 .form-control {
-  border-color: #000 !important;
+  border-color: var(--artizo-border) !important;
+  color: var(--artizo-text);
 }
 .form-control:focus {
-  border-color: #000 !important;
-  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+  border-color: var(--artizo-border) !important;
+  box-shadow: 0 0 0 0.2rem var(--artizo-focus);
 }
 
 .inter-medium-24 {
@@ -54,23 +71,26 @@
 /* Inter ExtraLight 15px font size */
 .inter-extralight-15 {
   font-family: "Inter", sans-serif;
-  font-weight: 200;
+  font-weight: 400;
   font-size: 15px;
-  color: #000 !important;
+  color: var(--artizo-text) !important;
+  line-height: 1.55;
 }
 
 .inter-extralight-24 {
   font-family: "Inter", sans-serif;
-  font-weight: 200;
+  font-weight: 400;
   font-size: 24px;
-  color: #000 !important;
+  color: var(--artizo-text) !important;
+  line-height: 1.45;
 }
 
 .inter-extralight-15-white {
   font-family: "Inter", sans-serif;
-  font-weight: 200;
+  font-weight: 400;
   font-size: 15px;
   color: #fff !important;
+  line-height: 1.55;
 }
 
 /* Inter Bold 32px font size */
@@ -107,12 +127,15 @@
 /* Center placeholder text in input fields */
 .form-control::placeholder {
   text-align: center;
+  color: var(--artizo-placeholder) !important;
+  opacity: 1;
 }
 
 /* Left-aligned placeholder for specific input */
 .left-placeholder::placeholder {
   text-align: left;
-  color: #b2b2b2;
+  color: var(--artizo-placeholder) !important;
+  opacity: 1;
 }
 
 /* Feedback error message styling */
@@ -122,12 +145,12 @@
 }
 
 .border_black {
-  border: 2px solid #000 !important;
+  border: 2px solid var(--artizo-border) !important;
 }
 
 .card_border {
   border-radius: 14px !important;
-  border: 2px solid #000 !important;
+  border: 2px solid var(--artizo-border) !important;
 }
 
 .card_artwork,
@@ -154,6 +177,10 @@
   padding-right: 52px;
   background-color: #b81149;
   display: inline-block;
+  color: #fff !important;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 9999px rgba(0, 0, 0, 0.18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .category_description {
@@ -194,8 +221,9 @@
 
 .banner-text p {
   font-family: 'Inter', sans-serif;
-  font-weight: 200; 
+  font-weight: 400; 
   font-size: 24px;
+  line-height: 1.45;
 }
 
 .centered-header {
@@ -220,6 +248,77 @@
   text-align: center;
   text-shadow: 0px 2px 6px rgba(0,0,0,0.6); 
   pointer-events: none;
+}
+
+a {
+  color: var(--artizo-black);
+}
+
+a:hover,
+a:focus {
+  color: var(--artizo-black);
+}
+
+.category_description {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.category_description .inter-extralight-24,
+.card_border .inter-extralight-24,
+.artwork-img-responsive + div .inter-medium-24 {
+  color: var(--artizo-text) !important;
+}
+
+.artwork-img-responsive + div .inter-medium-24 {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.row.row-cols-3.gx-4 > .col > div:last-child .inter-medium-24,
+.row.row-cols-3 > .col > div:last-child .inter-medium-24 {
+  color: var(--artizo-text) !important;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.row.row-cols-3 .card_border a,
+.row.row-cols-3.gx-4 .col a,
+.row.row-cols-1.row-cols-md-2.row-cols-lg-3 .card_border a {
+  color: var(--artizo-text);
+}
+
+.card_border[style*="height: 300px"] .inter-extralight-24 {
+  color: var(--artizo-text) !important;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.save-task-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 108px;
+  min-height: 53px;
+  padding: 10px 16px !important;
+  font-family: "Inter", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.save-task-btn.saved {
+  background-color: var(--artizo-black) !important;
+  color: #fff !important;
+}
+
+.save-task-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .top {
@@ -576,21 +675,7 @@
     flex-wrap: nowrap !important;
     overflow-x: auto;
 }
-        margin-top: 2rem !important;
-    }
-    .mb-5 {
-        margin-bottom: 2rem !important;
-    }
-    .gx-0 {
-        --bs-gutter-x: 0 !important;
-    }
-    .gy-4 {
-        --bs-gutter-y: 1.5rem !important;
-    }
-    .gy-lg-0 {
-        --bs-gutter-y: 0 !important;
-    }
-}
+
 @media (max-width: 767.98px) {
     .inter-bold-44 {
         font-size: 1.5rem !important;
@@ -637,4 +722,81 @@
 .comment-row-nowrap {
     flex-wrap: nowrap !important;
     overflow-x: auto;
+}
+
+@media (min-width: 1200px) {
+    body > .container-fluid {
+        max-width: var(--artizo-content-max);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body > .container-fluid[style*="padding-left: 60px"] {
+        padding-left: clamp(2rem, 3vw, 3.75rem) !important;
+        padding-right: clamp(2rem, 3vw, 3.75rem) !important;
+    }
+
+    body > .container-fluid > .row.row-cols-3,
+    body > .container-fluid > .row.row-cols-3.gx-4,
+    body > .container-fluid > .row.row-cols-1.row-cols-md-2.row-cols-lg-3 {
+        max-width: var(--artizo-gallery-max);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .row.row-cols-3 > .col,
+    .row.row-cols-3.gx-4 > .col {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    .artwork-img-responsive,
+    .card_artwork {
+        max-width: var(--artizo-artwork-card-max);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .row-cols-md-4 .card_artwork {
+        max-width: 320px;
+    }
+
+    .card_border[style*="height: 300px"] {
+        height: auto !important;
+        min-height: 300px;
+    }
+
+    .centered-header {
+        margin: 80px 0;
+    }
+
+    .banner-text {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 1600px) {
+    body > .container-fluid {
+        max-width: 1480px;
+    }
+
+    .row.row-cols-3,
+    .row.row-cols-3.gx-4,
+    .row.row-cols-1.row-cols-md-2.row-cols-lg-3 {
+        --bs-gutter-x: 2rem;
+    }
+}
+
+@media (min-width: 1800px) {
+    body > .container-fluid {
+        max-width: var(--artizo-content-max);
+    }
+
+    .banner-text {
+        left: 28%;
+    }
+
+    .carousel-inner > .carousel-item > div {
+        min-height: 560px !important;
+    }
 }
