@@ -80,11 +80,12 @@ include("navbar.php"); // Include the navigation bar
             </div>
         </div>
 
-        <h1 class="inter-bold-24 mb-4 px-3 px-md-5">My Artwork</h1>
+        <section class="user-artwork-section px-3 px-md-5">
+            <h1 class="inter-bold-24 mb-4">My Artwork</h1>
 
-        <?php
+            <?php
 
-        $sql = "SELECT a.*,
+            $sql = "SELECT a.*,
                        COALESCE(lc.like_count, 0) AS like_count,
                        CASE WHEN ul.artwork_like_id IS NULL THEN 0 ELSE 1 END AS is_liked
                 FROM artwork a
@@ -95,51 +96,52 @@ include("navbar.php"); // Include the navigation bar
                 ) lc ON a.artwork_id = lc.artwork_id
                 LEFT JOIN artwork_likes ul ON a.artwork_id = ul.artwork_id AND ul.user_id = ?
                 ORDER BY a.release_at DESC";
-        $artwork_stmt = $conn->prepare($sql);
-        $artwork_stmt->bind_param("i", $uid);
-        $artwork_stmt->execute();
-        $result = $artwork_stmt->get_result();
+            $artwork_stmt = $conn->prepare($sql);
+            $artwork_stmt->bind_param("i", $uid);
+            $artwork_stmt->execute();
+            $result = $artwork_stmt->get_result();
 
-        if ($result->num_rows > 0) {
-            ?>
-            <div class="row row-cols-1 row-cols-art-xs-2 row-cols-sm-2 row-cols-md-4 g-4" style="padding-bottom: 60px;">
-            <?php
-            //output data of each row
-            while ($row = $result->fetch_assoc()) {
-                $artworkId = intval($row['artwork_id']);
-                $likeCount = intval($row['like_count']);
-                $isLiked = intval($row['is_liked']) === 1;
+            if ($result->num_rows > 0) {
                 ?>
-                    <div class="col">
-                        <a href="artwork_detail.php?id=<?php echo urlencode($row['artwork_id']); ?>"
-                            style="text-decoration:none;">
-                            <div class="card card_artwork h-100 w-100">
-                                <img src="assets/uploads/artworks/<?php echo htmlspecialchars($row['artwork_image']); ?>"
-                                    alt="Artwork" class="card-img artwork-img-full">
-                            </div>
-                        </a>
-                        <button type="button"
-                            class="btn btn-outline-black border_black artwork-like-btn mt-3 <?php echo $isLiked ? 'liked' : ''; ?>"
-                            data-artwork-id="<?php echo htmlspecialchars($artworkId); ?>"
-                            data-liked="<?php echo $isLiked ? '1' : '0'; ?>"
-                            aria-pressed="<?php echo $isLiked ? 'true' : 'false'; ?>">
-                            <i class="<?php echo $isLiked ? 'fa-solid' : 'fa-regular'; ?> fa-heart" aria-hidden="true"></i>
-                            <span class="artwork-like-label"><?php echo $isLiked ? 'Unlike' : 'Like'; ?></span>
-                            <span class="artwork-like-count"><?php echo $likeCount; ?></span>
-                        </button>
-                    </div>
+                <div class="row row-cols-1 row-cols-art-xs-2 row-cols-sm-2 row-cols-md-4 g-4" style="padding-bottom: 60px;">
                 <?php
+                //output data of each row
+                while ($row = $result->fetch_assoc()) {
+                    $artworkId = intval($row['artwork_id']);
+                    $likeCount = intval($row['like_count']);
+                    $isLiked = intval($row['is_liked']) === 1;
+                    ?>
+                        <div class="col">
+                            <a href="artwork_detail.php?id=<?php echo urlencode($row['artwork_id']); ?>"
+                                style="text-decoration:none;">
+                                <div class="card card_artwork h-100 w-100">
+                                    <img src="assets/uploads/artworks/<?php echo htmlspecialchars($row['artwork_image']); ?>"
+                                        alt="Artwork" class="card-img artwork-img-full">
+                                </div>
+                            </a>
+                            <button type="button"
+                                class="btn btn-outline-black border_black artwork-like-btn mt-3 <?php echo $isLiked ? 'liked' : ''; ?>"
+                                data-artwork-id="<?php echo htmlspecialchars($artworkId); ?>"
+                                data-liked="<?php echo $isLiked ? '1' : '0'; ?>"
+                                aria-pressed="<?php echo $isLiked ? 'true' : 'false'; ?>">
+                                <i class="<?php echo $isLiked ? 'fa-solid' : 'fa-regular'; ?> fa-heart" aria-hidden="true"></i>
+                                <span class="artwork-like-label"><?php echo $isLiked ? 'Unlike' : 'Like'; ?></span>
+                                <span class="artwork-like-count"><?php echo $likeCount; ?></span>
+                            </button>
+                        </div>
+                    <?php
+                }
+                ?>
+                </div>
+                <?php
+            } else {
+                ?>
+                <p class="inter-extralight-15">users don't have artworks.</p>
+                <?php
+
             }
             ?>
-            </div>
-            <?php
-        } else {
-            ?>
-            <p class="inter-extralight-15 px-3">users don't have artworks.</p>
-            <?php
-
-        }
-        ?>
+        </section>
 
     </div>
 

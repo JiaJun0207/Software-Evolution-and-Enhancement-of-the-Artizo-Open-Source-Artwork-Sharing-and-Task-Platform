@@ -190,10 +190,10 @@ if ($columnCheck) {
                 $isSaved = isset($savedTaskLookup[intval($taskId)]);
             ?>
             <div class="col">
-                <div class="card_border d-flex flex-column justify-content-between"
+                <div class="card_border task-card d-flex flex-column justify-content-between"
                     style="padding: 24px 32px; height: 330px;">
                     <!-- Top content -->
-                    <div>
+                    <div class="task-card-content">
                         <div class="d-flex align-items-center">
                             <a href="user_profile.php?uid=<?php echo urlencode($userId); ?>">
                                 <img src="<?php echo htmlspecialchars($profileImg); ?>" alt="Profile Image" class="rounded-circle"
@@ -208,14 +208,14 @@ if ($columnCheck) {
                         <div class="mt-1">
                             <p class="task-category-chip mt-3 mb-2"><?php echo htmlspecialchars($categoryName); ?></p>
                             <a href="task_detail.php?id=<?php echo urlencode($taskId); ?>" style="text-decoration:none;">
-                                <p class="inter-extralight-24" style="color:#000;">
+                                <p class="inter-extralight-24 task-description" style="color:#000;">
                                     <?php echo htmlspecialchars($row['task_description']); ?>
                                 </p>
                             </a>
                         </div>
                     </div>
                     <!-- Bottom actions -->
-                    <div class="d-flex justify-content-between align-items-center gap-2">
+                    <div class="task-card-actions d-flex justify-content-between align-items-center gap-2">
                         <button type="button"
                             class="btn btn-outline-black border_black save-task-btn <?php echo $isSaved ? 'saved' : ''; ?>"
                             data-task-id="<?php echo htmlspecialchars($taskId); ?>"

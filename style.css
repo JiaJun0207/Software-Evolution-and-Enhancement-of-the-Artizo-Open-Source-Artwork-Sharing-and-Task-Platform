@@ -495,6 +495,30 @@ a:focus {
   line-height: 1.2;
 }
 
+.task-card {
+  overflow: hidden;
+}
+
+.task-card-content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.task-description {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
+  margin-bottom: 0;
+}
+
+.task-card-actions {
+  flex-shrink: 0;
+  margin-top: 16px;
+}
+
 .top {
   background-color: #F7822A !important;
   padding: 50px !important;
