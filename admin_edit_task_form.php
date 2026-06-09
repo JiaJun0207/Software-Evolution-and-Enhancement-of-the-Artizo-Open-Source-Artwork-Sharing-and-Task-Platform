@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['task_id'])) {
         $file = $_FILES['task_image'];
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'task_' . $task_id . '_' . time() . '.' . $ext;
-        $targetDir = 'assets/uploads/tasks/';
+        $targetDir = 'assets/uploads/task/';
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0777, true);
         }

@@ -38,7 +38,7 @@ $poster = $result_user->fetch_assoc();
 $posterImg = !empty($poster['profile_image']) ? "assets/profile/" . $poster['profile_image'] : "assets/profile/user_profile.png";
 $posterName = $poster['user_name'];
 
-$taskImg = !empty($task['task_image']) ? "assets/uploads/task/" . $task['task_image'] : "assets/uploads/task/default_task.jpeg";
+$taskImg = !empty($task['task_image']) ? "assets/uploads/task/" . $task['task_image'] : "assets/uploads/artworks/default_artwork.png";
 $taskSolutionImg = !empty($task['task_solution']) ? "assets/uploads/task_solution/" . $task['task_solution'] : null;
 $taskTitle = $task['task_title'];
 $taskDesc = $task['task_description'];

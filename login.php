@@ -30,11 +30,22 @@ session_start(); // to start a session
                     </div>
 
                     <form action="login_form.php" method="post">
-                        <input type="text" name="user_name" id="user_name" class="form-control mb-3 inter-medium-25 border_black" placeholder="Username">
+                        <input type="text" name="user_name" id="user_name" class="form-control mb-3 inter-medium-25 border_black" placeholder="Username or Email">
                         <input type="password" id="password" name="password" class="form-control mb-3 inter-medium-25 border_black" placeholder="Password">
                         <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25 border_black">Login</button>
-                        <a class="inter-extralight-15" href="forgot_password.php">forgot password?</a>
+                        <a class="inter-extralight-15" href="forgot_password.php">Forget Password</a>
                     </form>
+
+                    <?php if (isset($_SESSION["login_success_message"])): ?>
+                        <div id="login-success-message" class="alert alert-success inter-extralight-15 mt-3" role="status">
+                            <?php echo htmlspecialchars($_SESSION["login_success_message"]); ?>
+                        </div>
+                        <?php
+                        unset($_SESSION["login_success_message"]);
+                        $shouldRedirectAfterLogin = isset($_SESSION["login_success_redirect"]);
+                        unset($_SESSION["login_success_redirect"]);
+                        ?>
+                    <?php endif; ?>
 
                     <div id="feedback-message" class="feedback-error">
                     <?php
@@ -51,6 +62,12 @@ session_start(); // to start a session
                           feedback.style.display = 'none';
                         }, 3000); // 3 seconds
                       }
+
+                      <?php if (!empty($shouldRedirectAfterLogin)): ?>
+                      setTimeout(() => {
+                        window.location.href = 'index.php';
+                      }, 2000);
+                      <?php endif; ?>
                     </script>
 
                 </div>

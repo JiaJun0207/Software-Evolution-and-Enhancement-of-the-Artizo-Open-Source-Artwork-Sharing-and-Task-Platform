@@ -37,6 +37,12 @@ if ($categoryStmt) {
 <body>
 <div class="container-fluid" style="padding-left: 60px; padding-right: 60px;">
     <h1 class="inter-bold-44 mb-4" style="margin-top:60px;">Post Task</h1>
+    <?php if (isset($_SESSION['feedback'])): ?>
+        <div class="alert alert-info inter-extralight-24" role="status">
+            <?php echo htmlspecialchars($_SESSION['feedback']); ?>
+        </div>
+        <?php unset($_SESSION['feedback']); ?>
+    <?php endif; ?>
     <form action="upload_task_form.php" method="POST" enctype="multipart/form-data">
         <div class="mb-4">
             <label for="taskTitle" class="inter-bold-32 mb-3">Title</label>
@@ -63,6 +69,9 @@ if ($categoryStmt) {
                 <img src="assets/icons/upload.png" alt="Upload Icon" style="width:48px; height:48px; margin-bottom:12px; display:block;">
                 <span id="drop-text" class="inter-medium-24" style="display:block;">Drag & drop image here or click to select</span>
             </div>
+            <div id="task-image-preview-wrap" class="task-image-preview-wrap d-none mb-3">
+                <img id="task-image-preview" src="" alt="Task image preview">
+            </div>
             <input type="file" class="form-control d-none" id="task_image" name="task_image" accept="image/*" required>
         </div>
         <div class="text-end" style="padding-bottom: 60px;">
@@ -76,6 +85,23 @@ if ($categoryStmt) {
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('task_image');
 const dropText = document.getElementById('drop-text');
+const previewWrap = document.getElementById('task-image-preview-wrap');
+const previewImg = document.getElementById('task-image-preview');
+
+function updateImagePreview(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    previewWrap.classList.add('d-none');
+    previewImg.src = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    previewImg.src = event.target.result;
+    previewWrap.classList.remove('d-none');
+  };
+  reader.readAsDataURL(file);
+}
 
 dropArea.addEventListener('click', () => fileInput.click());
 dropArea.addEventListener('dragover', (e) => {
@@ -92,15 +118,24 @@ dropArea.addEventListener('drop', (e) => {
   e.preventDefault();
   dropArea.classList.remove('bg-light');
   if (e.dataTransfer.files.length) {
-    fileInput.files = e.dataTransfer.files;
+    try {
+      fileInput.files = e.dataTransfer.files;
+    } catch (error) {
+      dropText.textContent = 'Use the file picker to select this image';
+      updateImagePreview(e.dataTransfer.files[0]);
+      return;
+    }
     dropText.textContent = e.dataTransfer.files[0].name;
+    updateImagePreview(e.dataTransfer.files[0]);
   }
 });
 fileInput.addEventListener('change', () => {
   if (fileInput.files.length) {
     dropText.textContent = fileInput.files[0].name;
+    updateImagePreview(fileInput.files[0]);
   } else {
     dropText.textContent = 'Choose a file or drag and drop here';
+    updateImagePreview(null);
   }
 });
 </script>

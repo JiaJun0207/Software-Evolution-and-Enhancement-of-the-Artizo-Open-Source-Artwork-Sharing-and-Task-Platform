@@ -25,6 +25,37 @@ How to unsave a task:
 1. Click the `Saved` button again.
 2. The task is removed from the saved list or changes back to the unsaved state.
 
+## Account Verification
+
+New accounts require OTP verification.
+
+How to create an account:
+
+1. Open `signup.php`.
+2. Enter a username, email, and a password with at least 8 characters including letters and numbers.
+3. Submit the form.
+4. Enter the OTP sent to your email.
+5. After verification, log in from `login.php`.
+
+Users can log in with either their email address or exact-case username.
+
+## Support Tickets
+
+The Support page lets logged-in users submit tickets. Anyone with the ticket code and matching email can track a ticket.
+
+How to submit a ticket:
+
+1. Open `support.php`.
+2. Enter email, phone number, subject, and message.
+3. Submit the form.
+4. Save the displayed ticket code for tracking.
+
+How to track a ticket:
+
+1. Open `support.php`.
+2. Enter the ticket code and the email used for the ticket.
+3. Review the ticket status and details.
+
 ## Task Filtering
 
 Task filtering helps users find task posts by category.
@@ -37,6 +68,7 @@ How to create a categorized task:
 4. Select a category from the category dropdown.
 5. Upload the task image.
 6. Submit the form.
+7. Confirm the image preview and success notification appear.
 
 How to filter tasks:
 

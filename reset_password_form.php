@@ -14,6 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+    if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $password)) {
+        echo '<script>alert("Password must be at least 8 characters and include both letters and numbers."); window.history.back();</script>';
+        exit;
+    }
+
     // Validate the reset token and expiry in the database
     $query = "SELECT user_id FROM user WHERE BINARY reset_token = ?";
     $stmt = $conn->prepare($query);

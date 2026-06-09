@@ -55,6 +55,33 @@ Purpose: stores the selected task-specific category.
 
 The existing `task.category_id` field is preserved because the original system already uses the shared `category` table.
 
+### `pending_user_otps`
+
+Purpose: stores account registration data until the user verifies the emailed OTP.
+
+Important fields:
+
+- `user_name`
+- `email`
+- `password_hash`
+- `otp_code`
+- `expires_at`
+- `attempt_count`
+
+### `support_tickets`
+
+Purpose: stores user-created support tickets and tracking status. Ticket details can be tracked by matching ticket code and email.
+
+Important fields:
+
+- `ticket_code`
+- `user_id`
+- `email`
+- `phone`
+- `subject`
+- `message`
+- `status`
+
 ## New and Updated PHP Endpoints
 
 - `save_task_toggle.php`
@@ -64,6 +91,14 @@ The existing `task.category_id` field is preserved because the original system a
 
 - `saved_tasks.php`
   - Displays the logged-in user's saved tasks.
+
+- `submit_ticket.php`
+  - Inserts a support ticket for the logged-in user.
+  - Generates a unique ticket tracking code.
+
+- `verify_otp.php`
+  - Verifies account creation OTPs.
+  - Creates the final `user` record only after successful verification.
 
 - `task_filter.php`
   - Filters task cards by category and search term.
@@ -90,6 +125,11 @@ Updated pages:
 - `upload_task.php`
 - `upload_task_form.php`
 - `saved_tasks.php`
+- `support.php`
+- `login_form.php`
+- `signup_form.php`
+- `forgot_password.php`
+- `send_reset_link.php`
 - `explore.php`
 - `artwork_detail.php`
 - `user_profile.php`
@@ -137,6 +177,10 @@ Key additions:
 ## Security and Maintainability Measures
 
 - New feature SQL queries use prepared statements.
+- Login accepts either email or username.
+- Username login is case-sensitive through `BINARY user_name = ?`.
+- Registration passwords must be at least 8 characters and include letters and numbers.
+- Account creation requires OTP verification before inserting into `user`.
 - AJAX endpoints validate session state before allowing protected actions.
 - Save Task and Artwork Like endpoints validate target IDs before writing.
 - Comment endpoints validate artwork IDs and reject empty comments.
@@ -151,3 +195,4 @@ Key additions:
 - Budget filtering was not implemented because the task schema does not include budget, price, or amount fields.
 - Some original admin and authentication pages still contain legacy SQL style from the base project. The approved enhancement work uses prepared statements for new SQL paths.
 - Browser-level validation still requires XAMPP Apache and MySQL to be running with the database imported locally.
+- PHPMailer SMTP credentials must be configured before OTP or reset emails can be delivered.

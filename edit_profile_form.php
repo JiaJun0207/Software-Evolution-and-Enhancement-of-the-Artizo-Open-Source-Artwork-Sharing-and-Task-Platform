@@ -8,6 +8,11 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") { //prevent users to direct access th
 
 include("config.php");
 
+if (!isset($_SESSION['UID'])) {
+    header("Location: login.php");
+    exit();
+}
+
 $uid = $_SESSION['UID'];
 
 // Update description if posted
@@ -16,7 +21,7 @@ if (isset($_POST['user_description'])) {
     $updateDesc = $conn->prepare("UPDATE user SET user_description = ? WHERE user_id = ?");
     $updateDesc->bind_param("si", $desc, $uid);
     $updateDesc->execute();
-    header("Location: edit_profile.php?desc=success");
+    header("Location: user_profile.php?desc=success");
     exit();
 }
 

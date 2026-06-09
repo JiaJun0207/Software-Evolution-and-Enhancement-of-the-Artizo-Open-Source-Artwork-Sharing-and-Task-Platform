@@ -127,6 +127,12 @@ For task categorization on an existing database, also apply:
 assets/database/task_category_filter_migration.sql
 ```
 
+For the approved regression fixes, also apply:
+
+```text
+assets/database/regression_features_migration.sql
+```
+
 ## Database Objects Added
 
 - `saved_tasks`
@@ -154,6 +160,15 @@ assets/database/task_category_filter_migration.sql
   - Stores the selected task-specific category when the task category migration is applied.
   - The existing `task.category_id` field is preserved for compatibility with the original system.
 
+- `pending_user_otps`
+  - Temporarily stores pending account registrations until OTP verification succeeds.
+  - OTP codes expire after 10 minutes.
+
+- `support_tickets`
+  - Stores logged-in user support tickets.
+  - Uses a unique `ticket_code` for ticket tracking.
+  - Defaults new tickets to `Open`.
+
 ## Verifying the Database
 
 Run these SQL checks in phpMyAdmin:
@@ -162,6 +177,8 @@ Run these SQL checks in phpMyAdmin:
 SHOW TABLES LIKE 'saved_tasks';
 SHOW TABLES LIKE 'task_categories';
 SHOW TABLES LIKE 'artwork_likes';
+SHOW TABLES LIKE 'pending_user_otps';
+SHOW TABLES LIKE 'support_tickets';
 ```
 
 Check table structures:
@@ -171,6 +188,8 @@ DESCRIBE saved_tasks;
 DESCRIBE task_categories;
 DESCRIBE artwork_likes;
 DESCRIBE task;
+DESCRIBE pending_user_otps;
+DESCRIBE support_tickets;
 ```
 
 Check task category seed data:
@@ -235,6 +254,19 @@ Detailed test cases are provided in `TESTING.md`. The summary below can be used 
 5. Confirm the category label appears on the task card.
 6. Click a category filter and confirm the task list updates without a full page reload.
 
+### Regression Fixes
+
+1. Confirm the header and footer are smaller at 1920x1080 and remain usable on mobile.
+2. Confirm the footer Support link opens `support.php`.
+3. Register with a valid password, complete OTP verification, and log in.
+4. Confirm invalid passwords are rejected during registration.
+5. Log in with email and with an exact-case username.
+6. Confirm wrong-case username login fails.
+7. Submit a support ticket while logged in, then track it by ticket code and email.
+8. Upload a task using both normal file picker and drag-and-drop image selection.
+9. Confirm upload preview and success notification appear.
+10. Confirm Accepted Task and Saved Task navigation buttons match the approved labels.
+
 ### Artwork Like
 
 1. Open `explore.php`.
@@ -264,3 +296,4 @@ Detailed test cases are provided in `TESTING.md`. The summary below can be used 
 - AJAX comments are implemented for artwork comments because the current database schema stores comments with `comment.artwork_id`. Task comments are not part of the current schema.
 - Budget filtering was not implemented because the task table does not include budget, price, or amount fields.
 - Some older legacy/admin code still follows the original project style. The approved feature work uses prepared statements for new SQL paths.
+- OTP and password reset email delivery require working PHPMailer SMTP credentials in the local XAMPP environment.

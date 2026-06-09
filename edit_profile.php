@@ -90,12 +90,11 @@ include("navbar.php"); // Include the navigation bar
                 <form action="edit_profile_form.php" method="POST">
                     <div class="mb-4">
                         <textarea class="form-control inter-extralight-15 left-placeholder border_black"
-                            id="user_description" name="user_description" rows="3"
-                            readonly><?php echo htmlspecialchars($user['user_description']); ?></textarea>
+                            id="user_description" name="user_description" rows="3"><?php echo htmlspecialchars($user['user_description']); ?></textarea>
                     </div>
                     <div class="text-end d-flex justify-content-end gap-3">
                         <button type="button" class="btn btn-outline-black inter-medium-25 border_black"
-                            style="width:163px; height:53px;" onclick="document.getElementById('user_description').removeAttribute('readonly');">
+                            style="width:163px; height:53px;" onclick="document.getElementById('user_description').focus();">
                             Edit
                         </button>
                         <button type="submit" class="btn btn-outline-black inter-medium-25 border_black"

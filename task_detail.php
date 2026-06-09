@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
             <div class="row mb-5 gx-0 gy-4 gy-lg-0" style="padding-left: 0;">
                 <div class="col-12 col-lg-7 d-flex justify-content-center align-items-center"
                     style="background-color:#f0f0f0; max-height:700px; min-height:300px;">
-                    <img src="assets/uploads/task/<?php echo htmlspecialchars($task['task_image']); ?>" alt="task_image"
+                    <img src="<?php echo !empty($task['task_image']) ? 'assets/uploads/task/' . htmlspecialchars($task['task_image']) : 'assets/uploads/artworks/default_artwork.png'; ?>" alt="task_image"
                         style="max-width:100%; max-height:700px; width:auto; height:auto; display:block;">
                 </div>
                 <div class="col-12 col-lg-5 mt-4 mt-lg-0" style="padding-left: 20px;">

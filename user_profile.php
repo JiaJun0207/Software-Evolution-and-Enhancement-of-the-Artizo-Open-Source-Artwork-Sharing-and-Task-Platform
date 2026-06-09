@@ -57,13 +57,13 @@ include("navbar.php"); // Include the navigation bar
                     <a href="edit_profile.php" class="btn btn-outline-black inter-medium-25 border_black"
                         style="width:234px; height:53px;">Edit Profile</a>
                     <a href="logout.php" style="text-decoration:none;">
-                        <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center aspect-1-1"
+                        <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center aspect-1-1 profile-action-icon-btn"
                             style="width:53px; height:53px; padding:0;">
                             <img src="assets/icons/logout.png" alt="Logout Icon" style="width: 23px; height: 23px;">
                         </div>
                     </a>
                     <a href="support.php" style="text-decoration:none;">
-                        <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center aspect-1-1"
+                        <div class="btn form-control btn-outline-black border_black d-flex justify-content-center align-items-center aspect-1-1 profile-action-icon-btn"
                             style="width:53px; height:53px; padding:0;">
                             <img src="assets/icons/support.png" alt="Support Icon" style="width: 23px; height: 23px;">
                         </div>

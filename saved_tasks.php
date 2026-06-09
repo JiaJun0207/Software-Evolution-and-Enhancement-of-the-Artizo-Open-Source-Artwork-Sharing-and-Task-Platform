@@ -91,15 +91,11 @@ include("navbar.php");
                     });
                 </script>
             </div>
-            <div class="col-12 col-sm-4 col-lg-2">
-                <a href="task.php"
-                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Task Board</a>
-            </div>
-            <div class="col-12 col-sm-4 col-lg-2">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <a href="upload_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Post Task</a>
             </div>
-            <div class="col-12 col-sm-4 col-lg-2">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <a href="accepted_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Accepted Task</a>
             </div>
@@ -120,7 +116,7 @@ include("navbar.php");
             $taskDesc = $row['task_description'];
             $categoryName = $row['category_name'] ?? 'Uncategorized';
             $taskId = $row['task_id'];
-            $taskImg = !empty($row['task_image']) ? "assets/uploads/task/" . $row['task_image'] : "assets/uploads/task/default_task.jpeg";
+            $taskImg = !empty($row['task_image']) ? "assets/uploads/task/" . $row['task_image'] : "assets/uploads/artworks/default_artwork.png";
         ?>
         <div class="card_border saved-task-card" data-task-card="<?php echo htmlspecialchars($taskId); ?>"
             style="padding: 48px 64px; margin-bottom:48px;">

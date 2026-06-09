@@ -21,8 +21,8 @@ $user_check->bind_param("i", $user_id);
 $user_check->execute();
 $user_result = $user_check->get_result();
 if ($user_result->num_rows === 0) {
+    $_SESSION['feedback'] = "Invalid user. Please login again.";
     header("Location: upload_task.php");
-    echo "Invalid user. Please login again.";
     exit();
 }
 
@@ -32,8 +32,8 @@ $task_category_id = intval($_POST["task_category_id"] ?? 0);
 
 // Check empty field
 if (empty($task_title) || empty($task_description) || $task_category_id <= 0) {
+    $_SESSION['feedback'] = "All fields are required.";
     header("Location: upload_task.php");
-  echo "All fields are required.";
   exit();
 }
 
@@ -44,8 +44,8 @@ $category_result = $category_check->get_result();
 $task_category = $category_result->fetch_assoc();
 
 if (!$task_category) {
+    $_SESSION['feedback'] = "Invalid category.";
     header("Location: upload_task.php");
-    echo "Invalid category.";
     exit();
 }
 
@@ -66,30 +66,45 @@ if ($legacy_row = $legacy_result->fetch_assoc()) {
 }
 
 if ($legacy_category_id === null) {
+    $_SESSION['feedback'] = "Legacy category setup is missing.";
     header("Location: upload_task.php");
-    echo "Legacy category setup is missing.";
     exit();
 }
 
-$task_image = time() . '_' . $_FILES["task_image"]["name"];
-$path = "assets/uploads/task/" . $task_image;
+if (!isset($_FILES["task_image"]) || $_FILES["task_image"]["error"] !== UPLOAD_ERR_OK) {
+    $_SESSION['feedback'] = "Please upload a task image.";
+    header("Location: upload_task.php");
+    exit();
+}
 
 if($_FILES['task_image']['size'] > 25000000) { // Check file size
+    $_SESSION['feedback'] = "File size exceeds the limit of 25MB.";
     header("Location: upload_task.php");
-    echo "File size exceeds the limit of 25MB.";
     exit();
 }
 
-$imagefiletype = strtolower(pathinfo($task_image, PATHINFO_EXTENSION));
+$originalName = basename($_FILES["task_image"]["name"]);
+$imagefiletype = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 if(!in_array($imagefiletype, ['jpg', 'jpeg', 'png'])) { // Check file type
+    $_SESSION['feedback'] = "Only JPG, JPEG & PNG files are allowed.";
     header("Location: upload_task.php");
-    echo "Only JPG, JPEG & PNG files are allowed.";
     exit();
 }
+
+$uploadDir = "assets/uploads/task/";
+if (!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true)) {
+    $_SESSION['feedback'] = "Task upload folder is not available.";
+    header("Location: upload_task.php");
+    exit();
+}
+
+$safeBaseName = preg_replace('/[^A-Za-z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+$task_image = time() . '_' . $safeBaseName . '.' . $imagefiletype;
+$path = $uploadDir . $task_image;
 
 if (!move_uploaded_file($_FILES["task_image"]["tmp_name"], $path)) {
+    $_SESSION['feedback'] = "Failed to upload image file.";
     header("Location: upload_task.php");
-    echo "Failed to upload image file.";
     exit();
 }
 
@@ -111,14 +126,12 @@ if ($task_category_column_exists) {
 }
 
 if ($stmt->execute()) {
-    echo "Task uploaded successfully.";
     $_SESSION['feedback'] = "Task uploaded successfully.";
-    header("Location: index.php"); // Redirect to index page after successful upload
+    header("Location: upload_task.php");
     exit();
 } else {
-    header("Location: upload_task.php");
-    echo "Error uploading task.";
     $_SESSION['feedback'] = "Error uploading task.";
+    header("Location: upload_task.php");
     exit();
 }
 

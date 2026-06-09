@@ -27,8 +27,8 @@ include("navbar.php"); // Include the navigation bar
 <body>
     <div class="container-fluid"
         style="padding-left: 60px; padding-right: 60px; padding-bottom: 60px; margin-top:60px;">
-        <div class="row" style="margin-bottom: 60px;">
-            <div class="col-8">
+        <div class="row g-3 align-items-stretch" style="margin-bottom: 60px;">
+            <div class="col-12 col-lg-8">
                 <?php
                 $uid = $_SESSION['UID'];
 
@@ -87,13 +87,13 @@ include("navbar.php"); // Include the navigation bar
                 </script>
 
             </div>
-            <div class="col-2">
+            <div class="col-12 col-sm-6 col-lg-2">
                 <a href="upload_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Post Task</a>
             </div>
-            <div class="col-2">
-                <a href="accepted_task.php"
-                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Accepted Task</a>
+            <div class="col-12 col-sm-6 col-lg-2">
+                <a href="saved_tasks.php"
+                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Saved Task</a>
             </div>
         </div>
         <?php while ($row = $result->fetch_assoc()):
@@ -101,7 +101,7 @@ include("navbar.php"); // Include the navigation bar
             $userName = $row['user_name'];
             $taskTitle = $row['task_title'];
             $taskDesc = $row['task_description'];
-            $taskImg = !empty($row['task_image']) ? "assets/uploads/task/" . $row['task_image'] : "assets/uploads/task/default_task.jpeg";
+            $taskImg = !empty($row['task_image']) ? "assets/uploads/task/" . $row['task_image'] : "assets/uploads/artworks/default_artwork.png";
         ?>
         <div class="card_border" style="padding: 68px 100px; margin-bottom:48px;">
             <div class="row align-items-center mb-4">

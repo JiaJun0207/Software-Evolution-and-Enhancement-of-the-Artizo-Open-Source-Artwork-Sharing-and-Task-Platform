@@ -185,7 +185,7 @@ if ($columnCheck) {
                 $profileImg = !empty($row['profile_image']) ? "assets/profile/" . $row['profile_image'] : "assets/profile/user_profile.png";
                 $userId = $row['post_user_id'];
                 $taskId = $row['task_id'];
-                $taskImg = !empty($row['task_image']) ? "assets/uploads/tasks/" . $row['task_image'] : "";
+                $taskImg = !empty($row['task_image']) ? "assets/uploads/task/" . $row['task_image'] : "";
                 $categoryName = $row['display_category_name'];
                 $isSaved = isset($savedTaskLookup[intval($taskId)]);
             ?>

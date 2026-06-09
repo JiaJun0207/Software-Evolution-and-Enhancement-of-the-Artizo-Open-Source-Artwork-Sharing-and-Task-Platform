@@ -12,6 +12,31 @@
   --artizo-artwork-card-max: 440px;
 }
 
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body > .container-fluid {
+  flex: 1 0 auto;
+}
+
+body > footer {
+  width: 100%;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+body > footer .artizo-footer {
+  margin-top: 0 !important;
+}
+
 /* Custom button outline for black theme */
 /* Apply 2px border to all input, textarea, and select elements */
 
@@ -37,6 +62,15 @@
 }
 .btn.btn-outline-black:focus {
   box-shadow: 0 0 0 0.2rem var(--artizo-focus);
+}
+
+.profile-action-icon-btn img {
+  transition: filter 0.15s ease;
+}
+
+.profile-action-icon-btn:hover img,
+.profile-action-icon-btn:focus img {
+  filter: invert(1);
 }
 
 /* Make input borders black */
@@ -151,6 +185,77 @@
 .card_border {
   border-radius: 14px !important;
   border: 2px solid var(--artizo-border) !important;
+}
+
+.artizo-navbar-inner {
+  padding: 10px 48px;
+}
+
+.artizo-navbar-logo {
+  max-height: 40px;
+  width: auto;
+}
+
+.artizo-navbar-profile {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.artizo-footer-logo {
+  max-height: 42px;
+  width: auto;
+}
+
+.artizo-footer-tagline {
+  font-size: 1.5rem !important;
+}
+
+.artizo-footer-link {
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.artizo-footer-link:hover,
+.artizo-footer-link:focus {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.support-panel {
+  max-width: 100%;
+}
+
+.tracking-result-section {
+  border: 2px solid var(--artizo-border);
+  border-radius: 14px;
+  padding: 24px;
+  background: var(--artizo-surface);
+}
+
+.my-tickets-section {
+  border-top: 2px solid var(--artizo-border);
+  margin-top: 32px;
+  padding-top: 28px;
+}
+
+.task-image-preview-wrap {
+  border: 1px solid #111;
+  border-radius: 12px;
+  padding: 12px;
+  max-width: 360px;
+  background: #fff;
+}
+
+.task-image-preview-wrap img {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .card_artwork,

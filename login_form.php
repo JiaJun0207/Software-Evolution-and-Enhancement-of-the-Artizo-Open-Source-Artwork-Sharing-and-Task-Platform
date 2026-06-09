@@ -8,19 +8,29 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") { //prevent users to direct access thi
 
 include("config.php");
 
-$username = $_POST["user_name"];
-$password = $_POST["password"];
+$identifier = trim($_POST["user_name"] ?? "");
+$password = $_POST["password"] ?? "";
 
 
 // Check if any field is empty
-if (empty($username) || empty($password)) {
+if (empty($identifier) || empty($password)) {
   header("Location: login.php");
   $_SESSION["feedback"] = "Please fill in all fields.";
   exit();
 }
 
-$sql = "SELECT * FROM `user` WHERE `user_name`='$username'"; // Check if username already exists
-$result = $conn->query($sql);
+$isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+
+if ($isEmail) {
+  $stmt = $conn->prepare("SELECT user_id, user_name, password FROM `user` WHERE email = ? LIMIT 1");
+  $stmt->bind_param("s", $identifier);
+} else {
+  $stmt = $conn->prepare("SELECT user_id, user_name, password FROM `user` WHERE BINARY user_name = ? LIMIT 1");
+  $stmt->bind_param("s", $identifier);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows > 0) { // the username found in table, login here
   $row = $result->fetch_assoc();
@@ -29,8 +39,11 @@ if ($result->num_rows > 0) { // the username found in table, login here
     //password correct go to homepage
 
     $_SESSION['UID'] = $row['user_id']; // Assuming 'user' is the primary key in your user table
+    $_SESSION['login_success_message'] = $isEmail ? "Login successful using email." : "Login successful using username.";
+    $_SESSION['login_success_redirect'] = true;
 
-    header('location: index.php'); // Redirect to homepage after successful login
+    header('location: login.php'); // Show one-time success evidence before redirecting to homepage
+    exit();
   } else {
     //password incorrect
     header('Location: login.php');
@@ -39,7 +52,7 @@ if ($result->num_rows > 0) { // the username found in table, login here
   }
   //if username not found,go to sign up
 } else {
-  $_SESSION["feedback"] = "Username not found. Please sign up.";
+  $_SESSION["feedback"] = "Account not found. Please sign up.";
   header("Location: signup.php");
   exit();
 }

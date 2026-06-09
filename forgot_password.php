@@ -31,12 +31,13 @@
                         <input type="email" id="email" name="email" class="form-control mb-3 inter-medium-25"
                             placeholder="Email">
                         <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Send</button>
+                        <a href="login.php" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Back</a>
                     </form>
 
                     <div id="feedback-message" class="feedback-error">
                     <?php
                     if (isset($_SESSION["feedback"])) {
-                        echo $_SESSION["feedback"];
+                        echo htmlspecialchars($_SESSION["feedback"]);
                         unset($_SESSION["feedback"]);
                     }
                     ?>

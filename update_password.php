@@ -29,7 +29,7 @@
                         <p class="inter-extralight-15 mb-3">Enter a new password for your account.</p>
                         <input type="hidden" name="token" value="<?php echo isset($_GET['token']) ? htmlspecialchars($_GET['token']) : ''; ?>">
                         <input type="password" id="new_password" name="new_password" class="form-control mb-3 inter-medium-25"
-                            placeholder="New Password">
+                            placeholder="New Password" pattern="(?=.*[A-Za-z])(?=.*\d).{8,}" title="Password must be at least 8 characters and include both letters and numbers.">
                         <input type="password" id="confirm_password" name="confirm_password" class="form-control mb-3 inter-medium-25"
                             placeholder="Confirm New Password">
                         <button type="submit" class="btn btn-outline-black w-100 mb-3 inter-medium-25">Send</button>
