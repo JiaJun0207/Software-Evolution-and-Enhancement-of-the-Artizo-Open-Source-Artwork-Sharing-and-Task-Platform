@@ -77,26 +77,26 @@ This document lists manual test cases for the approved proposal improvements and
 
 | Test ID | Feature | Steps | Expected Result | Actual Result | Status |
 |---|---|---|---|---|---|
-| V-001 | 1366x768 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1366x768. | Layout remains readable with no major overlap or horizontal overflow. |  |  |
-| V-002 | 1440x900 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1440x900. | Layout remains readable with stable spacing and card sizing. |  |  |
-| V-003 | 1600x900 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1600x900. | Containers and cards remain visually controlled. |  |  |
-| V-004 | 1920x1080 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1920x1080. | Main containers do not stretch excessively and content remains readable. |  |  |
+| V-001 | 1366x768 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1366x768. | Layout remains readable with no major overlap or horizontal overflow. |  | PASS |
+| V-002 | 1440x900 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1440x900. | Layout remains readable with stable spacing and card sizing. |  | PASS |
+| V-003 | 1600x900 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1600x900. | Containers and cards remain visually controlled. |  | PASS |
+| V-004 | 1920x1080 responsive layout | Test homepage, explore page, task board, artwork detail, and profile at 1920x1080. | Main containers do not stretch excessively and content remains readable. |  | PASS |
 
 ## Database Validation Checklist
 
 | Test ID | Feature | Steps | Expected Result | Actual Result | Status |
 |---|---|---|---|---|---|
-| D-001 | `saved_tasks` table | Run `SHOW TABLES LIKE 'saved_tasks';`. | `saved_tasks` table exists. |  |  |
-| D-002 | `saved_tasks` table | Run `DESCRIBE saved_tasks;`. | Table includes `saved_task_id`, `user_id`, `task_id`, timestamps, and unique user/task constraint. |  |  |
-| D-003 | `task_categories` table (legacy / not primary) | Run `SHOW TABLES LIKE 'task_categories';`. | `task_categories` table exists but is now **legacy only**. Explore, Task, Post Task, and Post Artwork no longer use it as the category source; the shared `category` table is the unified source (see D-012). The table and `task.task_category_id` column are retained for backward compatibility. |  |  |
-| D-004 | `task_categories` table (legacy / not primary) | Run `SELECT * FROM task_categories ORDER BY task_category_id;`. | Legacy seed rows may still be present (Illustration, Graphic Design, Animation, Digital Painting, UI/UX Design, Photography, Other), but they are **not** the expected category source for the unified UI. The current expected source is the `category` table. |  |  |
-| D-005 | `artwork_likes` table | Run `SHOW TABLES LIKE 'artwork_likes';`. | `artwork_likes` table exists. |  |  |
-| D-006 | `artwork_likes` table | Run `DESCRIBE artwork_likes;`. | Table includes `artwork_like_id`, `user_id`, `artwork_id`, timestamp, and unique user/artwork constraint. |  |  |
-| D-007 | `task.category_id` / `tasks.category_id` | Run `DESCRIBE task;` in this project schema. | Existing singular `task` table includes `category_id`. If a local schema uses `tasks`, confirm equivalent `tasks.category_id`. |  |  |
-| D-008 | `task.task_category_id` | Run `DESCRIBE task;`. | `task_category_id` exists if the task categorization migration has been applied. |  |  |
-| D-009 | Foreign keys | Run an information schema check for `saved_tasks`, `artwork_likes`, and `task`. | Foreign keys exist where referenced base tables are present. |  |  |
-| D-010 | `pending_user_otps` table | Run `SHOW TABLES LIKE 'pending_user_otps';`. | Pending OTP table exists. |  |  |
-| D-011 | `support_tickets` table | Run `SHOW TABLES LIKE 'support_tickets';`. | Support tickets table exists. |  |  |
+| D-001 | `saved_tasks` table | Run `SHOW TABLES LIKE 'saved_tasks';`. | `saved_tasks` table exists. |  | PASS |
+| D-002 | `saved_tasks` table | Run `DESCRIBE saved_tasks;`. | Table includes `saved_task_id`, `user_id`, `task_id`, timestamps, and unique user/task constraint. |  | PASS |
+| D-003 | `task_categories` table (legacy / not primary) | Run `SHOW TABLES LIKE 'task_categories';`. | `task_categories` table exists but is now **legacy only**. Explore, Task, Post Task, and Post Artwork no longer use it as the category source; the shared `category` table is the unified source (see D-012). The table and `task.task_category_id` column are retained for backward compatibility. |  | PASS |
+| D-004 | `task_categories` table (legacy / not primary) | Run `SELECT * FROM task_categories ORDER BY task_category_id;`. | Legacy seed rows may still be present (Illustration, Graphic Design, Animation, Digital Painting, UI/UX Design, Photography, Other), but they are **not** the expected category source for the unified UI. The current expected source is the `category` table. |  | PASS |
+| D-005 | `artwork_likes` table | Run `SHOW TABLES LIKE 'artwork_likes';`. | `artwork_likes` table exists. |  | PASS |
+| D-006 | `artwork_likes` table | Run `DESCRIBE artwork_likes;`. | Table includes `artwork_like_id`, `user_id`, `artwork_id`, timestamp, and unique user/artwork constraint. |  | PASS |
+| D-007 | `task.category_id` / `tasks.category_id` | Run `DESCRIBE task;` in this project schema. | Existing singular `task` table includes `category_id`. If a local schema uses `tasks`, confirm equivalent `tasks.category_id`. |  | PASS |
+| D-008 | `task.task_category_id` | Run `DESCRIBE task;`. | `task_category_id` exists if the task categorization migration has been applied. |  | PASS |
+| D-009 | Foreign keys | Run an information schema check for `saved_tasks`, `artwork_likes`, and `task`. | Foreign keys exist where referenced base tables are present. |  | PASS |
+| D-010 | `pending_user_otps` table | Run `SHOW TABLES LIKE 'pending_user_otps';`. | Pending OTP table exists. |  | PASS |
+| D-011 | `support_tickets` table | Run `SHOW TABLES LIKE 'support_tickets';`. | Support tickets table exists. |  | PASS |
 | D-012 | `category` table (unified source) | Run `SELECT category_id, category_name FROM category ORDER BY category_id;`. | Shared category rows used by Explore, Task, Post Task, and Post Artwork exist (Graphic Design, Illustration, Photography, 3D Art, Advertising). | Returned the 5 shared categories. | PASS |
 | D-013 | `user.is_admin` column | Run `DESCRIBE user;`. | `is_admin` column exists with default `0`. | `is_admin tinyint(1) NOT NULL DEFAULT 0` present. | PASS |
 | D-014 | Default admin account | Run `SELECT user_id, user_name, email, is_admin FROM user WHERE user_name = 'admin';`. | Admin row exists with `is_admin = 1` (email `admin@artizo.local`). | Admin row exists with `is_admin = 1`. | PASS |
