@@ -2,6 +2,7 @@
 include("config.php");// Include the database connection file
 
 session_start(); // Start the session
+include("admin_auth.php"); // Restrict to authenticated admin sessions
 
 if (!isset($_SESSION['UID'])) {
     header("Location: login.php"); // Redirect to login if not logged in

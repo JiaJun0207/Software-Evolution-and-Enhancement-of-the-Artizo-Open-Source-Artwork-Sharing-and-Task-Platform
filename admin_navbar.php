@@ -20,6 +20,10 @@
             href="admin_user_preview.php">User Preview</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'admin_support.php' ? ' active' : ''; ?>"
+            href="admin_support.php">Support</a>
+        </li>
+        <li class="nav-item">
           <?php
           // Show user profile image from database if logged in
           $profile_img = "assets/profile/user_profile.png";

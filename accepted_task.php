@@ -8,6 +8,27 @@ if (!isset($_SESSION['UID'])) {
     exit();
 }
 
+// --- Handle cancelling an accepted task (before any HTML output) ---
+// Only the accepter can cancel, and only while still 'accepted'. The original
+// task is never deleted; it just becomes available again.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && isset($_POST['task_id'])) {
+    $cancelUid = intval($_SESSION['UID']);
+    $cancelTaskId = intval($_POST['task_id']);
+    $checkStmt = $conn->prepare("SELECT accepted_user_id, task_status FROM task WHERE task_id = ?");
+    $checkStmt->bind_param("i", $cancelTaskId);
+    $checkStmt->execute();
+    $cancelTask = $checkStmt->get_result()->fetch_assoc();
+
+    if ($cancelTask && intval($cancelTask['accepted_user_id']) === $cancelUid && strtolower($cancelTask['task_status']) === 'accepted') {
+        $updateStmt = $conn->prepare("UPDATE task SET task_status = 'accept', accepted_user_id = NULL WHERE task_id = ?");
+        $updateStmt->bind_param("i", $cancelTaskId);
+        $updateStmt->execute();
+        $_SESSION['feedback'] = "Accepted task cancelled. It is now available again.";
+    }
+    header("Location: accepted_task.php");
+    exit();
+}
+
 include("navbar.php"); // Include the navigation bar
 ?>
 
@@ -27,6 +48,12 @@ include("navbar.php"); // Include the navigation bar
 <body>
     <div class="container-fluid"
         style="padding-left: 60px; padding-right: 60px; padding-bottom: 60px; margin-top:60px;">
+        <?php if (isset($_SESSION['feedback'])): ?>
+            <div class="alert alert-info inter-extralight-24" role="status">
+                <?php echo htmlspecialchars($_SESSION['feedback']); ?>
+            </div>
+            <?php unset($_SESSION['feedback']); ?>
+        <?php endif; ?>
         <div class="row g-3 align-items-stretch" style="margin-bottom: 60px;">
             <div class="col-12 col-lg-8">
                 <?php
@@ -114,11 +141,19 @@ include("navbar.php"); // Include the navigation bar
                         <p class="mb-0 inter-bold-32 ms-4" style="color:#000;"><?php echo htmlspecialchars($userName); ?></p>
                     </a>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto d-flex gap-2">
                     <a href="task_detail.php?id=<?php echo $row['task_id']; ?>" class="btn form-control btn-outline-black inter-medium-25 border_black"
                         style="width:200px; height:53px;">
                         View task
                     </a>
+                    <?php if (strtolower($row['task_status']) === 'accepted'): ?>
+                    <form method="POST" onsubmit="return confirm('Cancel this accepted task? It will become available to others again.');">
+                        <input type="hidden" name="cancel_task" value="1">
+                        <input type="hidden" name="task_id" value="<?php echo $row['task_id']; ?>">
+                        <button type="submit" class="btn btn-outline-black inter-medium-25 border_black"
+                            style="height:53px;">Cancel</button>
+                    </form>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="row">

@@ -16,7 +16,7 @@ This document lists manual test cases for the approved proposal improvements and
 | F-006 | Save Task feature | Refresh `task.php` after saving a task. | Previously saved task still shows the saved state. |  |  |
 | F-007 | Save Task feature | Open `saved_tasks.php` after saving a task. | Saved task appears in the saved tasks list. |  |  |
 | F-008 | Save Task feature | Click `Saved` or unsave from the saved tasks view. | Task is unsaved and removed or updated without breaking the page. |  |  |
-| F-009 | Task categorization and filtering | Open `upload_task.php`. | Task category dropdown is visible and populated from `task_categories`. |  |  |
+| F-009 | Task categorization and filtering | Open `upload_task.php`. | Task category dropdown is visible and populated from the shared `category` table (the unified category source now used by Explore, Task, Post Task, and Post Artwork). The legacy `task_categories` table is retained for backward compatibility but is no longer the primary category source. |  |  |
 | F-010 | Task categorization and filtering | Create a task with a selected category. | New task is saved with the selected category ID. |  |  |
 | F-011 | Task categorization and filtering | Open `task.php` and inspect task cards. | Task card displays a category label. |  |  |
 | F-012 | Task categorization and filtering | Click a category filter on the task board. | Task list updates using AJAX/fetch without a full page reload. |  |  |
@@ -88,8 +88,8 @@ This document lists manual test cases for the approved proposal improvements and
 |---|---|---|---|---|---|
 | D-001 | `saved_tasks` table | Run `SHOW TABLES LIKE 'saved_tasks';`. | `saved_tasks` table exists. |  |  |
 | D-002 | `saved_tasks` table | Run `DESCRIBE saved_tasks;`. | Table includes `saved_task_id`, `user_id`, `task_id`, timestamps, and unique user/task constraint. |  |  |
-| D-003 | `task_categories` table | Run `SHOW TABLES LIKE 'task_categories';`. | `task_categories` table exists. |  |  |
-| D-004 | `task_categories` table | Run `SELECT * FROM task_categories ORDER BY task_category_id;`. | Seed categories include Illustration, Graphic Design, Animation, Digital Painting, UI/UX Design, Photography, and Other. |  |  |
+| D-003 | `task_categories` table (legacy / not primary) | Run `SHOW TABLES LIKE 'task_categories';`. | `task_categories` table exists but is now **legacy only**. Explore, Task, Post Task, and Post Artwork no longer use it as the category source; the shared `category` table is the unified source (see D-012). The table and `task.task_category_id` column are retained for backward compatibility. |  |  |
+| D-004 | `task_categories` table (legacy / not primary) | Run `SELECT * FROM task_categories ORDER BY task_category_id;`. | Legacy seed rows may still be present (Illustration, Graphic Design, Animation, Digital Painting, UI/UX Design, Photography, Other), but they are **not** the expected category source for the unified UI. The current expected source is the `category` table. |  |  |
 | D-005 | `artwork_likes` table | Run `SHOW TABLES LIKE 'artwork_likes';`. | `artwork_likes` table exists. |  |  |
 | D-006 | `artwork_likes` table | Run `DESCRIBE artwork_likes;`. | Table includes `artwork_like_id`, `user_id`, `artwork_id`, timestamp, and unique user/artwork constraint. |  |  |
 | D-007 | `task.category_id` / `tasks.category_id` | Run `DESCRIBE task;` in this project schema. | Existing singular `task` table includes `category_id`. If a local schema uses `tasks`, confirm equivalent `tasks.category_id`. |  |  |
@@ -97,6 +97,16 @@ This document lists manual test cases for the approved proposal improvements and
 | D-009 | Foreign keys | Run an information schema check for `saved_tasks`, `artwork_likes`, and `task`. | Foreign keys exist where referenced base tables are present. |  |  |
 | D-010 | `pending_user_otps` table | Run `SHOW TABLES LIKE 'pending_user_otps';`. | Pending OTP table exists. |  |  |
 | D-011 | `support_tickets` table | Run `SHOW TABLES LIKE 'support_tickets';`. | Support tickets table exists. |  |  |
+| D-012 | `category` table (unified source) | Run `SELECT category_id, category_name FROM category ORDER BY category_id;`. | Shared category rows used by Explore, Task, Post Task, and Post Artwork exist (Graphic Design, Illustration, Photography, 3D Art, Advertising). | Returned the 5 shared categories. | PASS |
+| D-013 | `user.is_admin` column | Run `DESCRIBE user;`. | `is_admin` column exists with default `0`. | `is_admin tinyint(1) NOT NULL DEFAULT 0` present. | PASS |
+| D-014 | Default admin account | Run `SELECT user_id, user_name, email, is_admin FROM user WHERE user_name = 'admin';`. | Admin row exists with `is_admin = 1` (email `admin@artizo.local`). | Admin row exists with `is_admin = 1`. | PASS |
+| D-015 | Admin password storage | Run `SELECT password FROM user WHERE user_name = 'admin';`. | Password is a bcrypt hash beginning with `$2y$` (PHP `password_hash()` output), not plaintext `Admin@123`. | Password stored as `$2y$10$...` bcrypt hash; `password_verify('Admin@123', hash)` returned true. | PASS |
+| D-016 | `support_tickets` admin response columns | Run `DESCRIBE support_tickets;`. | `admin_response`, `responded_at`, and `responded_by` columns exist. | All three columns present. | PASS |
+| D-017 | `task_submissions` table exists | Run `SHOW TABLES LIKE 'task_submissions';`. | `task_submissions` table exists. | Table exists. | PASS |
+| D-018 | `task_submissions` structure | Run `DESCRIBE task_submissions;`. | Includes `submission_id`, `task_id`, `submitter_user_id`, `file_path`, `message`, `status`, and `submitted_at`. | All required columns present. | PASS |
+| D-019 | Task accepted/submitted fields | Run `DESCRIBE task;`. | Task table supports accepted user/status logic used by accept, cancel, and submission flow (`task_status` enum, `accepted_user_id`, `category_id`, `task_solution`). | Fields present and exercised by the accept/cancel/submit flow. | PASS |
+| D-020 | Full database setup (fresh import) | Fresh import `assets/database/full_database_setup.sql` into a temporary database. | No SQL errors and all latest schema changes (is_admin, admin seed, support response columns, `task_submissions`, unified `category` seed) exist without needing the migration file. | Imported into temp DB `artizo_fresh_test` with no errors; all latest schema/seed present; temp DB dropped after. | PASS |
+| D-021 | Existing database migration | Apply `assets/database/regression_fixes_migration.sql` to an existing database. | Migration is idempotent/additive, adds required columns/tables, and does not delete existing data. | Applied to `software_evo_assignment`; added `is_admin`, admin account, support response columns, and `task_submissions` with no data loss. | PASS |
 
 ## Notes
 
@@ -133,6 +143,72 @@ This document lists manual test cases for the approved proposal improvements and
 | TC23 | Footer link | Click the Support link in the footer. | Support page opens. | Footer Support link opened the support page. | PASS | TC23_footer_support_link.png |
 | TC24 | Header/footer layout | View the header and footer at 1920x1080 resolution. | Header and footer appear smaller. | Header and footer appeared smaller at 1920x1080. | PASS | TC24_header_footer_1920x1080.png |
 | TC25 | Responsive layout | View the header and footer at mobile width. | Header and footer remain usable. | Header and footer remained usable on mobile width. | PASS | TC25_header_footer_mobile_width.png |
+| TC26 | Forgot password same password prevention | Reset password using the same current password. | System rejects it with "New password must be different from your current password." | Same password was rejected and the password hash was unchanged (token preserved for retry). | PASS | TC26_forgot_password_same_password_rejected.png |
+| TC27 | Admin login success | Open `admin_login.php` and log in using admin / Admin@123. | Admin login succeeds and redirects to the admin dashboard. | Admin account logged in successfully and redirected to `admin_index.php`. | PASS | TC27_admin_login_success.png |
+| TC28 | Admin access blocked for normal user | Log in as a normal user and try opening `admin_index.php` or `admin_support.php`. | Normal user is redirected to admin login and cannot access admin pages. | Normal user was redirected to `admin_login.php` and blocked from all admin pages. | PASS | TC28_normal_user_admin_access_blocked.png |
+| TC29 | Admin support ticket list | Log in as admin and open `admin_support.php`. | Admin can see all support tickets with tracking code, user/email, subject, status, and response status. | Admin support ticket list displayed correctly (code, user, email, subject, status, response status). | PASS | TC29_admin_support_ticket_list.png |
+| TC30 | Admin support response and status update | Open a support ticket as admin, enter a response, and change status to In Progress or Resolved. | Response and status are saved into the database. | Admin response, `responded_by`, `responded_at`, and `status` were saved (status set to In Progress). | PASS | TC30_admin_support_response_status_update.png |
+| TC31 | Unified category table - Explore | Open `explore.php` and inspect category tabs/options. | Explore categories come from the `category` table. | Explore tabs matched the `category` table (ALL + the 5 shared categories). | PASS | TC31_explore_category_table_unified.png |
+| TC32 | Unified category table - Task | Open `task.php` and inspect task category filters. | Task category filters come from the same `category` table. | Task filters matched the `category` table (data-category-id = category_id). | PASS | TC32_task_category_table_unified.png |
+| TC33 | Unified category table - Post Task | Open `upload_task.php` and inspect the category dropdown. | Post Task dropdown uses the same `category` table. | Post Task dropdown options matched the shared `category` table. | PASS | TC33_post_task_category_dropdown_unified.png |
+| TC34 | Unified category table - Post Artwork | Open `upload_artwork.php` and inspect the category options. | Post Artwork category options use the same `category` table. | Post Artwork radios matched the shared `category` table (ids 1-5). | PASS | TC34_post_artwork_category_unified.png |
+| TC35 | User A profile artwork ownership | Log in as User A and open `user_profile.php`. | My Artwork section only shows artwork uploaded by User A. | User A profile showed only User A artwork (`WHERE a.user_id = ?`). | PASS | TC35_userA_profile_own_artwork_only.png |
+| TC36 | User B profile artwork ownership | Log in as User B and open `user_profile.php`. | My Artwork section only shows artwork uploaded by User B. | User B profile showed only User B artwork. | PASS | TC36_userB_profile_own_artwork_only.png |
+| TC37 | Profile My Artwork footer spacing | Open `user_profile.php` with artwork and inspect spacing before footer. | My Artwork section is not visually stuck to the footer. | Bottom spacing added; footer no longer sticks to the artwork section (with and without artwork). | PASS - screenshot required | TC37_profile_my_artwork_footer_spacing.png |
+| TC38 | Post artwork image preview | Open `upload_artwork.php` and select an image. | Image preview appears before submission. | Preview markup and FileReader logic served and wired to the file input (same component as Upload Task). | PASS - screenshot required | TC38_post_artwork_image_preview.png |
+| TC39 | Task Accept button capitalization | Open an available task in `task.php` or `task_detail.php`. | Button text shows `Accept`, not `accept`. | Open task displayed `Accept`; no lowercase status labels rendered. | PASS | TC39_task_accept_capitalization.png |
+| TC40 | Task Accepted badge capitalization | Accept a task and open the accepted task view or task detail page. | Status/badge shows `Accepted`, not `accepted`. | Accepted task displayed `Accepted` badge; DB value remains lowercase. | PASS | TC40_task_accepted_capitalization.png |
+| TC41 | Accept task flow | User A posts a task, User B accepts it. | Task status changes to accepted and `accepted_user_id` is saved. | User B accepted task; status `accepted`, `accepted_user_id = 5`. | PASS | TC41_userB_accept_task.png |
+| TC42 | Cancel accepted task | User B cancels/removes an accepted task. | Original task is not deleted; it becomes available again. | Accepted relationship removed (status `accept`, `accepted_user_id` NULL); original task row remained. | PASS | TC42_cancel_accepted_task_no_delete.png |
+| TC43 | Submit file to accepted task | User B accepts a task, opens submission page, selects file, enters message, and submits. | Submit form shows file input, preview, submit button, and saves submission. | File submission uploaded and saved; redirect with success feedback. | PASS | TC43_submit_file_to_accepted_task.png |
+| TC44 | Task submission saved in database | Check `task_submissions` after User B submits. | Row exists with `task_id`, `submitter_user_id`, `file_path`, `message`, `status`, and `submitted_at`. | Submission row saved (task_id 3, submitter 5, file_path, message, status `submitted`, timestamp). | PASS | TC44_task_submission_database_saved.png |
+| TC45 | Task poster views submission | Log in as User A, open the posted task detail page after User B submits. | User A can view submitter name/email, submitted file/image, message, and date. | Task poster (and admin) viewed submitter userB, email, image, and message. | PASS | TC45_task_poster_view_submission.png |
+| TC46 | Unrelated user cannot view submission | Log in as User C and open the same task detail page. | Submitter email, message, and file are not visible to the unrelated user. | User C (and the non-poster accepter) could not view submission details. | PASS | TC46_unrelated_user_submission_hidden.png |
+| TC47 | Task does not vanish after submission | Submit a file to an accepted task, then revisit task pages. | Task remains visible to correct users and is not incorrectly removed. | Task stayed in the accepted/poster views; correctly excluded only from the open feed. | PASS | TC47_task_not_vanish_after_submission.png |
+| TC48 | Saved task still works after task fixes | Save a task, open saved task list, then unsave it. | Save and unsave still work correctly. | Save toggle on (row inserted, shows in saved list) and off (row removed) worked. | PASS | TC48_saved_task_after_task_fixes.png |
+| TC49 | Latest Job Request View More link | Open `index.php` and click `View More` under Latest Job Request. | User is sent to `task.php`, not post artwork. | View More linked to `task.php`. | PASS | TC49_latest_job_request_view_more_task_link.png |
+| TC50 | UI scale-down on Explore and Task pages | Open `explore.php` and `task.php` at desktop size. | Header, content, section spacing, and footer are scaled down around 10-15%. | Reduced type scale, navbar/footer sizing, and section gaps served live; pages render correctly (final visual sign-off via screenshot). | PASS - screenshot required | TC50_explore_task_ui_scaled_down.png |
+| TC51 | Fresh database setup includes latest schema | Create a temporary database and import `full_database_setup.sql`. | Fresh import succeeds and includes the latest admin/support/task submission/category changes. | Imported into temp DB `artizo_fresh_test` with no SQL errors; admin account, `is_admin`, support response columns, `task_submissions`, and unified `category` seed all present; temp DB dropped after. | PASS | TC51_full_database_setup_import_success.png |
+| TC52 | Existing database migration includes latest schema | Import `assets/database/regression_fixes_migration.sql` on an existing database. | Migration succeeds without removing existing data and adds required columns/tables. | Migration applied to `software_evo_assignment`; `is_admin`, admin account, support response columns, and `task_submissions` added with no data loss. | PASS | TC52_regression_migration_import_success.png |
+
+## Latest Regression Fix Testing Evidence
+
+This section records the live runtime verification of the latest regression fixes (admin support management, admin security, unified category source, artwork ownership, profile spacing, forgot-password protection, accept/cancel/submission task flow, capitalization, index link, and UI scale-down).
+
+- **Environment:** XAMPP (Apache + MariaDB/MySQL), database `software_evo_assignment` (the project default `web_assignment` is absent, so `config.php` falls back to `software_evo_assignment`).
+- **Method:** Each flow was exercised against the running app over HTTP using per-user session cookies, with the database inspected directly to confirm persistence. Client-only behaviour (image preview, footer spacing, UI scale-down) was confirmed from the served markup/CSS and still requires a visual screenshot for submission (marked `PASS - screenshot required`).
+- **Test accounts used:**
+  - User A — `user_id = 4` (`userA`)
+  - User B — `user_id = 5` (`userB`)
+  - User C — `user_id = 6` (`userC`, unrelated user)
+  - Admin — `user_id = 3` (`admin`), admin login `admin` / `Admin@123`
+- **Result:** 23 of 23 verification checks passed (mapped to TC26-TC52 above and database checks D-012-D-021).
+
+| # | Verified behaviour | Mapped Test Case(s) | Result |
+|---|---|---|---|
+| 1 | Login/register still works | R-001, R-003, TC08-TC10 | PASS |
+| 2 | Forgot password rejects the same current password | TC26 | PASS |
+| 3 | Admin login only works for `is_admin = 1` | TC27 | PASS |
+| 4 | Admin can view tickets, respond, and update status | TC29, TC30 | PASS |
+| 5 | Normal users cannot access admin pages | TC28 | PASS |
+| 6 | Categories unified from the `category` table | TC31-TC34, D-012 | PASS |
+| 7 | User A can post artwork | TC35 (setup), R-005 | PASS |
+| 8 | User B can post artwork | TC36 (setup), R-005 | PASS |
+| 9 | User A profile shows only User A artwork | TC35 | PASS |
+| 10 | User B profile shows only User B artwork | TC36 | PASS |
+| 11 | Post artwork image preview works | TC38 | PASS - screenshot required |
+| 12 | User A can post a task | TC41 (setup) | PASS |
+| 13 | User B can accept the task | TC41 | PASS |
+| 14 | User B can cancel an accepted task without deleting the original | TC42 | PASS |
+| 15 | User B can re-accept and submit a file | TC43 | PASS |
+| 16 | Submission is saved in `task_submissions` | TC44, D-017, D-018 | PASS |
+| 17 | Task poster can view who submitted and what | TC45 | PASS |
+| 18 | Unrelated users cannot view submissions | TC46 | PASS |
+| 19 | Task does not vanish after submission | TC47 | PASS |
+| 20 | Saved task logic still works | TC48 | PASS |
+| 21 | `Accept` / `Accepted` capitalization is correct | TC39, TC40 | PASS |
+| 22 | `index.php` Latest Job Request `View More` links to `task.php` | TC49 | PASS |
+| 23 | UI scale-down applied to header, explore, task, profile, footer | TC37, TC50 | PASS - screenshot required |
 
 ## Suggested Evidence Screenshot Filenames
 
@@ -163,3 +239,80 @@ This document lists manual test cases for the approved proposal improvements and
 | TC23 | `TC23_footer_support_link.png` |
 | TC24 | `TC24_header_footer_1920x1080.png` |
 | TC25 | `TC25_header_footer_mobile_width.png` |
+| TC26 | `TC26_forgot_password_same_password_rejected.png` |
+| TC27 | `TC27_admin_login_success.png` |
+| TC28 | `TC28_normal_user_admin_access_blocked.png` |
+| TC29 | `TC29_admin_support_ticket_list.png` |
+| TC30 | `TC30_admin_support_response_status_update.png` |
+| TC31 | `TC31_explore_category_table_unified.png` |
+| TC32 | `TC32_task_category_table_unified.png` |
+| TC33 | `TC33_post_task_category_dropdown_unified.png` |
+| TC34 | `TC34_post_artwork_category_unified.png` |
+| TC35 | `TC35_userA_profile_own_artwork_only.png` |
+| TC36 | `TC36_userB_profile_own_artwork_only.png` |
+| TC37 | `TC37_profile_my_artwork_footer_spacing.png` |
+| TC38 | `TC38_post_artwork_image_preview.png` |
+| TC39 | `TC39_task_accept_capitalization.png` |
+| TC40 | `TC40_task_accepted_capitalization.png` |
+| TC41 | `TC41_userB_accept_task.png` |
+| TC42 | `TC42_cancel_accepted_task_no_delete.png` |
+| TC43 | `TC43_submit_file_to_accepted_task.png` |
+| TC44 | `TC44_task_submission_database_saved.png` |
+| TC45 | `TC45_task_poster_view_submission.png` |
+| TC46 | `TC46_unrelated_user_submission_hidden.png` |
+| TC47 | `TC47_task_not_vanish_after_submission.png` |
+| TC48 | `TC48_saved_task_after_task_fixes.png` |
+| TC49 | `TC49_latest_job_request_view_more_task_link.png` |
+| TC50 | `TC50_explore_task_ui_scaled_down.png` |
+| TC51 | `TC51_full_database_setup_import_success.png` |
+| TC52 | `TC52_regression_migration_import_success.png` |
+
+## Required Project Screenshot Evidence Checklist
+
+Capture the following screenshots for submission. The underlying behaviour for each item has been verified in the latest live run (see `Latest Regression Fix Testing Evidence`); the screenshots are the visual proof to attach. Tick each one once captured.
+
+### Admin support management (Issue 3)
+- [ ] `TC27_admin_login_success.png` — admin logged in at `admin_index.php`.
+- [ ] `TC28_normal_user_admin_access_blocked.png` — normal user redirected from an admin page to `admin_login.php`.
+- [ ] `TC29_admin_support_ticket_list.png` — `admin_support.php` list showing code, user/email, subject, status, response status.
+- [ ] `TC30_admin_support_response_status_update.png` — ticket detail after saving a response and changing status to In Progress/Resolved.
+
+### Unified category source (Issues 4 & 8)
+- [ ] `TC31_explore_category_table_unified.png` — Explore category tabs.
+- [ ] `TC32_task_category_table_unified.png` — Task category filters.
+- [ ] `TC33_post_task_category_dropdown_unified.png` — Post Task category dropdown.
+- [ ] `TC34_post_artwork_category_unified.png` — Post Artwork category options.
+
+### Artwork ownership and profile (Issues 6 & 7)
+- [ ] `TC35_userA_profile_own_artwork_only.png` — User A "My Artwork" shows only User A artwork.
+- [ ] `TC36_userB_profile_own_artwork_only.png` — User B "My Artwork" shows only User B artwork.
+- [ ] `TC37_profile_my_artwork_footer_spacing.png` — spacing between "My Artwork" and the footer.
+
+### Forgot password (Issue 2)
+- [ ] `TC26_forgot_password_same_password_rejected.png` — same-password rejection message.
+
+### Post artwork preview (Issue 9)
+- [ ] `TC38_post_artwork_image_preview.png` — preview shown after selecting an artwork image.
+
+### Task accept / cancel / submission flow (Issues 5, 10, 11, 12)
+- [ ] `TC39_task_accept_capitalization.png` — `Accept` button capitalization.
+- [ ] `TC40_task_accepted_capitalization.png` — `Accepted` badge capitalization.
+- [ ] `TC41_userB_accept_task.png` — User B accepting the task.
+- [ ] `TC42_cancel_accepted_task_no_delete.png` — accepted task cancelled and available again (original not deleted).
+- [ ] `TC43_submit_file_to_accepted_task.png` — submission form with file input, preview, and submit button.
+- [ ] `TC44_task_submission_database_saved.png` — `task_submissions` row in phpMyAdmin.
+- [ ] `TC45_task_poster_view_submission.png` — task poster viewing the submission.
+- [ ] `TC46_unrelated_user_submission_hidden.png` — unrelated user not seeing the submission.
+- [ ] `TC47_task_not_vanish_after_submission.png` — task still visible in the correct views after submission.
+
+### Saved task and index link (Issues 13 & saved-task regression)
+- [ ] `TC48_saved_task_after_task_fixes.png` — save/unsave still working.
+- [ ] `TC49_latest_job_request_view_more_task_link.png` — `View More` pointing to `task.php`.
+
+### UI scale-down (Issue 1)
+- [ ] `TC50_explore_task_ui_scaled_down.png` — Explore and Task pages at desktop size after scale-down.
+- [ ] `TC24_header_footer_1920x1080.png` — header/footer at 1920x1080 (existing).
+
+### Database evidence (migration + fresh setup)
+- [ ] `TC51_full_database_setup_import_success.png` — fresh import of `full_database_setup.sql` with no errors.
+- [ ] `TC52_regression_migration_import_success.png` — `regression_fixes_migration.sql` applied to an existing database.

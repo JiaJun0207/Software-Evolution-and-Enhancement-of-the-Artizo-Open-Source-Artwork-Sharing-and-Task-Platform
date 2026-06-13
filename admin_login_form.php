@@ -8,43 +8,45 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") { //prevent users to direct access thi
 
 include("config.php");
 
-$username = $_POST["user_name"];
-$password = $_POST["password"];
+$username = trim($_POST["user_name"] ?? "");
+$password = $_POST["password"] ?? "";
 
 
 // Check if any field is empty
 if (empty($username) || empty($password)) {
-  header("Location: admin_login.php");
   $_SESSION["feedback"] = "Please fill in all fields.";
+  header("Location: admin_login.php");
   exit();
 }
 
-$sql = "SELECT * FROM `user` WHERE `user_name`='$username'"; // Check if username already exists
-$result = $conn->query($sql);
+// Only an account explicitly flagged as administrator may log in here.
+$stmt = $conn->prepare("SELECT user_id, password, is_admin FROM `user` WHERE BINARY user_name = ? LIMIT 1");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if ($result->num_rows > 0) { // the username found in table, login here
-  $row = $result->fetch_assoc();
-
-  if (password_verify($password, $row['password'])) { // Verify the password
-    //password correct go to homepage
-
-    $_SESSION['UID'] = $row['user_id']; // Assuming 'user' is the primary key in your user table
-
-    header('location: admin_index.php'); // Redirect to homepage after successful login
-  } else {
-    //password incorrect
-    header('Location: admin_login.php');
-    $_SESSION["feedback"] = "Incorrect password. Please try again.";
+if ($row = $result->fetch_assoc()) { // the username found in table
+  if (intval($row['is_admin']) !== 1) {
+    // Not an admin account: refuse access and never reveal that the user exists.
+    $_SESSION["feedback"] = "Invalid admin credentials.";
+    header("Location: admin_login.php");
     exit();
   }
-  //if username not found,go to sign up
-} else {
-  $_SESSION["feedback"] = "Username not found.";
-  header("Location: admin_signup.php");
+
+  if (password_verify($password, $row['password'])) { // Verify the password
+    $_SESSION['UID'] = $row['user_id'];
+    $_SESSION['ADMIN'] = 1; // Mark this session as an authenticated admin session
+    header('location: admin_index.php');
+    exit();
+  }
+
+  $_SESSION["feedback"] = "Incorrect password. Please try again.";
+  header('Location: admin_login.php');
   exit();
 }
 
-
-
-$conn->close();
+// Username not found.
+$_SESSION["feedback"] = "Invalid admin credentials.";
+header("Location: admin_login.php");
+exit();
 ?>

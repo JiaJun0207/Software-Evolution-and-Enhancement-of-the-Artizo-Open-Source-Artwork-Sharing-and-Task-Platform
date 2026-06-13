@@ -8,6 +8,17 @@ if (!isset($_SESSION['UID'])) {
   exit();
 }
 
+// Load categories from the shared `category` table (same source as Explore / Task).
+$artworkCategories = [];
+$artworkCategoryStmt = $conn->prepare("SELECT category_id, category_name FROM category ORDER BY category_id ASC");
+if ($artworkCategoryStmt) {
+    $artworkCategoryStmt->execute();
+    $artworkCategoryResult = $artworkCategoryStmt->get_result();
+    while ($artworkCategoryRow = $artworkCategoryResult->fetch_assoc()) {
+        $artworkCategories[] = $artworkCategoryRow;
+    }
+}
+
 include("navbar.php"); // Include the navigation bar
 ?>
 
@@ -40,20 +51,14 @@ include("navbar.php"); // Include the navigation bar
             <label class="inter-bold-32 mb-3">Category</label>
             <div class="category-scroll">
               <div class="d-flex gap-2 flex-wrap" role="group" aria-label="artwork_category">
-                <input type="radio" class="btn-check" name="artwork_category" id="graphic_design" value="1" autocomplete="off" required>
-                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="graphic_design">Graphic Design</label>
-
-                <input type="radio" class="btn-check" name="artwork_category" id="illustration" value="2" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="illustration">Illustration</label>
-
-                <input type="radio" class="btn-check" name="artwork_category" id="photography" value="3" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="photography">Photography</label>
-
-                <input type="radio" class="btn-check" name="artwork_category" id="3d_art" value="4" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="3d_art">3D Art</label>
-
-                <input type="radio" class="btn-check" name="artwork_category" id="advertising" value="5" autocomplete="off">
-                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="advertising">Advertising</label>
+                <?php foreach ($artworkCategories as $index => $artworkCategory):
+                    $catId = intval($artworkCategory['category_id']);
+                    $radioId = 'artwork_category_' . $catId;
+                ?>
+                <input type="radio" class="btn-check" name="artwork_category" id="<?php echo htmlspecialchars($radioId); ?>"
+                    value="<?php echo htmlspecialchars($catId); ?>" autocomplete="off" <?php echo $index === 0 ? 'required' : ''; ?>>
+                <label class="btn btn-outline-black flex-fill inter-medium-25 border_black category-label" for="<?php echo htmlspecialchars($radioId); ?>"><?php echo htmlspecialchars($artworkCategory['category_name']); ?></label>
+                <?php endforeach; ?>
               </div>
             </div>
         </div>
@@ -62,6 +67,9 @@ include("navbar.php"); // Include the navigation bar
             <div id="drop-area" class="border border-2 border-dark rounded-3 text-center mb-3 d-flex flex-column align-items-center justify-content-center" style="cursor:pointer; background:#fafafa; padding:60px;">
                 <img src="assets/icons/upload.png" alt="Upload Icon" style="width:48px; height:48px; margin-bottom:12px; display:block;">
                 <span id="drop-text" class="inter-medium-24" style="display:block;">Drag & drop image here or click to select</span>
+            </div>
+            <div id="artwork-image-preview-wrap" class="task-image-preview-wrap d-none mb-3">
+                <img id="artwork-image-preview" src="" alt="Artwork image preview">
             </div>
             <input type="file" class="form-control d-none" id="artwork_image" name="artwork_image" accept="image/*" required>
         </div>
@@ -76,6 +84,22 @@ include("navbar.php"); // Include the navigation bar
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('artwork_image');
 const dropText = document.getElementById('drop-text');
+const previewWrap = document.getElementById('artwork-image-preview-wrap');
+const previewImg = document.getElementById('artwork-image-preview');
+
+function updateImagePreview(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    previewWrap.classList.add('d-none');
+    previewImg.src = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    previewImg.src = event.target.result;
+    previewWrap.classList.remove('d-none');
+  };
+  reader.readAsDataURL(file);
+}
 
 dropArea.addEventListener('click', () => fileInput.click());
 dropArea.addEventListener('dragover', (e) => {
@@ -92,15 +116,24 @@ dropArea.addEventListener('drop', (e) => {
   e.preventDefault();
   dropArea.classList.remove('bg-light');
   if (e.dataTransfer.files.length) {
-    fileInput.files = e.dataTransfer.files;
+    try {
+      fileInput.files = e.dataTransfer.files;
+    } catch (error) {
+      dropText.textContent = 'Use the file picker to select this image';
+      updateImagePreview(e.dataTransfer.files[0]);
+      return;
+    }
     dropText.textContent = e.dataTransfer.files[0].name;
+    updateImagePreview(e.dataTransfer.files[0]);
   }
 });
 fileInput.addEventListener('change', () => {
   if (fileInput.files.length) {
     dropText.textContent = fileInput.files[0].name;
+    updateImagePreview(fileInput.files[0]);
   } else {
     dropText.textContent = 'Choose a file or drag and drop here';
+    updateImagePreview(null);
   }
 });
 </script>

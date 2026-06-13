@@ -223,7 +223,7 @@ $result = $conn->query($sql);
       <?php endwhile; ?>
     </div>
     <div class="d-flex justify-content-center w-100 mt-4 px-3 px-md-5">
-      <a href="upload_artwork.php"
+      <a href="task.php"
         class="btn btn-outline-black inter-medium-25 border_black px-4 px-md-5 py-2 fs-5 fs-md-4"
         style="min-width:180px;">
         View More

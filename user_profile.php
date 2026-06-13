@@ -41,7 +41,7 @@ include("navbar.php"); // Include the navigation bar
 </head>
 
 <body>
-    <div class="container-fluid px-3 px-md-5" style="margin-top:60px;">
+    <div class="container-fluid px-3 px-md-5" style="margin-top:60px; padding-bottom:60px;">
         <div class="card card_border mb-4">
             <div class="card-body d-flex flex-column flex-md-row align-items-center gap-3 px-3 px-md-5">
                 <div class="d-inline-block mb-3 mb-md-0">
@@ -95,9 +95,10 @@ include("navbar.php"); // Include the navigation bar
                     GROUP BY artwork_id
                 ) lc ON a.artwork_id = lc.artwork_id
                 LEFT JOIN artwork_likes ul ON a.artwork_id = ul.artwork_id AND ul.user_id = ?
+                WHERE a.user_id = ?
                 ORDER BY a.release_at DESC";
             $artwork_stmt = $conn->prepare($sql);
-            $artwork_stmt->bind_param("i", $uid);
+            $artwork_stmt->bind_param("ii", $uid, $uid);
             $artwork_stmt->execute();
             $result = $artwork_stmt->get_result();
 
@@ -136,7 +137,7 @@ include("navbar.php"); // Include the navigation bar
                 <?php
             } else {
                 ?>
-                <p class="inter-extralight-15">users don't have artworks.</p>
+                <p class="inter-extralight-15" style="padding-bottom: 40px;">You don't have any artworks yet.</p>
                 <?php
 
             }

@@ -1,11 +1,7 @@
 <?php
 include("config.php");
 session_start();
-
-if (!isset($_SESSION['UID'])) {
-    header("Location: login.php");
-    exit();
-}
+include("admin_auth.php"); // Deletions are admin-only operations
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && isset($_POST['id'])) {
     $type = $_POST['type'];

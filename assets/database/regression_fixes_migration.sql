@@ -1,0 +1,168 @@
+-- Regression fixes migration for Artizo (admin support, task submissions,
+-- forgot-password, ownership and category unification work).
+--
+-- Run this AFTER the base schema and the existing Phase 1 / regression
+-- migrations. It is idempotent: every change is guarded so the file can be
+-- imported more than once without errors and without removing existing data.
+--
+-- Confirmed table names (singular): `user`, `task`, `support_tickets`,
+-- `category`. No `users` table exists in this project.
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+START TRANSACTION;
+
+-- --------------------------------------------------------
+-- 1. Admin role flag on the user table.
+-- --------------------------------------------------------
+
+SET @user_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'user'
+);
+
+SET @is_admin_column_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'user'
+    AND COLUMN_NAME = 'is_admin'
+);
+
+SET @sql := IF(
+  @user_table_exists > 0 AND @is_admin_column_exists = 0,
+  'ALTER TABLE `user` ADD COLUMN `is_admin` TINYINT(1) NOT NULL DEFAULT 0',
+  'SELECT ''user table missing or user.is_admin already exists; no ALTER TABLE needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- --------------------------------------------------------
+-- 2. Seed one admin account.
+--    Username : admin
+--    Email    : admin@artizo.local
+--    Password : Admin@123  (stored ONLY as a bcrypt hash, never plaintext)
+--    The hash below was produced with PHP password_hash('Admin@123', PASSWORD_BCRYPT).
+--    INSERT IGNORE + UNIQUE-safe update keeps this idempotent and guarantees
+--    the account ends up flagged as admin.
+-- --------------------------------------------------------
+
+SET @sql := IF(
+  @user_table_exists > 0,
+  'INSERT INTO `user` (`user_name`, `user_description`, `email`, `password`, `profile_image`, `is_admin`)
+   SELECT ''admin'', ''System administrator'', ''admin@artizo.local'',
+          ''$2y$10$vBY5GhMN0MEJZj5.nj71H.tY3r3InXE9mBpJbgzRDO7k8p2C4CIZq'', '''', 1
+   FROM DUAL
+   WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `user_name` = ''admin'')',
+  'SELECT ''user table missing; skipped admin seed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Ensure an existing `admin` user is flagged as administrator.
+SET @sql := IF(
+  @user_table_exists > 0,
+  'UPDATE `user` SET `is_admin` = 1 WHERE `user_name` = ''admin''',
+  'SELECT ''user table missing; skipped admin flag update.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- --------------------------------------------------------
+-- 3. Support ticket response / status handling columns.
+-- --------------------------------------------------------
+
+SET @support_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'support_tickets'
+);
+
+SET @support_response_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'support_tickets'
+    AND COLUMN_NAME = 'admin_response'
+);
+
+SET @sql := IF(
+  @support_table_exists > 0 AND @support_response_exists = 0,
+  'ALTER TABLE `support_tickets`
+     ADD COLUMN `admin_response` TEXT NULL AFTER `status`,
+     ADD COLUMN `responded_at` TIMESTAMP NULL DEFAULT NULL AFTER `admin_response`,
+     ADD COLUMN `responded_by` INT(11) NULL DEFAULT NULL AFTER `responded_at`',
+  'SELECT ''support_tickets table missing or response columns already exist; no ALTER TABLE needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- --------------------------------------------------------
+-- 4. Task submissions table.
+--    Stores each submission made by a user who accepted a task so the task
+--    poster (and admin) can review who submitted what.
+-- --------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `task_submissions` (
+  `submission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `submitter_user_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `message` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'submitted',
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`submission_id`),
+  KEY `idx_task_submissions_task` (`task_id`),
+  KEY `idx_task_submissions_user` (`submitter_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+SET @task_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task'
+);
+
+SET @task_submissions_task_fk_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task_submissions'
+    AND CONSTRAINT_NAME = 'fk_task_submissions_task'
+);
+
+SET @sql := IF(
+  @task_table_exists > 0 AND @task_submissions_task_fk_exists = 0,
+  'ALTER TABLE `task_submissions` ADD CONSTRAINT `fk_task_submissions_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''task table missing or task_submissions task foreign key already exists; no FK needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @task_submissions_user_fk_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task_submissions'
+    AND CONSTRAINT_NAME = 'fk_task_submissions_user'
+);
+
+SET @sql := IF(
+  @user_table_exists > 0 AND @task_submissions_user_fk_exists = 0,
+  'ALTER TABLE `task_submissions` ADD CONSTRAINT `fk_task_submissions_user` FOREIGN KEY (`submitter_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''user table missing or task_submissions user foreign key already exists; no FK needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+COMMIT;

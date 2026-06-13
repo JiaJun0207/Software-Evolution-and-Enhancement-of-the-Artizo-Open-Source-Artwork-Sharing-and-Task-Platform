@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Validate the reset token and expiry in the database
-    $query = "SELECT user_id FROM user WHERE BINARY reset_token = ?";
+    $query = "SELECT user_id, password FROM user WHERE BINARY reset_token = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $token); // Bind the token to the query
     $stmt->execute();
@@ -28,9 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($stmt->num_rows > 0) {
         // Token is valid, proceed with updating the password
-        $stmt->bind_result($userID);
+        $stmt->bind_result($userID, $current_hashed_password);
         $stmt->fetch();
         $stmt->close();
+
+        // Reject a new password that matches the current password.
+        if (password_verify($password, $current_hashed_password)) {
+            echo '<script>alert("New password must be different from your current password."); window.history.back();</script>';
+            exit;
+        }
 
         // Hash the new password
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);

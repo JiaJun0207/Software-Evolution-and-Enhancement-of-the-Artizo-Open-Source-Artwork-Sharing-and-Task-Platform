@@ -49,6 +49,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
     }
 }
 
+// --- Handle cancelling an accepted task BEFORE fetching task info ---
+// Only the user who accepted the task may cancel it, and only while it is still
+// 'accepted' (not yet submitted). The original task row is never deleted; it
+// simply becomes available again.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && isset($_POST['task_id'])) {
+    $cancel_task_id = intval($_POST['task_id']);
+    $checkStmt = $conn->prepare("SELECT accepted_user_id, task_status FROM task WHERE task_id = ?");
+    $checkStmt->bind_param("i", $cancel_task_id);
+    $checkStmt->execute();
+    $cancelTask = $checkStmt->get_result()->fetch_assoc();
+
+    if ($cancelTask && intval($cancelTask['accepted_user_id']) === $uid && strtolower($cancelTask['task_status']) === 'accepted') {
+        $updateStmt = $conn->prepare("UPDATE task SET task_status = 'accept', accepted_user_id = NULL WHERE task_id = ?");
+        $updateStmt->bind_param("i", $cancel_task_id);
+        $updateStmt->execute();
+        $_SESSION['feedback'] = "Accepted task cancelled. It is now available again.";
+        header("Location: task_detail.php?id=" . $cancel_task_id);
+        exit();
+    }
+}
+
 ?>
 
 <html lang="en">
@@ -84,16 +105,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
 
     if ($result->num_rows > 0) {
         $task = $result->fetch_assoc();
-        // --- Auto-update status to 'submitted' if solution exists and not already submitted ---
-        if (!empty($task['task_solution']) && strtolower($task['task_status']) !== 'submitted') {
-            $updateStatusSql = "UPDATE task SET task_status = 'submitted' WHERE task_id = ?";
-            $updateStatusStmt = $conn->prepare($updateStatusSql);
-            $updateStatusStmt->bind_param("i", $task_id);
-            $updateStatusStmt->execute();
-            // Refresh to show updated status
-            header("Location: task_detail.php?id=" . $task_id);
-            exit();
+
+        // Human-friendly status labels (the database keeps the lowercase values).
+        $statusLabels = ['accept' => 'Accept', 'accepted' => 'Accepted', 'submitted' => 'Submitted', 'done' => 'Done'];
+        $statusKey = strtolower($task['task_status']);
+        $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
+
+        $isPoster = ($uid == $task['post_user_id']);
+        $isAccepter = (intval($task['accepted_user_id']) === $uid);
+        $isAdmin = !empty($_SESSION['ADMIN']);
+
+        // Load submissions so the task poster (and admin) can review them.
+        $submissions = [];
+        if ($isPoster || $isAdmin) {
+            $subStmt = $conn->prepare(
+                "SELECT ts.*, u.user_name, u.email
+                 FROM task_submissions ts
+                 JOIN `user` u ON ts.submitter_user_id = u.user_id
+                 WHERE ts.task_id = ?
+                 ORDER BY ts.submitted_at DESC"
+            );
+            $subStmt->bind_param("i", $task_id);
+            $subStmt->execute();
+            $subResult = $subStmt->get_result();
+            while ($subRow = $subResult->fetch_assoc()) {
+                $submissions[] = $subRow;
+            }
         }
+
         $posterImg = !empty($task['profile_image']) ? "assets/profile/" . $task['profile_image'] : "assets/profile/user_profile.png";
         $posterName = $task['user_name'];
         $categoryName = $task['category_name'];
@@ -123,6 +162,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
 
         ?>
         <div class="container-fluid px-3 px-md-5 pb-4 pb-md-5" style="margin-top:60px;">
+            <?php if (isset($_SESSION['feedback'])): ?>
+                <div class="alert alert-info inter-extralight-24" role="status">
+                    <?php echo htmlspecialchars($_SESSION['feedback']); ?>
+                </div>
+                <?php unset($_SESSION['feedback']); ?>
+            <?php endif; ?>
             <div class="d-flex align-items-center flex-column flex-sm-row">
                 <div class="d-inline-block mb-3 mb-sm-0">
                     <img src="<?php echo htmlspecialchars($posterImg); ?>" alt="Profile Image" class="rounded-circle"
@@ -149,12 +194,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
                                 <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task_id); ?>">
                                 <button type="submit" class="card_border inter-medium-25 mb-0"
                                     style="padding: 8px 40px; <?php echo $statusBg; ?> border:none; background:transparent; cursor:pointer;">
-                                    <?php echo htmlspecialchars($task['task_status']); ?>
+                                    <?php echo htmlspecialchars($statusLabel); ?>
                                 </button>
                             </form>
                         <?php else: ?>
                             <div class="card_border inter-medium-25 mb-0" style="padding: 8px 40px; <?php echo $statusBg; ?>">
-                                <?php echo htmlspecialchars($task['task_status']); ?>
+                                <?php echo htmlspecialchars($statusLabel); ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -177,10 +222,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
                     <p class="inter-extralight-24"><?php echo htmlspecialchars($task['task_description']); ?></p>
                 </div>
             </div>
-            <?php if (strtolower($task['task_status']) === 'accepted'): ?>
+            <?php if ($isAccepter && $statusKey === 'accepted'): ?>
             <form id="submission-form" action="submission_task.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task_id); ?>">
-                <div class="mb-5">
+                <div class="mb-4">
                     <label for="artwork_image" class="inter-bold-32 mb-3">Submission</label>
                     <div id="drop-area"
                         class="border border-2 border-dark rounded-3 text-center mb-3 d-flex flex-column align-items-center justify-content-center"
@@ -190,18 +235,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && iss
                         <span id="drop-text" class="inter-medium-24" style="display:block;">Drag & drop image here or click to
                             select</span>
                     </div>
+                    <div id="submission-preview-wrap" class="task-image-preview-wrap d-none mb-3">
+                        <img id="submission-preview" src="" alt="Submission preview">
+                    </div>
                     <input type="file" class="form-control d-none" id="artwork_image" name="artwork_image" accept="image/*"
                         required>
                 </div>
+                <div class="mb-4">
+                    <label for="submission_message" class="inter-bold-32 mb-3">Message (optional)</label>
+                    <textarea id="submission_message" name="message" rows="3"
+                        class="form-control inter-medium-25 left-placeholder border_black"
+                        placeholder="Add a note for the task poster"></textarea>
+                </div>
+                <div class="d-flex gap-2 mb-5">
+                    <button type="submit" class="btn btn-outline-black inter-medium-24 active">
+                        <img src="assets/icons/post.png" alt="post Icon" style="width:20px; height:20px; margin-right:8px; vertical-align:middle;">
+                        Submit Work
+                    </button>
+                </div>
+            </form>
+            <form method="POST" class="mb-5" onsubmit="return confirm('Cancel this accepted task? It will become available to others again.');">
+                <input type="hidden" name="cancel_task" value="1">
+                <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task_id); ?>">
+                <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Cancel Accepted Task</button>
             </form>
             <?php endif; ?>
+
+            <?php if ($isPoster || $isAdmin): ?>
+            <div class="mb-5">
+                <h5 class="inter-bold-32 mb-3">Submissions</h5>
+                <?php if (empty($submissions)): ?>
+                    <p class="inter-extralight-24">No submissions yet.</p>
+                <?php else: ?>
+                    <?php foreach ($submissions as $submission): ?>
+                        <div class="card_border mb-3" style="padding: 24px 30px;">
+                            <div class="row gx-4 gy-3 align-items-center">
+                                <div class="col-12 col-md-4">
+                                    <img src="assets/uploads/task_solution/<?php echo htmlspecialchars($submission['file_path']); ?>"
+                                        alt="Submission" style="width:100%; max-height:240px; object-fit:cover; border-radius:12px;">
+                                </div>
+                                <div class="col-12 col-md-8">
+                                    <p class="inter-bold-24 mb-1"><?php echo htmlspecialchars($submission['user_name']); ?></p>
+                                    <p class="inter-extralight-15 mb-1"><?php echo htmlspecialchars($submission['email']); ?></p>
+                                    <p class="inter-extralight-15 mb-1">Status: <?php echo htmlspecialchars($submission['status']); ?></p>
+                                    <p class="inter-extralight-15 mb-2">Submitted: <?php echo htmlspecialchars($submission['submitted_at']); ?></p>
+                                    <?php if (!empty($submission['message'])): ?>
+                                        <p class="inter-extralight-24 mb-0"><?php echo nl2br(htmlspecialchars($submission['message'])); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
-        <?php if (strtolower($task['task_status']) === 'accepted'): ?>
+        <?php if ($isAccepter && $statusKey === 'accepted'): ?>
         <script>
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('artwork_image');
 const dropText = document.getElementById('drop-text');
-const uploadForm = document.getElementById('submission-form');
+const previewWrap = document.getElementById('submission-preview-wrap');
+const previewImg = document.getElementById('submission-preview');
+
+function updateSubmissionPreview(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    previewWrap.classList.add('d-none');
+    previewImg.src = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    previewImg.src = event.target.result;
+    previewWrap.classList.remove('d-none');
+  };
+  reader.readAsDataURL(file);
+}
 
 // Click drop area opens file picker
 dropArea.addEventListener('click', () => fileInput.click());
@@ -221,26 +330,26 @@ dropArea.addEventListener('drop', (e) => {
   e.preventDefault();
   dropArea.classList.remove('bg-light');
   if (e.dataTransfer.files.length) {
-    fileInput.files = e.dataTransfer.files;
+    try {
+      fileInput.files = e.dataTransfer.files;
+    } catch (error) {
+      dropText.textContent = 'Use the file picker to select this image';
+      updateSubmissionPreview(e.dataTransfer.files[0]);
+      return;
+    }
     dropText.textContent = e.dataTransfer.files[0].name;
+    updateSubmissionPreview(e.dataTransfer.files[0]);
   }
 });
 
-// When file selected, update text
+// When file selected, update text + preview
 fileInput.addEventListener('change', () => {
   if (fileInput.files.length) {
     dropText.textContent = fileInput.files[0].name;
-    dropArea.setAttribute("tabindex", "0");
-    dropArea.focus();
+    updateSubmissionPreview(fileInput.files[0]);
   } else {
     dropText.textContent = 'Choose a file or drag and drop here';
-  }
-});
-
-// Listen for Enter key to auto-submit
-dropArea.addEventListener('keydown', (e) => {
-  if (e.key === "Enter" && fileInput.files.length) {
-    uploadForm.submit();
+    updateSubmissionPreview(null);
   }
 });
 </script>

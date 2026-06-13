@@ -74,18 +74,24 @@ include("navbar.php"); // Include the navigation bar
         // Get selected category from GET
         $selectedCategory = $_GET['category'] ?? 'ALL';
 
-        // Define categories
-        $categories = [
-            'ALL',
-            'Graphic Design',
-            'Illustration',
-            'Photography',
-            '3D Art',
-            'Advertising'
-        ];
+        // Load categories from the shared `category` table (same source as Task / Post Task).
+        $categories = ['ALL'];
+        $exploreCategoryStmt = $conn->prepare("SELECT category_name FROM category ORDER BY category_id ASC");
+        if ($exploreCategoryStmt) {
+            $exploreCategoryStmt->execute();
+            $exploreCategoryResult = $exploreCategoryStmt->get_result();
+            while ($exploreCategoryRow = $exploreCategoryResult->fetch_assoc()) {
+                $categories[] = $exploreCategoryRow['category_name'];
+            }
+        }
+
+        // Fallback if the category table could not be read (keeps the page usable).
+        if (count($categories) === 1) {
+            $categories = ['ALL', 'Graphic Design', 'Illustration', 'Photography', '3D Art', 'Advertising'];
+        }
         ?>
 
-        <div class="row" style="margin-top:100px; margin-bottom:100px;">
+        <div class="row" style="margin-top:64px; margin-bottom:64px;">
             <div class="d-flex justify-content-between align-items-center" style="gap:0; padding:0 20px;">
                 <?php foreach ($categories as $cat): ?>
                     <?php

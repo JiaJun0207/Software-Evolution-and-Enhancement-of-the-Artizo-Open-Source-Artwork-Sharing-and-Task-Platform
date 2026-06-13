@@ -15,15 +15,8 @@ if (!isset($_SESSION['UID'])) {
 
 $uid = intval($_SESSION['UID']);
 $searchValue = trim($_GET['search'] ?? '');
-$taskCategoryId = intval($_GET['task_category_id'] ?? 0);
-
-$taskCategoryColumnExists = false;
-$columnCheck = $conn->prepare("SELECT COUNT(*) AS column_count FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'task' AND COLUMN_NAME = 'task_category_id'");
-$columnCheck->execute();
-$columnResult = $columnCheck->get_result();
-if ($columnRow = $columnResult->fetch_assoc()) {
-    $taskCategoryColumnExists = intval($columnRow["column_count"]) > 0;
-}
+// Unified category source: same `category` table as explore. Filter on task.category_id.
+$selectedCategoryId = intval($_GET['category_id'] ?? 0);
 
 $savedTaskLookup = [];
 $savedStmt = $conn->prepare("SELECT task_id FROM saved_tasks WHERE user_id = ?");
@@ -36,20 +29,11 @@ if ($savedStmt) {
     }
 }
 
-if ($taskCategoryColumnExists) {
-    $sql = "SELECT t.*, u.user_name, u.profile_image,
-                   COALESCE(tc.category_name, c.category_name, 'Uncategorized') AS display_category_name
-            FROM task t
-            JOIN user u ON t.post_user_id = u.user_id
-            LEFT JOIN category c ON t.category_id = c.category_id
-            LEFT JOIN task_categories tc ON t.task_category_id = tc.task_category_id";
-} else {
-    $sql = "SELECT t.*, u.user_name, u.profile_image,
-                   COALESCE(c.category_name, 'Uncategorized') AS display_category_name
-            FROM task t
-            JOIN user u ON t.post_user_id = u.user_id
-            LEFT JOIN category c ON t.category_id = c.category_id";
-}
+$sql = "SELECT t.*, u.user_name, u.profile_image,
+               COALESCE(c.category_name, 'Uncategorized') AS display_category_name
+        FROM task t
+        JOIN user u ON t.post_user_id = u.user_id
+        LEFT JOIN category c ON t.category_id = c.category_id";
 
 $where = ["t.task_status = 'accept'"];
 $params = [];
@@ -63,9 +47,9 @@ if ($searchValue !== '') {
     $types .= "ss";
 }
 
-if ($taskCategoryColumnExists && $taskCategoryId > 0) {
-    $where[] = "t.task_category_id = ?";
-    $params[] = $taskCategoryId;
+if ($selectedCategoryId > 0) {
+    $where[] = "t.category_id = ?";
+    $params[] = $selectedCategoryId;
     $types .= "i";
 }
 

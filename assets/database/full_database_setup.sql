@@ -18,8 +18,20 @@ CREATE TABLE IF NOT EXISTS `user` (
   `password` varchar(255) NOT NULL,
   `profile_image` varchar(255) NOT NULL DEFAULT '',
   `reset_token` varchar(255) DEFAULT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Default administrator account.
+--   Username : admin
+--   Email    : admin@artizo.local
+--   Password : Admin@123  (stored ONLY as a bcrypt hash from password_hash(), never plaintext)
+-- The NOT EXISTS guard keeps this safe if the file is imported more than once.
+INSERT INTO `user` (`user_name`, `user_description`, `email`, `password`, `profile_image`, `is_admin`)
+SELECT 'admin', 'System administrator', 'admin@artizo.local',
+       '$2y$10$vBY5GhMN0MEJZj5.nj71H.tY3r3InXE9mBpJbgzRDO7k8p2C4CIZq', '', 1
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `user_name` = 'admin');
 
 CREATE TABLE IF NOT EXISTS `pending_user_otps` (
   `pending_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -44,12 +56,17 @@ CREATE TABLE IF NOT EXISTS `support_tickets` (
   `subject` varchar(255) NOT NULL,
   `message` text NOT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'Open',
+  `admin_response` text DEFAULT NULL,
+  `responded_at` timestamp NULL DEFAULT NULL,
+  `responded_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (`ticket_id`),
   UNIQUE KEY `uniq_support_ticket_code` (`ticket_code`),
   KEY `idx_support_tickets_user` (`user_id`),
-  CONSTRAINT `fk_support_tickets_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `idx_support_tickets_responded_by` (`responded_by`),
+  CONSTRAINT `fk_support_tickets_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_support_tickets_responded_by` FOREIGN KEY (`responded_by`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS `category` (
@@ -159,6 +176,23 @@ CREATE TABLE IF NOT EXISTS `artwork_likes` (
   KEY `idx_artwork_likes_artwork` (`artwork_id`),
   CONSTRAINT `fk_artwork_likes_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_artwork_likes_artwork` FOREIGN KEY (`artwork_id`) REFERENCES `artwork` (`artwork_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Task submissions: work submitted by the user who accepted a task, so the
+-- task poster (and admin) can review who submitted what.
+CREATE TABLE IF NOT EXISTS `task_submissions` (
+  `submission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `submitter_user_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `message` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'submitted',
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`submission_id`),
+  KEY `idx_task_submissions_task` (`task_id`),
+  KEY `idx_task_submissions_user` (`submitter_user_id`),
+  CONSTRAINT `fk_task_submissions_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_task_submissions_user` FOREIGN KEY (`submitter_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 COMMIT;

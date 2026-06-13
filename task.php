@@ -13,25 +13,16 @@ $uid = intval($_SESSION['UID']);
 include("navbar.php"); // Include the navigation bar
 
 $searchValue = $_GET['search'] ?? '';
-$selectedTaskCategoryId = intval($_GET['task_category_id'] ?? 0);
+// Unified category source: same `category` table as explore. Filter on task.category_id.
+$selectedCategoryId = intval($_GET['category_id'] ?? 0);
 
 $taskCategories = [];
-$categoryStmt = $conn->prepare("SELECT task_category_id, category_name FROM task_categories ORDER BY category_name ASC");
+$categoryStmt = $conn->prepare("SELECT category_id, category_name FROM category ORDER BY category_id ASC");
 if ($categoryStmt) {
     $categoryStmt->execute();
     $categoryResult = $categoryStmt->get_result();
     while ($categoryRow = $categoryResult->fetch_assoc()) {
         $taskCategories[] = $categoryRow;
-    }
-}
-
-$taskCategoryColumnExists = false;
-$columnCheck = $conn->prepare("SELECT COUNT(*) AS column_count FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'task' AND COLUMN_NAME = 'task_category_id'");
-if ($columnCheck) {
-    $columnCheck->execute();
-    $columnResult = $columnCheck->get_result();
-    if ($columnRow = $columnResult->fetch_assoc()) {
-        $taskCategoryColumnExists = intval($columnRow["column_count"]) > 0;
     }
 }
 ?>
@@ -100,17 +91,17 @@ if ($columnCheck) {
             </div>
         </div>
 
-        <div class="row" style="margin-top:100px; margin-bottom:130px;">
+        <div class="row" style="margin-top:64px; margin-bottom:80px;">
             <div id="taskCategoryFilters" class="task-filter-bar d-flex justify-content-between align-items-center" style="gap:0; padding:0 20px;">
                 <button type="button"
-                    class="task-filter-btn inter-medium-32 <?php echo $selectedTaskCategoryId === 0 ? 'active' : ''; ?>"
+                    class="task-filter-btn inter-medium-32 <?php echo $selectedCategoryId === 0 ? 'active' : ''; ?>"
                     data-category-id="0">
                     ALL
                 </button>
                 <?php foreach ($taskCategories as $cat): ?>
-                    <?php $categoryId = intval($cat['task_category_id']); ?>
+                    <?php $categoryId = intval($cat['category_id']); ?>
                     <button type="button"
-                        class="task-filter-btn inter-medium-32 <?php echo $selectedTaskCategoryId === $categoryId ? 'active' : ''; ?>"
+                        class="task-filter-btn inter-medium-32 <?php echo $selectedCategoryId === $categoryId ? 'active' : ''; ?>"
                         data-category-id="<?php echo htmlspecialchars($categoryId); ?>">
                         <?php echo htmlspecialchars($cat['category_name']); ?>
                     </button>
@@ -130,21 +121,12 @@ if ($columnCheck) {
             }
         }
 
-        // Build SQL for category and search
-        if ($taskCategoryColumnExists) {
-            $sql = "SELECT t.*, u.user_name, u.profile_image,
-                           COALESCE(tc.category_name, c.category_name, 'Uncategorized') AS display_category_name
-                    FROM task t
-                    JOIN user u ON t.post_user_id = u.user_id
-                    LEFT JOIN category c ON t.category_id = c.category_id
-                    LEFT JOIN task_categories tc ON t.task_category_id = tc.task_category_id";
-        } else {
-            $sql = "SELECT t.*, u.user_name, u.profile_image,
-                           COALESCE(c.category_name, 'Uncategorized') AS display_category_name
-                    FROM task t
-                    JOIN user u ON t.post_user_id = u.user_id
-                    LEFT JOIN category c ON t.category_id = c.category_id";
-        }
+        // Build SQL for category and search (unified `category` table source)
+        $sql = "SELECT t.*, u.user_name, u.profile_image,
+                       COALESCE(c.category_name, 'Uncategorized') AS display_category_name
+                FROM task t
+                JOIN user u ON t.post_user_id = u.user_id
+                LEFT JOIN category c ON t.category_id = c.category_id";
 
         $where = ["t.task_status = 'accept'"];
         $params = [];
@@ -158,9 +140,9 @@ if ($columnCheck) {
             $types .= "ss";
         }
 
-        if ($taskCategoryColumnExists && $selectedTaskCategoryId > 0) {
-            $where[] = "t.task_category_id = ?";
-            $params[] = $selectedTaskCategoryId;
+        if ($selectedCategoryId > 0) {
+            $where[] = "t.category_id = ?";
+            $params[] = $selectedCategoryId;
             $types .= "i";
         }
 
@@ -293,7 +275,7 @@ if ($columnCheck) {
             }
 
             if (categoryId && categoryId !== '0') {
-                params.set('task_category_id', categoryId);
+                params.set('category_id', categoryId);
             }
 
             taskCards.setAttribute('aria-busy', 'true');

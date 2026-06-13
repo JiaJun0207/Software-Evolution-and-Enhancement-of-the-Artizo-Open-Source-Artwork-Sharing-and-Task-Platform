@@ -188,11 +188,11 @@ body > footer .artizo-footer {
 }
 
 .artizo-navbar-inner {
-  padding: 10px 48px;
+  padding: 8px 40px;
 }
 
 .artizo-navbar-logo {
-  max-height: 40px;
+  max-height: 34px;
   width: auto;
 }
 
@@ -204,12 +204,12 @@ body > footer .artizo-footer {
 }
 
 .artizo-footer-logo {
-  max-height: 42px;
+  max-height: 36px;
   width: auto;
 }
 
 .artizo-footer-tagline {
-  font-size: 1.5rem !important;
+  font-size: 1.3rem !important;
 }
 
 .artizo-footer-link {
@@ -290,8 +290,8 @@ body > footer .artizo-footer {
 
 .category_description {
   text-align: center;
-  margin-top: 130px;
-  margin-bottom: 130px;
+  margin-top: 80px;
+  margin-bottom: 80px;
 }
 
 .banner {
@@ -333,7 +333,7 @@ body > footer .artizo-footer {
 
 .centered-header {
   text-align: center;
-  margin: 100px 0;
+  margin: 64px 0;
 }
 
 .custom-img {
@@ -684,12 +684,12 @@ a:focus {
   }
 }
 @media (min-width: 768px) {
-  .inter-bold-44 { font-size: 2.75rem !important; }
-  .inter-medium-32 { font-size: 2rem !important; }
-  .inter-medium-24 { font-size: 2rem !important; }
-  .inter-extralight-24 { font-size: 1.5rem !important; }
-  .banner-text h1 { font-size: 2.5rem !important; }
-  .banner-text p { font-size: 1.25rem !important; }
+  .inter-bold-44 { font-size: 2.4rem !important; }
+  .inter-medium-32 { font-size: 1.75rem !important; }
+  .inter-medium-24 { font-size: 1.75rem !important; }
+  .inter-extralight-24 { font-size: 1.35rem !important; }
+  .banner-text h1 { font-size: 2.2rem !important; }
+  .banner-text p { font-size: 1.1rem !important; }
 }
 @media (max-width: 425px) {
   .carousel-inner > .carousel-item > div {
@@ -965,7 +965,7 @@ a:focus {
     }
 
     .centered-header {
-        margin: 80px 0;
+        margin: 56px 0;
     }
 
     .banner-text {

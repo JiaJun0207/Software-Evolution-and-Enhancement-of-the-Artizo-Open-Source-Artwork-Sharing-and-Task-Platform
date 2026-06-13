@@ -1,6 +1,7 @@
 <?php
 include("config.php");
 session_start();
+include("admin_auth.php"); // Restrict to authenticated admin sessions
 
 if (!isset($_SESSION['UID'])) {
     header("Location: login.php");

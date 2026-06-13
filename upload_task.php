@@ -10,8 +10,9 @@ if (!isset($_SESSION['UID'])) {
 
 include("navbar.php"); // Include the navigation bar
 
+// Unified category source: the same `category` table that explore/artwork uses.
 $taskCategories = [];
-$categoryStmt = $conn->prepare("SELECT task_category_id, category_name FROM task_categories ORDER BY category_name ASC");
+$categoryStmt = $conn->prepare("SELECT category_id, category_name FROM category ORDER BY category_id ASC");
 if ($categoryStmt) {
     $categoryStmt->execute();
     $categoryResult = $categoryStmt->get_result();
@@ -54,10 +55,10 @@ if ($categoryStmt) {
         </div>
         <div class="mb-4">
             <label for="task_category_id" class="inter-bold-32 mb-3">Category</label>
-            <select class="form-control inter-medium-25 border_black" id="task_category_id" name="task_category_id" required>
+            <select class="form-control inter-medium-25 border_black" id="task_category_id" name="category_id" required>
                 <option value="">Select a category</option>
                 <?php foreach ($taskCategories as $category): ?>
-                    <option value="<?php echo htmlspecialchars($category['task_category_id']); ?>">
+                    <option value="<?php echo htmlspecialchars($category['category_id']); ?>">
                         <?php echo htmlspecialchars($category['category_name']); ?>
                     </option>
                 <?php endforeach; ?>

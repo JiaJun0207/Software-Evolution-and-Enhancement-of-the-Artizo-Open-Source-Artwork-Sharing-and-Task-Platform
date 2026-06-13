@@ -56,9 +56,9 @@
 @media (min-width: 992px) {
   .navbar-main-list {
     font-family: 'Inter', sans-serif;
-    gap: 42px !important;
+    gap: 34px !important;
     font-weight: 200 !important;
-    font-size: 24px !important;
+    font-size: 20px !important;
   }
 }
 </style>
