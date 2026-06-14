@@ -133,6 +133,33 @@ For the approved regression fixes, also apply:
 assets/database/regression_features_migration.sql
 ```
 
+## Optional Demo Evidence Seed
+
+`assets/database/demo_evidence_seed.sql` recreates the screenshot/demo data for the
+multi-user task workflow (test cases TC70-TC88): the demo accounts, one open task
+posted by userA, and two independent submissions (userB and userC) to the same task.
+It is **for screenshot/testing evidence only** and is intentionally **not** part of the
+default fresh setup. Run it on a **clean / local demo database**, after the schema is in
+place:
+
+```text
+mysql -u root software_evo_assignment < assets/database/full_database_setup.sql
+mysql -u root software_evo_assignment < assets/database/demo_evidence_seed.sql
+```
+
+Demo logins (passwords are stored only as bcrypt hashes in the seed, never plaintext):
+
+| Account | Username | Password |
+|---|---|---|
+| Admin | `admin` | `Admin@123` |
+| User A (poster) | `userA` | `Test@1234` |
+| User B (submitter) | `userB` | `Test@1234` |
+| User C (submitter) | `userC` | `Test@1234` |
+
+The seed pins exact IDs (admin=1, userA=2, userB=3, userC=4, task_id=2, submission_id=3
+and 4) for screenshot consistency, is idempotent, and references the committed demo
+images under `assets/demo_uploads/` so they survive a clone.
+
 ## Database Objects Added
 
 - `saved_tasks`
