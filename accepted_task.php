@@ -55,7 +55,7 @@ include("navbar.php"); // Include the navigation bar
             <?php unset($_SESSION['feedback']); ?>
         <?php endif; ?>
         <div class="row g-3 align-items-stretch" style="margin-bottom: 60px;">
-            <div class="col-12 col-lg-8">
+            <div class="col-12 col-lg-6">
                 <?php
                 $uid = $_SESSION['UID'];
 
@@ -114,15 +114,28 @@ include("navbar.php"); // Include the navigation bar
                 </script>
 
             </div>
-            <div class="col-12 col-sm-6 col-lg-2">
+            <div class="col-12 col-sm-4 col-lg-2">
                 <a href="upload_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Post Task</a>
             </div>
-            <div class="col-12 col-sm-6 col-lg-2">
+            <div class="col-12 col-sm-4 col-lg-2">
                 <a href="saved_tasks.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Saved Task</a>
             </div>
+            <div class="col-12 col-sm-4 col-lg-2">
+                <a href="my_task.php"
+                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">My Task</a>
+            </div>
         </div>
+
+        <h1 class="inter-bold-44 mb-4">Accepted Tasks</h1>
+
+        <?php if ($result->num_rows === 0): ?>
+            <div class="card_border" style="padding: 40px; margin-bottom:48px;">
+                <p class="inter-extralight-24 mb-0">No accepted tasks yet.</p>
+            </div>
+        <?php endif; ?>
+
         <?php while ($row = $result->fetch_assoc()):
             $profileImg = !empty($row['profile_image']) ? "assets/profile/" . $row['profile_image'] : "assets/profile/user_profile.png";
             $userName = $row['user_name'];

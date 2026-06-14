@@ -44,7 +44,7 @@ if ($categoryStmt) {
     <div class="container-fluid"
         style="padding-left: 60px; padding-right: 60px; padding-bottom: 60px; margin-top:60px;">
         <div class="row g-3 align-items-stretch">
-            <div class="col-12 col-lg-6">
+            <div class="col-12 col-lg-4">
                 <form action="" method="get">
                     <div id="searchBarWrapper" style="position:relative; background:#000; border-radius:14px;">
                         <input type="text" class="form-control inter-medium-25 left-placeholder border_black"
@@ -88,6 +88,10 @@ if ($categoryStmt) {
             <div class="col-12 col-sm-4 col-lg-2">
                 <a href="saved_tasks.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Saved Tasks</a>
+            </div>
+            <div class="col-12 col-sm-4 col-lg-2">
+                <a href="my_task.php"
+                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">My Task</a>
             </div>
         </div>
 

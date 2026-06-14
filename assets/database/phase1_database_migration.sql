@@ -1,3 +1,15 @@
+-- =====================================================================
+-- SUPERSEDED NOTICE
+-- This historical migration creates the legacy `task_categories` table.
+-- The project now uses the shared `category` table for Explore, Task,
+-- Post Task, and Post Artwork (via `task.category_id`). The legacy
+-- `task_categories` table and `task.task_category_id` column were removed
+-- in `assets/database/regression_fixes_migration.sql`, and fresh installs
+-- via `full_database_setup.sql` no longer create them.
+-- This file is kept only as a historical record; do not run it after the
+-- regression fixes migration, as it would re-create the removed legacy items.
+-- =====================================================================
+--
 -- Phase 1 database migration for CSE6364 Artizo enhancements.
 -- Compatible with MySQL/MariaDB in XAMPP/phpMyAdmin.
 --

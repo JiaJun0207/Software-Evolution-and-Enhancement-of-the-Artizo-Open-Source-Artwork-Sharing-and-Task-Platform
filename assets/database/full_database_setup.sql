@@ -97,23 +97,9 @@ CREATE TABLE IF NOT EXISTS `artwork` (
   CONSTRAINT `fk_artwork_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `task_categories` (
-  `task_category_id` int(11) NOT NULL AUTO_INCREMENT,
-  `category_name` varchar(100) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (`task_category_id`),
-  UNIQUE KEY `uniq_task_categories_name` (`category_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-INSERT IGNORE INTO `task_categories` (`category_name`) VALUES
-('Illustration'),
-('Graphic Design'),
-('Animation'),
-('Digital Painting'),
-('UI/UX Design'),
-('Photography'),
-('Other');
+-- Note: the legacy `task_categories` table and `task.task_category_id` column
+-- have been removed. Task categories now use the shared `category` table via
+-- `task.category_id` (the same source as Explore, Task, Post Task, and Post Artwork).
 
 CREATE TABLE IF NOT EXISTS `task` (
   `task_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -125,16 +111,13 @@ CREATE TABLE IF NOT EXISTS `task` (
   `post_user_id` int(11) NOT NULL,
   `accepted_user_id` int(11) DEFAULT NULL,
   `category_id` int(11) NOT NULL,
-  `task_category_id` int(11) DEFAULT NULL,
   `release_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`task_id`),
   KEY `idx_task_user` (`accepted_user_id`),
   KEY `idx_task_category` (`category_id`),
-  KEY `idx_task_task_category` (`task_category_id`),
   KEY `fk_post_user` (`post_user_id`),
   CONSTRAINT `fk_post_user` FOREIGN KEY (`post_user_id`) REFERENCES `user` (`user_id`),
   CONSTRAINT `fk_task_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_task_task_category` FOREIGN KEY (`task_category_id`) REFERENCES `task_categories` (`task_category_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_task_user` FOREIGN KEY (`accepted_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

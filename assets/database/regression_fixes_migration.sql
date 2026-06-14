@@ -165,4 +165,84 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- --------------------------------------------------------
+-- 5. Remove unused legacy task category schema.
+--    Task categories now use the shared `category` table via `task.category_id`.
+--    No application code references `task.task_category_id` or `task_categories`.
+--    Each step is guarded so the migration is idempotent and safe to re-run.
+--    Order: drop FK -> drop index -> drop column -> drop table.
+--    The shared `category` table and `task.category_id` are NOT touched.
+-- --------------------------------------------------------
+
+-- Drop the foreign key on task.task_category_id (if present).
+SET @fk_task_task_category_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task'
+    AND CONSTRAINT_NAME = 'fk_task_task_category'
+);
+
+SET @sql := IF(
+  @fk_task_task_category_exists > 0,
+  'ALTER TABLE `task` DROP FOREIGN KEY `fk_task_task_category`',
+  'SELECT ''fk_task_task_category not present; no FK drop needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Drop the index on task.task_category_id (if present).
+SET @idx_task_task_category_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task'
+    AND INDEX_NAME = 'idx_task_task_category'
+);
+
+SET @sql := IF(
+  @idx_task_task_category_exists > 0,
+  'ALTER TABLE `task` DROP INDEX `idx_task_task_category`',
+  'SELECT ''idx_task_task_category not present; no index drop needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Drop the column task.task_category_id (if present).
+SET @task_category_id_column_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task'
+    AND COLUMN_NAME = 'task_category_id'
+);
+
+SET @sql := IF(
+  @task_category_id_column_exists > 0,
+  'ALTER TABLE `task` DROP COLUMN `task_category_id`',
+  'SELECT ''task.task_category_id not present; no column drop needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Drop the legacy task_categories table (if present).
+SET @task_categories_table_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task_categories'
+);
+
+SET @sql := IF(
+  @task_categories_table_exists > 0,
+  'DROP TABLE `task_categories`',
+  'SELECT ''task_categories table not present; no table drop needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 COMMIT;

@@ -54,8 +54,8 @@ if ($categoryStmt) {
             <textarea class="form-control inter-medium-25 left-placeholder border_black" id="task_description" name="task_description" rows="3" placeholder="Add a detailed description" required></textarea>
         </div>
         <div class="mb-4">
-            <label for="task_category_id" class="inter-bold-32 mb-3">Category</label>
-            <select class="form-control inter-medium-25 border_black" id="task_category_id" name="category_id" required>
+            <label for="category_id" class="inter-bold-32 mb-3">Category</label>
+            <select class="form-control inter-medium-25 border_black" id="category_id" name="category_id" required>
                 <option value="">Select a category</option>
                 <?php foreach ($taskCategories as $category): ?>
                     <option value="<?php echo htmlspecialchars($category['category_id']); ?>">

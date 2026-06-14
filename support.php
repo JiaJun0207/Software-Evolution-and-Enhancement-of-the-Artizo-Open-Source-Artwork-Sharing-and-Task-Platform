@@ -23,7 +23,7 @@ $trackCode = trim($_GET["ticket_code"] ?? "");
 $trackEmail = trim($_GET["ticket_email"] ?? "");
 $hasTrackSearch = $isTrackingAction;
 if ($isTrackingAction && $trackCode !== "" && $trackEmail !== "" && filter_var($trackEmail, FILTER_VALIDATE_EMAIL)) {
-    $trackStmt = $conn->prepare("SELECT ticket_code, email, phone, subject, message, status, created_at, updated_at FROM support_tickets WHERE ticket_code = ? AND email = ? LIMIT 1");
+    $trackStmt = $conn->prepare("SELECT ticket_code, email, phone, subject, message, status, admin_response, responded_at, created_at, updated_at FROM support_tickets WHERE ticket_code = ? AND email = ? LIMIT 1");
     $trackStmt->bind_param("ss", $trackCode, $trackEmail);
     $trackStmt->execute();
     $trackedTicket = $trackStmt->get_result()->fetch_assoc();
@@ -156,7 +156,19 @@ include("navbar.php");
                                     <p class="inter-bold-24 mb-2"><?php echo htmlspecialchars($trackedTicket["subject"]); ?></p>
                                     <p class="inter-extralight-15 mb-2">Code: <?php echo htmlspecialchars($trackedTicket["ticket_code"]); ?></p>
                                     <p class="inter-extralight-15 mb-2">Status: <?php echo htmlspecialchars($trackedTicket["status"]); ?></p>
-                                    <p class="inter-extralight-24 mb-0"><?php echo nl2br(htmlspecialchars($trackedTicket["message"])); ?></p>
+                                    <p class="inter-extralight-24 mb-3"><?php echo nl2br(htmlspecialchars($trackedTicket["message"])); ?></p>
+
+                                    <div class="mt-3" style="border-top:2px solid var(--artizo-border); padding-top:16px;">
+                                        <p class="inter-bold-24 mb-2">Admin Response</p>
+                                        <?php if (!empty($trackedTicket["admin_response"])): ?>
+                                            <p class="inter-extralight-24 mb-2"><?php echo nl2br(htmlspecialchars($trackedTicket["admin_response"])); ?></p>
+                                            <?php if (!empty($trackedTicket["responded_at"])): ?>
+                                                <p class="inter-extralight-15 mb-0">Responded at: <?php echo htmlspecialchars($trackedTicket["responded_at"]); ?></p>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <p class="inter-extralight-24 mb-0">No admin response yet.</p>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             <?php endif; ?>
                         </section>

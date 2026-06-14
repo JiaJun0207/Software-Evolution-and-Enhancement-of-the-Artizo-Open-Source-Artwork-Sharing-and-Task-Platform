@@ -1,7 +1,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="background-color: #000;">
   <div class="container-fluid" style="padding: 15px 60px 15px 60px;">
-    <a class="navbar-brand" href="index.php">
+    <a class="navbar-brand" href="admin_index.php">
       <img src="assets/logo/navbar_logo.png" alt="Logo">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"

@@ -170,6 +170,23 @@ This document lists manual test cases for the approved proposal improvements and
 | TC50 | UI scale-down on Explore and Task pages | Open `explore.php` and `task.php` at desktop size. | Header, content, section spacing, and footer are scaled down around 10-15%. | Reduced type scale, navbar/footer sizing, and section gaps served live; pages render correctly (final visual sign-off via screenshot). | PASS - screenshot required | TC50_explore_task_ui_scaled_down.png |
 | TC51 | Fresh database setup includes latest schema | Create a temporary database and import `full_database_setup.sql`. | Fresh import succeeds and includes the latest admin/support/task submission/category changes. | Imported into temp DB `artizo_fresh_test` with no SQL errors; admin account, `is_admin`, support response columns, `task_submissions`, and unified `category` seed all present; temp DB dropped after. | PASS | TC51_full_database_setup_import_success.png |
 | TC52 | Existing database migration includes latest schema | Import `assets/database/regression_fixes_migration.sql` on an existing database. | Migration succeeds without removing existing data and adds required columns/tables. | Migration applied to `software_evo_assignment`; `is_admin`, admin account, support response columns, and `task_submissions` added with no data loss. | PASS | TC52_regression_migration_import_success.png |
+| TC53 | Admin Home button target | Log in as admin and inspect the admin navbar Home/brand link. | Admin Home link points to `admin_index.php`, not the public `index.php`; public navbar Home still points to `index.php`. | Admin navbar brand `href="admin_index.php"`; public navbar brand `href="index.php"`. | PASS | TC53_admin_home_button_admin_index.png |
+| TC54 | Legacy task category removed (runtime) | After the regression migration, confirm `task_categories` and `task.task_category_id` are gone while category features still work. | Legacy table/column removed; task filter and Post Task dropdown still work via the shared `category` table. | `task_categories`=0, `task.task_category_id`=0, `task.category_id`=1; task_filter `success:true`; dropdown shows the 5 `category` rows. | PASS | TC54_legacy_task_categories_removed.png |
+| TC55 | Accepted Task page header | Open `accepted_task.php`. | Page shows an `Accepted Tasks` header styled like the Saved Task page, keeping Post Task / Saved Task buttons. | `<h1 class="inter-bold-44 mb-4">Accepted Tasks</h1>` rendered. | PASS | TC55_accepted_tasks_header.png |
+| TC56 | Task detail submission not cropped | Open `task_detail.php` for a task with a submission as the poster. | Submission thumbnail is not badly cropped (uses contain, not cover). | Served markup uses `object-fit:contain`; no `object-fit:cover` on submission image. | PASS - screenshot required | TC56_task_detail_submission_not_cropped.png |
+| TC57 | Submission detail full image/file | Open `submission_detail.php?id=<id>`. | Full submitted image shown uncropped; non-image files show a safe open/download link. | Submission Detail page renders the full image (max-height 700px, contain) and shows task title, submitter, message, date. | PASS - screenshot required | TC57_submission_detail_full_image.png |
+| TC58 | Submission detail - poster view | As the task poster, open `submission_detail.php?id=<id>`. | Poster can view the submission detail. | Poster (userA) saw the submission detail (HTTP 200). | PASS | TC58_submission_detail_poster_view.png |
+| TC59 | Submission detail - submitter view | As the submitter, open `submission_detail.php?id=<id>`. | Submitter can view their own submission detail. | Submitter (userB) saw the submission detail. | PASS | TC59_submission_detail_submitter_view.png |
+| TC60 | Submission detail - admin view | As admin, open `submission_detail.php?id=<id>`. | Admin can view the submission detail. | Admin saw the submission detail. | PASS | TC60_submission_detail_admin_view.png |
+| TC61 | Submission detail - unrelated blocked | As an unrelated user, open `submission_detail.php?id=<id>`. | Unrelated user cannot view the submission detail. | Unrelated user (userC) was blocked ("You are not allowed to view this submission."). | PASS | TC61_submission_detail_unrelated_blocked.png |
+| TC62 | My Task page opens | Log in as a normal user and open `my_task.php`. | My Task page opens for the logged-in user. | My Task opened (HTTP 200). | PASS | TC62_my_task_page.png |
+| TC63 | My Task - Tasks I Posted | Open `my_task.php` as a user who posted a task. | "Tasks I Posted" lists the user's posted tasks, each linking to task detail with status. | userA saw "Tasks I Posted" with a link to `task_detail.php?id=3`. | PASS | TC63_my_task_tasks_i_posted.png |
+| TC64 | My Task - My Submissions | Open `my_task.php` as a user who submitted work. | "My Submissions" lists the user's submissions, each linking to submission detail. | userB saw "My Submissions" with a link to `submission_detail.php?id=1`. | PASS | TC64_my_task_my_submissions.png |
+| TC65 | My Task - empty states | Open `my_task.php` as a user with no posted tasks and no submissions. | Clean empty messages are shown for both sections. | userC saw "You have not posted any tasks yet." and "You have not submitted any work yet." | PASS | TC65_my_task_empty_states.png |
+| TC66 | Support tracking shows admin response | Track a ticket with the correct code and matching email after admin has replied. | Tracking shows status, original details, admin response, and response date; if no response, shows "No admin response yet." | Tracking showed "Admin Response", the response text, and "Responded at:". | PASS | TC66_support_tracking_admin_response.png |
+| TC67 | Support tracking wrong email blocked | Track a ticket with the correct code but the wrong email. | Ticket (and admin response) is not shown. | Wrong email returned "No matching ticket found"; response text not shown. | PASS | TC67_support_tracking_wrong_email_blocked.png |
+| TC68 | Fresh setup excludes legacy category | Fresh import `full_database_setup.sql` into a temporary database. | `task_categories` and `task.task_category_id` are not created; `task.category_id` and the shared `category` table exist. | Temp DB `artizo_fresh_test`: `task_categories`=0, `task.task_category_id`=0, `task.category_id`=1, category seed=5, no errors; temp DB dropped. | PASS | TC68_full_database_setup_legacy_removed.png |
+| TC69 | Existing migration drops legacy safely | Run `assets/database/regression_fixes_migration.sql` on the existing database. | Migration drops only the unused legacy table/column, is idempotent, and removes no real data. | On `software_evo_assignment`: legacy table/column dropped, `category_id` kept, row counts unchanged before/after, 2nd run no errors. | PASS | TC69_regression_migration_legacy_removed.png |
 
 ## Latest Regression Fix Testing Evidence
 
@@ -266,6 +283,23 @@ This section records the live runtime verification of the latest regression fixe
 | TC50 | `TC50_explore_task_ui_scaled_down.png` |
 | TC51 | `TC51_full_database_setup_import_success.png` |
 | TC52 | `TC52_regression_migration_import_success.png` |
+| TC53 | `TC53_admin_home_button_admin_index.png` |
+| TC54 | `TC54_legacy_task_categories_removed.png` |
+| TC55 | `TC55_accepted_tasks_header.png` |
+| TC56 | `TC56_task_detail_submission_not_cropped.png` |
+| TC57 | `TC57_submission_detail_full_image.png` |
+| TC58 | `TC58_submission_detail_poster_view.png` |
+| TC59 | `TC59_submission_detail_submitter_view.png` |
+| TC60 | `TC60_submission_detail_admin_view.png` |
+| TC61 | `TC61_submission_detail_unrelated_blocked.png` |
+| TC62 | `TC62_my_task_page.png` |
+| TC63 | `TC63_my_task_tasks_i_posted.png` |
+| TC64 | `TC64_my_task_my_submissions.png` |
+| TC65 | `TC65_my_task_empty_states.png` |
+| TC66 | `TC66_support_tracking_admin_response.png` |
+| TC67 | `TC67_support_tracking_wrong_email_blocked.png` |
+| TC68 | `TC68_full_database_setup_legacy_removed.png` |
+| TC69 | `TC69_regression_migration_legacy_removed.png` |
 
 ## Required Project Screenshot Evidence Checklist
 
@@ -316,3 +350,32 @@ Capture the following screenshots for submission. The underlying behaviour for e
 ### Database evidence (migration + fresh setup)
 - [ ] `TC51_full_database_setup_import_success.png` — fresh import of `full_database_setup.sql` with no errors.
 - [ ] `TC52_regression_migration_import_success.png` — `regression_fixes_migration.sql` applied to an existing database.
+
+### Admin navigation (final fix — Issue 1)
+- [ ] `TC53_admin_home_button_admin_index.png` — admin navbar Home/brand linking to `admin_index.php`.
+
+### Legacy task category removal (final fix — Issue 2)
+- [ ] `TC54_legacy_task_categories_removed.png` — runtime confirmation that `task_categories` / `task.task_category_id` are gone and category features still work.
+- [ ] `TC68_full_database_setup_legacy_removed.png` — fresh import showing the legacy table/column are not created.
+- [ ] `TC69_regression_migration_legacy_removed.png` — migration output dropping the legacy table/column with no data loss.
+
+### Accepted Task header (final fix — Issue 3)
+- [ ] `TC55_accepted_tasks_header.png` — `Accepted Tasks` header on `accepted_task.php`.
+
+### Submission viewing and detail page (final fix — Issue 4)
+- [ ] `TC56_task_detail_submission_not_cropped.png` — submission image not cropped on `task_detail.php`.
+- [ ] `TC57_submission_detail_full_image.png` — full uncropped image on `submission_detail.php`.
+- [ ] `TC58_submission_detail_poster_view.png` — poster viewing submission detail.
+- [ ] `TC59_submission_detail_submitter_view.png` — submitter viewing submission detail.
+- [ ] `TC60_submission_detail_admin_view.png` — admin viewing submission detail.
+- [ ] `TC61_submission_detail_unrelated_blocked.png` — unrelated user blocked from submission detail.
+
+### My Task page (final fix — Issue 5)
+- [ ] `TC62_my_task_page.png` — `my_task.php` open for a normal user.
+- [ ] `TC63_my_task_tasks_i_posted.png` — "Tasks I Posted" section.
+- [ ] `TC64_my_task_my_submissions.png` — "My Submissions" section.
+- [ ] `TC65_my_task_empty_states.png` — empty states for both sections.
+
+### Support response in tracking (final fix — Issue 6)
+- [ ] `TC66_support_tracking_admin_response.png` — admin response + date shown when tracking with correct email.
+- [ ] `TC67_support_tracking_wrong_email_blocked.png` — wrong email cannot view the ticket.

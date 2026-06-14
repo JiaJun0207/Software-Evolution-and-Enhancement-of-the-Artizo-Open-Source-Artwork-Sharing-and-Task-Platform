@@ -91,13 +91,17 @@ include("navbar.php");
                     });
                 </script>
             </div>
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-4 col-lg-2">
                 <a href="upload_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Post Task</a>
             </div>
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-4 col-lg-2">
                 <a href="accepted_task.php"
                     class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">Accepted Task</a>
+            </div>
+            <div class="col-12 col-sm-4 col-lg-2">
+                <a href="my_task.php"
+                    class="btn form-control btn-outline-black flex-fill inter-medium-25 border_black">My Task</a>
             </div>
         </div>
 

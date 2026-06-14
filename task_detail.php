@@ -267,12 +267,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
                 <?php if (empty($submissions)): ?>
                     <p class="inter-extralight-24">No submissions yet.</p>
                 <?php else: ?>
-                    <?php foreach ($submissions as $submission): ?>
+                    <?php foreach ($submissions as $submission):
+                        $subFile = $submission['file_path'];
+                        $subExt = strtolower(pathinfo($subFile, PATHINFO_EXTENSION));
+                        $subIsImage = in_array($subExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+                    ?>
                         <div class="card_border mb-3" style="padding: 24px 30px;">
                             <div class="row gx-4 gy-3 align-items-center">
                                 <div class="col-12 col-md-4">
-                                    <img src="assets/uploads/task_solution/<?php echo htmlspecialchars($submission['file_path']); ?>"
-                                        alt="Submission" style="width:100%; max-height:240px; object-fit:cover; border-radius:12px;">
+                                    <?php if ($subIsImage): ?>
+                                        <div style="background:#f0f0f0; border-radius:12px; padding:8px; text-align:center;">
+                                            <img src="assets/uploads/task_solution/<?php echo htmlspecialchars($subFile); ?>"
+                                                alt="Submission" style="max-width:100%; max-height:240px; width:auto; height:auto; object-fit:contain; border-radius:8px;">
+                                        </div>
+                                    <?php else: ?>
+                                        <a href="assets/uploads/task_solution/<?php echo htmlspecialchars($subFile); ?>" target="_blank"
+                                            class="btn btn-outline-black inter-medium-25 border_black">Open file</a>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="col-12 col-md-8">
                                     <p class="inter-bold-24 mb-1"><?php echo htmlspecialchars($submission['user_name']); ?></p>
@@ -280,8 +291,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
                                     <p class="inter-extralight-15 mb-1">Status: <?php echo htmlspecialchars($submission['status']); ?></p>
                                     <p class="inter-extralight-15 mb-2">Submitted: <?php echo htmlspecialchars($submission['submitted_at']); ?></p>
                                     <?php if (!empty($submission['message'])): ?>
-                                        <p class="inter-extralight-24 mb-0"><?php echo nl2br(htmlspecialchars($submission['message'])); ?></p>
+                                        <p class="inter-extralight-24 mb-3"><?php echo nl2br(htmlspecialchars($submission['message'])); ?></p>
                                     <?php endif; ?>
+                                    <a href="submission_detail.php?id=<?php echo intval($submission['submission_id']); ?>"
+                                        class="btn btn-outline-black inter-medium-25 border_black">View Submission</a>
                                 </div>
                             </div>
                         </div>
