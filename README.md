@@ -169,33 +169,53 @@ assets/database/regression_features_migration.sql
   - Uses a unique `ticket_code` for ticket tracking.
   - Defaults new tickets to `Open`.
 
+- `task_submissions`
+  - Stores each user's submitted work for a task (`submission_id`, `task_id`, `submitter_user_id`, `file_path`, `message`, `status`, `submitted_at`).
+  - Unique key `uniq_task_submissions_task_user` on `(task_id, submitter_user_id)` enforces one active submission per user per task.
+
+- `task_acceptances`
+  - Stores per-user acceptance/submission state so multiple users can independently accept and submit to the same task.
+  - Fields: `acceptance_id`, `task_id`, `user_id`, `status` (`accepted`/`cancelled`/`submitted`), `accepted_at`, `updated_at`.
+  - `UNIQUE (task_id, user_id)`; foreign keys to `task` and `user` with `ON DELETE CASCADE`.
+
+- `task.task_state`
+  - `ENUM('open','closed','completed') NOT NULL DEFAULT 'open'`.
+  - Poster-level task lifecycle and the single source of truth for task board visibility (the board filters on `task_state='open'`).
+
+### Legacy fields (compatibility only — do not reintroduce removed objects)
+
+- `task.task_status` and `task.accepted_user_id` are legacy single-accepter fields, retained for backward compatibility only. They are no longer used for task board gating; per-user state lives in `task_acceptances` and board visibility lives in `task.task_state`.
+- `task_categories` and `task.task_category_id` are legacy and must not be reintroduced. The unified category source is the shared `category` table via `task.category_id` (used by Explore, Task, Post Task, and Post Artwork).
+
 ## Verifying the Database
 
 Run these SQL checks in phpMyAdmin:
 
 ```sql
 SHOW TABLES LIKE 'saved_tasks';
-SHOW TABLES LIKE 'task_categories';
 SHOW TABLES LIKE 'artwork_likes';
 SHOW TABLES LIKE 'pending_user_otps';
 SHOW TABLES LIKE 'support_tickets';
+SHOW TABLES LIKE 'task_submissions';
+SHOW TABLES LIKE 'task_acceptances';
 ```
 
 Check table structures:
 
 ```sql
 DESCRIBE saved_tasks;
-DESCRIBE task_categories;
 DESCRIBE artwork_likes;
 DESCRIBE task;
 DESCRIBE pending_user_otps;
 DESCRIBE support_tickets;
+DESCRIBE task_submissions;
+DESCRIBE task_acceptances;
 ```
 
-Check task category seed data:
+Check the unified category seed data (shared `category` table):
 
 ```sql
-SELECT * FROM task_categories ORDER BY task_category_id;
+SELECT category_id, category_name FROM category ORDER BY category_id;
 ```
 
 Check foreign keys:

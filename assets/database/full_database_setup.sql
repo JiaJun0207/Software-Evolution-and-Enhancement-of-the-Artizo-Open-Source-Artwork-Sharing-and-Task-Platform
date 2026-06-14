@@ -107,7 +107,12 @@ CREATE TABLE IF NOT EXISTS `task` (
   `task_description` varchar(255) NOT NULL,
   `task_image` varchar(255) NOT NULL,
   `task_solution` varchar(255) NOT NULL DEFAULT '',
+  -- Legacy single-accepter columns (`task_status`, `accepted_user_id`) are kept
+  -- for backward compatibility but no longer gate the task board. Board
+  -- visibility is controlled by the poster-level `task_state`; per-user accept/
+  -- submit state lives in `task_acceptances`.
   `task_status` enum('accept','accepted','submitted','') DEFAULT 'accept',
+  `task_state` enum('open','closed','completed') NOT NULL DEFAULT 'open',
   `post_user_id` int(11) NOT NULL,
   `accepted_user_id` int(11) DEFAULT NULL,
   `category_id` int(11) NOT NULL,
@@ -172,10 +177,28 @@ CREATE TABLE IF NOT EXISTS `task_submissions` (
   `status` varchar(50) NOT NULL DEFAULT 'submitted',
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`submission_id`),
+  UNIQUE KEY `uniq_task_submissions_task_user` (`task_id`, `submitter_user_id`),
   KEY `idx_task_submissions_task` (`task_id`),
   KEY `idx_task_submissions_user` (`submitter_user_id`),
   CONSTRAINT `fk_task_submissions_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_task_submissions_user` FOREIGN KEY (`submitter_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Per-user task acceptance state. A posted task can be accepted/submitted by
+-- many users; each user's state lives here (one row per task per user).
+CREATE TABLE IF NOT EXISTS `task_acceptances` (
+  `acceptance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `status` enum('accepted','cancelled','submitted') NOT NULL DEFAULT 'accepted',
+  `accepted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (`acceptance_id`),
+  UNIQUE KEY `uniq_task_acceptances_task_user` (`task_id`, `user_id`),
+  KEY `idx_task_acceptances_task` (`task_id`),
+  KEY `idx_task_acceptances_user` (`user_id`),
+  CONSTRAINT `fk_task_acceptances_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_task_acceptances_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 COMMIT;

@@ -12,7 +12,7 @@ $uid = intval($_SESSION['UID']);
 // Tasks the user posted.
 $postedTasks = [];
 $postedStmt = $conn->prepare(
-    "SELECT task_id, task_title, task_description, task_status, task_image
+    "SELECT task_id, task_title, task_description, task_state, task_image
      FROM task
      WHERE post_user_id = ?
      ORDER BY release_at DESC"
@@ -41,7 +41,8 @@ while ($row = $subResult->fetch_assoc()) {
     $mySubmissions[] = $row;
 }
 
-$statusLabels = ['accept' => 'Accept', 'accepted' => 'Accepted', 'submitted' => 'Submitted', 'done' => 'Done'];
+$taskStateLabels = ['open' => 'Open', 'closed' => 'Closed', 'completed' => 'Completed'];
+$submissionStatusLabels = ['accepted' => 'Accepted', 'submitted' => 'Submitted', 'cancelled' => 'Cancelled'];
 
 include("navbar.php");
 ?>
@@ -90,8 +91,8 @@ include("navbar.php");
         <?php else: ?>
             <?php foreach ($postedTasks as $task):
                 $taskImg = !empty($task['task_image']) ? "assets/uploads/task/" . $task['task_image'] : "assets/uploads/artworks/default_artwork.png";
-                $statusKey = strtolower($task['task_status']);
-                $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
+                $stateKey = strtolower($task['task_state'] ?? 'open');
+                $statusLabel = $taskStateLabels[$stateKey] ?? ucfirst($stateKey);
             ?>
             <div class="card_border" style="padding: 32px 48px; margin-bottom:32px;">
                 <div class="row align-items-center">
@@ -99,8 +100,22 @@ include("navbar.php");
                         <p class="mb-2 inter-bold-32"><?php echo htmlspecialchars($task['task_title']); ?></p>
                         <p class="mb-2 inter-extralight-24"><?php echo htmlspecialchars($task['task_description']); ?></p>
                         <p class="mb-3 inter-extralight-15">Status: <?php echo htmlspecialchars($statusLabel); ?></p>
-                        <a href="task_detail.php?id=<?php echo intval($task['task_id']); ?>"
-                            class="btn btn-outline-black inter-medium-25 border_black">View task</a>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="task_detail.php?id=<?php echo intval($task['task_id']); ?>"
+                                class="btn btn-outline-black inter-medium-25 border_black">View task</a>
+                            <?php if ($stateKey === 'open'): ?>
+                                <a href="edit_task.php?id=<?php echo intval($task['task_id']); ?>"
+                                    class="btn btn-outline-black inter-medium-25 border_black">Edit</a>
+                                <form method="POST" action="close_task.php" onsubmit="return confirm('Close this task? It will be removed from the open task board but submissions are kept.');">
+                                    <input type="hidden" name="task_id" value="<?php echo intval($task['task_id']); ?>">
+                                    <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Close</button>
+                                </form>
+                            <?php endif; ?>
+                            <form method="POST" action="delete_task.php" onsubmit="return confirm('Permanently delete this task and ALL its submissions/files? This cannot be undone.');">
+                                <input type="hidden" name="task_id" value="<?php echo intval($task['task_id']); ?>">
+                                <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Delete</button>
+                            </form>
+                        </div>
                     </div>
                     <div class="col-auto">
                         <img src="<?php echo htmlspecialchars($taskImg); ?>" alt="Task Image"
@@ -123,7 +138,7 @@ include("navbar.php");
                 $subExt = strtolower(pathinfo($submission['file_path'], PATHINFO_EXTENSION));
                 $subIsImage = in_array($subExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
                 $statusKey = strtolower($submission['status']);
-                $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
+                $statusLabel = $submissionStatusLabels[$statusKey] ?? ucfirst($statusKey);
             ?>
             <div class="card_border" style="padding: 32px 48px; margin-bottom:32px;">
                 <div class="row align-items-center gx-4">
@@ -131,8 +146,16 @@ include("navbar.php");
                         <p class="mb-2 inter-bold-32"><?php echo htmlspecialchars($submission['task_title']); ?></p>
                         <p class="mb-2 inter-extralight-15">Status: <?php echo htmlspecialchars($statusLabel); ?></p>
                         <p class="mb-3 inter-extralight-15">Submitted: <?php echo htmlspecialchars($submission['submitted_at']); ?></p>
-                        <a href="submission_detail.php?id=<?php echo intval($submission['submission_id']); ?>"
-                            class="btn btn-outline-black inter-medium-25 border_black">View Submission</a>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="submission_detail.php?id=<?php echo intval($submission['submission_id']); ?>"
+                                class="btn btn-outline-black inter-medium-25 border_black">View Submission</a>
+                            <a href="edit_submission.php?id=<?php echo intval($submission['submission_id']); ?>"
+                                class="btn btn-outline-black inter-medium-25 border_black">Edit</a>
+                            <form method="POST" action="delete_submission.php" onsubmit="return confirm('Delete your submission? This removes your file but keeps the task; you can submit again later.');">
+                                <input type="hidden" name="submission_id" value="<?php echo intval($submission['submission_id']); ?>">
+                                <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Delete</button>
+                            </form>
+                        </div>
                     </div>
                     <div class="col-auto">
                         <?php if ($subIsImage): ?>

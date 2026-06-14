@@ -15,6 +15,7 @@ $sql = "SELECT t.*, u.user_name, u.profile_image, c.category_name
         FROM task t
         JOIN user u ON t.post_user_id = u.user_id
         LEFT JOIN category c ON t.category_id = c.category_id
+        WHERE t.task_state = 'open'
         ORDER BY t.release_at DESC
         LIMIT 9";
 $result = $conn->query($sql);

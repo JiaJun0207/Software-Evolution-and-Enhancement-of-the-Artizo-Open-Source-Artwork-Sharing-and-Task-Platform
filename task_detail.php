@@ -25,46 +25,46 @@ if (!empty($user['profile_image'])) {
 
 include("navbar.php");
 
-// --- Handle status change to accepted BEFORE fetching task info ---
+// --- Handle accepting a task (per-user) BEFORE fetching task info ---
+// Many users can accept the same open task. State is stored per user in
+// task_acceptances; the task itself is never globally flipped.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_task']) && isset($_POST['task_id'])) {
     $accept_task_id = intval($_POST['task_id']);
-    // Fetch current task info
-    $checkSql = "SELECT post_user_id, task_status FROM task WHERE task_id = ?";
-    $checkStmt = $conn->prepare($checkSql);
+    $checkStmt = $conn->prepare("SELECT post_user_id, task_state FROM task WHERE task_id = ?");
     $checkStmt->bind_param("i", $accept_task_id);
     $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-    $checkTask = $checkResult->fetch_assoc();
+    $checkTask = $checkStmt->get_result()->fetch_assoc();
 
-    // Only allow if not post_user_id and not already accepted/done/submitted
-    $currentStatus = strtolower($checkTask['task_status']);
-    if ($uid != $checkTask['post_user_id'] && $currentStatus !== 'accepted' && $currentStatus !== 'done' && $currentStatus !== 'submitted') {
-        $updateSql = "UPDATE task SET task_status = 'accepted', accepted_user_id = ? WHERE task_id = ?";
-        $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param("ii", $uid, $accept_task_id);
-        $updateStmt->execute();
-        // Refresh page to show updated status
+    if ($checkTask && $uid != $checkTask['post_user_id'] && $checkTask['task_state'] === 'open') {
+        // Upsert this user's acceptance back to 'accepted' (also revives a
+        // previously cancelled row). Does not touch other users.
+        $upsert = $conn->prepare(
+            "INSERT INTO task_acceptances (task_id, user_id, status)
+             VALUES (?, ?, 'accepted')
+             ON DUPLICATE KEY UPDATE status = 'accepted'"
+        );
+        $upsert->bind_param("ii", $accept_task_id, $uid);
+        $upsert->execute();
         header("Location: task_detail.php?id=" . $accept_task_id);
         exit();
     }
 }
 
-// --- Handle cancelling an accepted task BEFORE fetching task info ---
-// Only the user who accepted the task may cancel it, and only while it is still
-// 'accepted' (not yet submitted). The original task row is never deleted; it
-// simply becomes available again.
+// --- Handle cancelling an accepted task (per-user) BEFORE fetching task info ---
+// Only marks the current user's acceptance as cancelled. The task row is never
+// deleted and other users' acceptances/submissions are untouched.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && isset($_POST['task_id'])) {
     $cancel_task_id = intval($_POST['task_id']);
-    $checkStmt = $conn->prepare("SELECT accepted_user_id, task_status FROM task WHERE task_id = ?");
-    $checkStmt->bind_param("i", $cancel_task_id);
+    $checkStmt = $conn->prepare("SELECT status FROM task_acceptances WHERE task_id = ? AND user_id = ? LIMIT 1");
+    $checkStmt->bind_param("ii", $cancel_task_id, $uid);
     $checkStmt->execute();
-    $cancelTask = $checkStmt->get_result()->fetch_assoc();
+    $cancelAcc = $checkStmt->get_result()->fetch_assoc();
 
-    if ($cancelTask && intval($cancelTask['accepted_user_id']) === $uid && strtolower($cancelTask['task_status']) === 'accepted') {
-        $updateStmt = $conn->prepare("UPDATE task SET task_status = 'accept', accepted_user_id = NULL WHERE task_id = ?");
-        $updateStmt->bind_param("i", $cancel_task_id);
+    if ($cancelAcc && $cancelAcc['status'] === 'accepted') {
+        $updateStmt = $conn->prepare("UPDATE task_acceptances SET status = 'cancelled' WHERE task_id = ? AND user_id = ?");
+        $updateStmt->bind_param("ii", $cancel_task_id, $uid);
         $updateStmt->execute();
-        $_SESSION['feedback'] = "Accepted task cancelled. It is now available again.";
+        $_SESSION['feedback'] = "You cancelled this task. You can accept it again anytime.";
         header("Location: task_detail.php?id=" . $cancel_task_id);
         exit();
     }
@@ -106,14 +106,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
     if ($result->num_rows > 0) {
         $task = $result->fetch_assoc();
 
-        // Human-friendly status labels (the database keeps the lowercase values).
-        $statusLabels = ['accept' => 'Accept', 'accepted' => 'Accepted', 'submitted' => 'Submitted', 'done' => 'Done'];
-        $statusKey = strtolower($task['task_status']);
-        $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
-
         $isPoster = ($uid == $task['post_user_id']);
-        $isAccepter = (intval($task['accepted_user_id']) === $uid);
         $isAdmin = !empty($_SESSION['ADMIN']);
+        $taskState = $task['task_state'] ?? 'open';
+
+        // This user's per-user acceptance status (accepted | submitted | cancelled | null).
+        $myAcceptance = null;
+        $accStmt = $conn->prepare("SELECT status FROM task_acceptances WHERE task_id = ? AND user_id = ? LIMIT 1");
+        $accStmt->bind_param("ii", $task_id, $uid);
+        $accStmt->execute();
+        if ($accRow = $accStmt->get_result()->fetch_assoc()) {
+            $myAcceptance = $accRow['status'];
+        }
+
+        // User-friendly status label shown to the current viewer.
+        if ($taskState === 'closed') {
+            $statusLabel = 'Closed';
+        } elseif ($taskState === 'completed') {
+            $statusLabel = 'Completed';
+        } elseif ($isPoster) {
+            $statusLabel = 'Open';
+        } elseif ($myAcceptance === 'submitted') {
+            $statusLabel = 'Submitted by you';
+        } elseif ($myAcceptance === 'accepted') {
+            $statusLabel = 'Accepted by you';
+        } else {
+            $statusLabel = 'Open';
+        }
+
+        // The accept button is shown to a non-poster on an open task who has not
+        // currently accepted/submitted it.
+        $canAccept = (!$isPoster && $taskState === 'open' && ($myAcceptance === null || $myAcceptance === 'cancelled'));
+        // The submission form is shown to a user holding an 'accepted' acceptance.
+        $canSubmit = (!$isPoster && $taskState === 'open' && $myAcceptance === 'accepted');
 
         // Load submissions so the task poster (and admin) can review them.
         $submissions = [];
@@ -184,17 +209,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
                             <?php echo htmlspecialchars($task['task_title']); ?>
                         </h1>
                         <?php
-                        $statusLower = strtolower($task['task_status']);
-                        $statusBg = ($statusLower === 'accepted' || $statusLower === 'done' || $statusLower === 'submitted') ? 'background:#000; color:#fff;' : '';
-                        $isClickable = ($uid != $task['post_user_id'] && $statusLower !== 'accepted' && $statusLower !== 'done' && $statusLower !== 'submitted');
+                        $statusBg = ($statusLabel !== 'Open') ? 'background:#000; color:#fff;' : '';
                         ?>
-                        <?php if ($isClickable): ?>
+                        <?php if ($canAccept): ?>
                             <form id="accept-task-form" method="POST" style="display:inline;">
                                 <input type="hidden" name="accept_task" value="1">
                                 <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task_id); ?>">
                                 <button type="submit" class="card_border inter-medium-25 mb-0"
-                                    style="padding: 8px 40px; <?php echo $statusBg; ?> border:none; background:transparent; cursor:pointer;">
-                                    <?php echo htmlspecialchars($statusLabel); ?>
+                                    style="padding: 8px 40px; border:none; background:transparent; cursor:pointer;">
+                                    Accept
                                 </button>
                             </form>
                         <?php else: ?>
@@ -222,7 +245,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
                     <p class="inter-extralight-24"><?php echo htmlspecialchars($task['task_description']); ?></p>
                 </div>
             </div>
-            <?php if ($isAccepter && $statusKey === 'accepted'): ?>
+
+            <?php if ($isPoster): ?>
+            <div class="d-flex flex-wrap gap-2 mb-5">
+                <?php if ($taskState === 'open'): ?>
+                    <a href="edit_task.php?id=<?php echo intval($task_id); ?>"
+                        class="btn btn-outline-black inter-medium-25 border_black">Edit Task</a>
+                    <form method="POST" action="close_task.php" onsubmit="return confirm('Close this task? It will be removed from the open task board but submissions are kept.');">
+                        <input type="hidden" name="task_id" value="<?php echo intval($task_id); ?>">
+                        <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Close Task</button>
+                    </form>
+                <?php endif; ?>
+                <form method="POST" action="delete_task.php" onsubmit="return confirm('Permanently delete this task and ALL its submissions/files? This cannot be undone.');">
+                    <input type="hidden" name="task_id" value="<?php echo intval($task_id); ?>">
+                    <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Delete Task</button>
+                </form>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($canSubmit): ?>
             <form id="submission-form" action="submission_task.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task_id); ?>">
                 <div class="mb-4">
@@ -254,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
                     </button>
                 </div>
             </form>
-            <form method="POST" class="mb-5" onsubmit="return confirm('Cancel this accepted task? It will become available to others again.');">
+            <form method="POST" class="mb-5" onsubmit="return confirm('Cancel your acceptance of this task? You can accept it again later.');">
                 <input type="hidden" name="cancel_task" value="1">
                 <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task_id); ?>">
                 <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Cancel Accepted Task</button>
@@ -272,27 +313,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
                         $subExt = strtolower(pathinfo($subFile, PATHINFO_EXTENSION));
                         $subIsImage = in_array($subExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
                     ?>
-                        <div class="card_border mb-3" style="padding: 24px 30px;">
+                        <?php
+                            $subStatusLabel = ucfirst($submission['status']);
+                            $msgPreview = trim((string)$submission['message']);
+                            if (mb_strlen($msgPreview) > 120) {
+                                $msgPreview = mb_substr($msgPreview, 0, 120) . '…';
+                            }
+                        ?>
+                        <div class="card_border mb-3" style="padding: 20px 24px;">
                             <div class="row gx-4 gy-3 align-items-center">
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-3">
                                     <?php if ($subIsImage): ?>
-                                        <div style="background:#f0f0f0; border-radius:12px; padding:8px; text-align:center;">
+                                        <div style="background:#f0f0f0; border-radius:12px; padding:6px; text-align:center;">
                                             <img src="assets/uploads/task_solution/<?php echo htmlspecialchars($subFile); ?>"
-                                                alt="Submission" style="max-width:100%; max-height:240px; width:auto; height:auto; object-fit:contain; border-radius:8px;">
+                                                alt="Submission" style="width:100%; max-height:150px; object-fit:contain; border-radius:8px;">
                                         </div>
                                     <?php else: ?>
                                         <a href="assets/uploads/task_solution/<?php echo htmlspecialchars($subFile); ?>" target="_blank"
                                             class="btn btn-outline-black inter-medium-25 border_black">Open file</a>
                                     <?php endif; ?>
                                 </div>
-                                <div class="col-12 col-md-8">
+                                <div class="col-12 col-md-6">
                                     <p class="inter-bold-24 mb-1"><?php echo htmlspecialchars($submission['user_name']); ?></p>
-                                    <p class="inter-extralight-15 mb-1"><?php echo htmlspecialchars($submission['email']); ?></p>
-                                    <p class="inter-extralight-15 mb-1">Status: <?php echo htmlspecialchars($submission['status']); ?></p>
+                                    <p class="inter-extralight-15 mb-1">Status: <?php echo htmlspecialchars($subStatusLabel); ?></p>
                                     <p class="inter-extralight-15 mb-2">Submitted: <?php echo htmlspecialchars($submission['submitted_at']); ?></p>
-                                    <?php if (!empty($submission['message'])): ?>
-                                        <p class="inter-extralight-24 mb-3"><?php echo nl2br(htmlspecialchars($submission['message'])); ?></p>
+                                    <?php if ($msgPreview !== ''): ?>
+                                        <p class="inter-extralight-15 mb-0"><?php echo htmlspecialchars($msgPreview); ?></p>
                                     <?php endif; ?>
+                                </div>
+                                <div class="col-12 col-md-3 text-md-end">
                                     <a href="submission_detail.php?id=<?php echo intval($submission['submission_id']); ?>"
                                         class="btn btn-outline-black inter-medium-25 border_black">View Submission</a>
                                 </div>
@@ -303,7 +352,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && iss
             </div>
             <?php endif; ?>
         </div>
-        <?php if ($isAccepter && $statusKey === 'accepted'): ?>
+        <?php if ($canSubmit): ?>
         <script>
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('artwork_image');

@@ -9,21 +9,21 @@ if (!isset($_SESSION['UID'])) {
 }
 
 // --- Handle cancelling an accepted task (before any HTML output) ---
-// Only the accepter can cancel, and only while still 'accepted'. The original
-// task is never deleted; it just becomes available again.
+// Only marks the current user's acceptance as cancelled. The task and other
+// users' acceptances/submissions are untouched.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_task']) && isset($_POST['task_id'])) {
     $cancelUid = intval($_SESSION['UID']);
     $cancelTaskId = intval($_POST['task_id']);
-    $checkStmt = $conn->prepare("SELECT accepted_user_id, task_status FROM task WHERE task_id = ?");
-    $checkStmt->bind_param("i", $cancelTaskId);
+    $checkStmt = $conn->prepare("SELECT status FROM task_acceptances WHERE task_id = ? AND user_id = ? LIMIT 1");
+    $checkStmt->bind_param("ii", $cancelTaskId, $cancelUid);
     $checkStmt->execute();
-    $cancelTask = $checkStmt->get_result()->fetch_assoc();
+    $cancelAcc = $checkStmt->get_result()->fetch_assoc();
 
-    if ($cancelTask && intval($cancelTask['accepted_user_id']) === $cancelUid && strtolower($cancelTask['task_status']) === 'accepted') {
-        $updateStmt = $conn->prepare("UPDATE task SET task_status = 'accept', accepted_user_id = NULL WHERE task_id = ?");
-        $updateStmt->bind_param("i", $cancelTaskId);
+    if ($cancelAcc && $cancelAcc['status'] === 'accepted') {
+        $updateStmt = $conn->prepare("UPDATE task_acceptances SET status = 'cancelled' WHERE task_id = ? AND user_id = ?");
+        $updateStmt->bind_param("ii", $cancelTaskId, $cancelUid);
         $updateStmt->execute();
-        $_SESSION['feedback'] = "Accepted task cancelled. It is now available again.";
+        $_SESSION['feedback'] = "You cancelled this task. You can accept it again anytime.";
     }
     header("Location: accepted_task.php");
     exit();
@@ -59,11 +59,13 @@ include("navbar.php"); // Include the navigation bar
                 <?php
                 $uid = $_SESSION['UID'];
 
-                // Fetch accepted tasks for this user
-                $sql = "SELECT t.*, u.user_name, u.profile_image 
-                        FROM task t
+                // Fetch tasks this user currently holds via task_acceptances
+                // (accepted or submitted). Multiple users can accept the same task.
+                $sql = "SELECT t.*, u.user_name, u.profile_image, ta.status AS acceptance_status
+                        FROM task_acceptances ta
+                        JOIN task t ON ta.task_id = t.task_id
                         JOIN user u ON t.post_user_id = u.user_id
-                        WHERE t.accepted_user_id = ?";
+                        WHERE ta.user_id = ? AND ta.status IN ('accepted','submitted')";
 
                 $params = [$uid];
                 $types = "i";
@@ -159,7 +161,7 @@ include("navbar.php"); // Include the navigation bar
                         style="width:200px; height:53px;">
                         View task
                     </a>
-                    <?php if (strtolower($row['task_status']) === 'accepted'): ?>
+                    <?php if ($row['acceptance_status'] === 'accepted'): ?>
                     <form method="POST" onsubmit="return confirm('Cancel this accepted task? It will become available to others again.');">
                         <input type="hidden" name="cancel_task" value="1">
                         <input type="hidden" name="task_id" value="<?php echo $row['task_id']; ?>">

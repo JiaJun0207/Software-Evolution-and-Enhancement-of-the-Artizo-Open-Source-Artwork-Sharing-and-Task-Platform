@@ -245,4 +245,128 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- --------------------------------------------------------
+-- 6. Multi-user task workflow.
+--    A posted task can be accepted and submitted to by many users.
+--    Per-user accept/submit state lives in `task_acceptances`; the poster
+--    controls board visibility via `task.task_state`. Legacy
+--    `task.task_status` / `task.accepted_user_id` are kept for backward
+--    compatibility but no longer gate the task board.
+-- --------------------------------------------------------
+
+-- 6a. Poster-level lifecycle column on `task`.
+SET @task_state_column_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'task'
+    AND COLUMN_NAME = 'task_state'
+);
+
+SET @sql := IF(
+  @task_state_column_exists = 0,
+  'ALTER TABLE `task` ADD COLUMN `task_state` ENUM(''open'',''closed'',''completed'') NOT NULL DEFAULT ''open'' AFTER `task_status`',
+  'SELECT ''task.task_state already exists; no column add needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 6b. Per-user acceptance state table.
+CREATE TABLE IF NOT EXISTS `task_acceptances` (
+  `acceptance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `status` ENUM('accepted','cancelled','submitted') NOT NULL DEFAULT 'accepted',
+  `accepted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (`acceptance_id`),
+  UNIQUE KEY `uniq_task_acceptances_task_user` (`task_id`, `user_id`),
+  KEY `idx_task_acceptances_task` (`task_id`),
+  KEY `idx_task_acceptances_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+SET @task_table_exists := (
+  SELECT COUNT(*) FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'task'
+);
+SET @user_table_exists := (
+  SELECT COUNT(*) FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'user'
+);
+
+SET @ta_task_fk_exists := (
+  SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'task_acceptances'
+    AND CONSTRAINT_NAME = 'fk_task_acceptances_task'
+);
+SET @sql := IF(
+  @task_table_exists > 0 AND @ta_task_fk_exists = 0,
+  'ALTER TABLE `task_acceptances` ADD CONSTRAINT `fk_task_acceptances_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''task table missing or task_acceptances task FK already exists.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @ta_user_fk_exists := (
+  SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'task_acceptances'
+    AND CONSTRAINT_NAME = 'fk_task_acceptances_user'
+);
+SET @sql := IF(
+  @user_table_exists > 0 AND @ta_user_fk_exists = 0,
+  'ALTER TABLE `task_acceptances` ADD CONSTRAINT `fk_task_acceptances_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE',
+  'SELECT ''user table missing or task_acceptances user FK already exists.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 6c. One active submission per user per task.
+SET @task_submissions_unique_exists := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'task_submissions'
+    AND INDEX_NAME = 'uniq_task_submissions_task_user'
+);
+SET @sql := IF(
+  @task_submissions_unique_exists = 0,
+  'ALTER TABLE `task_submissions` ADD UNIQUE KEY `uniq_task_submissions_task_user` (`task_id`, `submitter_user_id`)',
+  'SELECT ''task_submissions unique key already exists; no add needed.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 6d. Backfill: every existing task is open unless a poster later closes it.
+SET @sql := IF(
+  @task_table_exists > 0,
+  'UPDATE `task` SET `task_state` = ''open'' WHERE `task_state` IS NULL',
+  'SELECT ''task table missing; skipped task_state backfill.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 6e. Backfill task_acceptances from the legacy single-accepter columns.
+--     Maps task_status submitted->submitted, otherwise accepted. Idempotent via
+--     the unique (task_id, user_id) key + NOT EXISTS guard.
+SET @sql := IF(
+  @task_table_exists > 0,
+  'INSERT INTO `task_acceptances` (`task_id`, `user_id`, `status`, `accepted_at`)
+   SELECT t.task_id, t.accepted_user_id,
+          IF(LOWER(t.task_status) = ''submitted'', ''submitted'', ''accepted''),
+          t.release_at
+   FROM `task` t
+   WHERE t.accepted_user_id IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1 FROM `task_acceptances` ta
+       WHERE ta.task_id = t.task_id AND ta.user_id = t.accepted_user_id
+     )',
+  'SELECT ''task table missing; skipped task_acceptances backfill.'' AS migration_note'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 COMMIT;

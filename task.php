@@ -132,7 +132,7 @@ if ($categoryStmt) {
                 JOIN user u ON t.post_user_id = u.user_id
                 LEFT JOIN category c ON t.category_id = c.category_id";
 
-        $where = ["t.task_status = 'accept'"];
+        $where = ["t.task_state = 'open'"];
         $params = [];
         $types = "";
 

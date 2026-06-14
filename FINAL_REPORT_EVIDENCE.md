@@ -157,19 +157,40 @@ Additional integration/documentation work:
 - Uses `user_id` and `artwork_id`.
 - Prevents duplicate likes with a unique user/artwork key.
 
+`task_submissions`
+
+- Stores each user's submitted work for a task.
+- Fields: `submission_id`, `task_id`, `submitter_user_id`, `file_path`, `message`, `status`, `submitted_at`.
+- Unique key `uniq_task_submissions_task_user` on `(task_id, submitter_user_id)` enforces one active submission per user per task.
+
+`task_acceptances`
+
+- Stores per-user acceptance/submission state so multiple users can independently accept and submit to the same posted task.
+- Fields: `acceptance_id`, `task_id`, `user_id`, `status` (`accepted`/`cancelled`/`submitted`), `accepted_at`, `updated_at`.
+- `UNIQUE (task_id, user_id)`; foreign keys to `task` and `user` with `ON DELETE CASCADE`.
+
 ### New/Updated Columns
 
-`task.task_category_id`
+`task.task_state`
 
-- Added by the task category migration when needed.
-- Stores the selected task-specific category.
-- Existing `task.category_id` is preserved for compatibility.
+- `ENUM('open','closed','completed') NOT NULL DEFAULT 'open'`.
+- Poster-level task lifecycle and the single source of truth for task board visibility (board filters on `task_state='open'`).
+
+`task.category_id` (unified category)
+
+- The unified category source is the shared `category` table referenced by `task.category_id`.
+
+Legacy (backward compatibility only):
+
+- `task.task_status` and `task.accepted_user_id` — legacy single-accepter fields, no longer used for board gating (per-user state now lives in `task_acceptances`).
+- `task_categories` and `task.task_category_id` — legacy and must not be reintroduced; superseded by the shared `category` table.
 
 ### Migration Files
 
 - `assets/database/phase1_database_migration.sql`
-- `assets/database/full_database_setup.sql`
-- `assets/database/task_category_filter_migration.sql`
+- `assets/database/full_database_setup.sql` (fresh install — already includes `task_submissions`, `task_acceptances`, `task.task_state`, and the `task_submissions` unique key)
+- `assets/database/regression_fixes_migration.sql` (idempotent upgrade for existing databases — adds `task.task_state`, `task_acceptances`, the `task_submissions` unique key, and backfills from legacy fields)
+- `assets/database/task_category_filter_migration.sql` (legacy / superseded)
 
 ## 6. Testing Evidence Checklist
 

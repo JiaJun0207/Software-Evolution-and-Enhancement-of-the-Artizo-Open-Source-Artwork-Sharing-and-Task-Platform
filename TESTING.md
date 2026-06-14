@@ -107,6 +107,10 @@ This document lists manual test cases for the approved proposal improvements and
 | D-019 | Task accepted/submitted fields | Run `DESCRIBE task;`. | Task table supports accepted user/status logic used by accept, cancel, and submission flow (`task_status` enum, `accepted_user_id`, `category_id`, `task_solution`). | Fields present and exercised by the accept/cancel/submit flow. | PASS |
 | D-020 | Full database setup (fresh import) | Fresh import `assets/database/full_database_setup.sql` into a temporary database. | No SQL errors and all latest schema changes (is_admin, admin seed, support response columns, `task_submissions`, unified `category` seed) exist without needing the migration file. | Imported into temp DB `artizo_fresh_test` with no errors; all latest schema/seed present; temp DB dropped after. | PASS |
 | D-021 | Existing database migration | Apply `assets/database/regression_fixes_migration.sql` to an existing database. | Migration is idempotent/additive, adds required columns/tables, and does not delete existing data. | Applied to `software_evo_assignment`; added `is_admin`, admin account, support response columns, and `task_submissions` with no data loss. | PASS |
+| D-022 | `task_acceptances` table | Run `SHOW TABLES LIKE 'task_acceptances';` and `DESCRIBE task_acceptances;`. | Table exists with `acceptance_id`, `task_id`, `user_id`, `status`, `accepted_at`, `updated_at`, `UNIQUE (task_id, user_id)`, and FKs to `task`/`user` (`ON DELETE CASCADE`). | Table present with all columns, unique key, and 2 cascade FKs. | PASS |
+| D-023 | `task.task_state` column | Run `DESCRIBE task;`. | `task_state` exists as `ENUM('open','closed','completed') NOT NULL DEFAULT 'open'` and is used for board visibility. | `task_state` present; board query filters `task_state='open'`. | PASS |
+| D-024 | `task_submissions` unique key | Run `SHOW INDEX FROM task_submissions;`. | Unique key `uniq_task_submissions_task_user` on `(task_id, submitter_user_id)` exists (one active submission per user per task). | Unique key present; duplicate submission blocked at app and DB level. | PASS |
+| D-025 | Legacy fields retained, not gating | Run `DESCRIBE task;`. | `task_status` and `accepted_user_id` still exist for backward compatibility but are not used for board gating; `task_categories`/`task.task_category_id` are absent. | Legacy columns present and unused for gating; `task_categories`/`task_category_id` absent. | PASS |
 
 ## Notes
 
@@ -187,6 +191,43 @@ This document lists manual test cases for the approved proposal improvements and
 | TC67 | Support tracking wrong email blocked | Track a ticket with the correct code but the wrong email. | Ticket (and admin response) is not shown. | Wrong email returned "No matching ticket found"; response text not shown. | PASS | TC67_support_tracking_wrong_email_blocked.png |
 | TC68 | Fresh setup excludes legacy category | Fresh import `full_database_setup.sql` into a temporary database. | `task_categories` and `task.task_category_id` are not created; `task.category_id` and the shared `category` table exist. | Temp DB `artizo_fresh_test`: `task_categories`=0, `task.task_category_id`=0, `task.category_id`=1, category seed=5, no errors; temp DB dropped. | PASS | TC68_full_database_setup_legacy_removed.png |
 | TC69 | Existing migration drops legacy safely | Run `assets/database/regression_fixes_migration.sql` on the existing database. | Migration drops only the unused legacy table/column, is idempotent, and removes no real data. | On `software_evo_assignment`: legacy table/column dropped, `category_id` kept, row counts unchanged before/after, 2nd run no errors. | PASS | TC69_regression_migration_legacy_removed.png |
+| TC70 | Multi-user task remains open after first submission | User A posts a task; User B accepts and submits. Re-check the task state. | Task stays `task_state='open'` and is not removed from the board after the first submission. | After User B submitted, `task` (id 2) remained `task_state='open'`; the task still appeared on the open board. | PASS | TC70_multi_user_task_still_open_after_first_submission.png |
+| TC71 | User B accepts and submits a task | As User B, accept task 2 then submit a file with a message. | A `task_acceptances` row (B) becomes `submitted` and a `task_submissions` row is created for B. | B acceptance status = `submitted`; submission id 3 saved (`solution_2_3_*.jpg`). | PASS | TC71_userB_accept_submit_task.png |
+| TC72 | User C can still see the task after User B submits | As User C, open the task board and task 2 detail after User B has submitted. | Task 2 is still visible and acceptable to User C. | Task 2 still listed on the open board and openable by User C after B's submission. | PASS | TC72_userC_can_see_task_after_userB_submission.png |
+| TC73 | User C accepts and submits the same task | As User C, accept task 2 then submit a file. | C gets an independent `task_acceptances` (`submitted`) and `task_submissions` row; task stays open. | C acceptance = `submitted`; submission id 4 saved (`solution_2_4_*.jpg`); task 2 still `open`. | PASS | TC73_userC_accept_submit_same_task.png |
+| TC74 | Task poster views both submissions | As User A (poster), open task 2 detail. | Poster sees both User B and User C submission summary cards with View Submission links. | Poster saw both submissions, linking to `submission_detail.php?id=3` and `?id=4`. | PASS | TC74_poster_views_multiple_submissions.png |
+| TC75 | User B cannot view User C submission detail | As User B, open `submission_detail.php?id=4` (C's submission). | Access is denied. | B was blocked ("You are not allowed to view this submission."). | PASS | TC75_userB_blocked_from_userC_submission.png |
+| TC76 | User C cannot view User B submission detail | As User C, open `submission_detail.php?id=3` (B's submission). | Access is denied. | C was blocked ("You are not allowed to view this submission."). | PASS | TC76_userC_blocked_from_userB_submission.png |
+| TC77 | Admin can view all submissions | As admin, open `submission_detail.php?id=3` and `?id=4`. | Admin can view every submission. | Admin viewed both submissions (HTTP 200 each). | PASS | TC77_admin_views_all_submissions.png |
+| TC78 | Task poster can edit own task | As User A, open `edit_task.php?id=2` and change title/description/category/image (while open). | Prefilled edit form loads and saves changes for the poster. | Poster's prefilled edit form loaded (HTTP 200); save path verified earlier (title/category update persisted). | PASS | TC78_poster_edit_own_task.png |
+| TC79 | Other user cannot edit someone else's task | As User B, POST to `edit_task.php` for task 2. | Edit is rejected; the task is unchanged. | B was redirected (302) and the title stayed "Logo design for Artizo coffee brand" (unchanged). | PASS | TC79_other_user_cannot_edit_task.png |
+| TC80 | Task poster can close own task (soft) | As the poster, click Close on a task. | `task_state` becomes `closed`; task leaves the open board; submissions are kept. | Verified on a disposable task in the Phase 7 runtime run: close set `task_state='closed'` and removed it from the board while keeping submissions. (Re-shoot on a throwaway task to preserve the TC70-77 evidence task.) | PASS | TC80_poster_close_task.png |
+| TC81 | Task poster can hard delete own task safely | As the poster, click Delete on a task and confirm. | Task, its submissions, and acceptances are removed (FK cascade) and solution/image files are unlinked; users are untouched. | Verified on a disposable task in the Phase 7 runtime run: task/submissions/acceptances all removed, files unlinked, user rows intact. (Re-shoot on a throwaway task to preserve the TC70-77 evidence task.) | PASS | TC81_poster_delete_task_safely.png |
+| TC82 | Submitter can edit own submission | As User B, open `edit_submission.php?id=3` and edit message / replace file. | Prefilled submission edit form loads and saves for the owner. | B's prefilled edit form loaded (HTTP 200); save path verified earlier (message/file update persisted). | PASS | TC82_submitter_edit_own_submission.png |
+| TC83 | Other user cannot edit someone else's submission | As User C, POST to `edit_submission.php` for B's submission (id 3). | Edit is rejected; the submission is unchanged. | C was redirected (302) and B's message was unchanged. | PASS | TC83_other_user_cannot_edit_submission.png |
+| TC84 | Submitter deletes own submission; task remains | As the submitter, delete a submission. | Submission row + file are removed, the user's acceptance reverts to `accepted`, and the task is NOT deleted. | Verified in the Phase 7 runtime run: submission/file removed, acceptance reverted to `accepted`, task row preserved. (Re-shoot on a throwaway submission to preserve the TC70-77 evidence submissions.) | PASS | TC84_submitter_delete_submission_task_remains.png |
+| TC85 | Submission summary card hides email | As the poster, view the submission summary cards on task 2 detail. | Summary cards show username, date, status, message preview, thumbnail, and a View Submission button — but NOT the submitter email. | Poster's task detail summary cards contained 0 submitter email addresses. | PASS | TC85_submission_summary_email_hidden.png |
+| TC86 | Submission detail email only for poster/admin | Open `submission_detail.php?id=3` as poster, submitter, and admin. | Submitter email is shown only to the poster and admin, never to the submitter (or others). | Poster and admin saw the email; the submitter (B) viewing their own submission did NOT see the email row. | PASS | TC86_submission_detail_email_poster_admin_only.png |
+| TC87 | Task board filters by task_state='open' | Open `task.php` (and index Latest Job Request). | Only tasks with `task_state='open'` appear; closed/completed tasks are excluded. | Board query uses `t.task_state='open'`; open task 2 appeared on `task.php`. | PASS | TC87_task_board_open_state_filter.png |
+| TC88 | Saved/Accepted/My Task pages work after refactor | Open `saved_tasks.php`, `accepted_task.php`, and `my_task.php` after the `task_acceptances` refactor. | All three pages load correctly with the new acceptance-based queries. | `accepted_task.php` (B), `my_task.php` (A), and `saved_tasks.php` (A) all returned HTTP 200. | PASS | TC88_saved_accepted_my_task_pages_work.png |
+
+## Multi-User Task Workflow Refactor Evidence (TC70-TC88)
+
+This section records the live runtime verification of the multi-user task workflow refactor (per-user `task_acceptances`, poster-level `task_state`, edit/close/delete task, edit/delete submission, and submission email privacy).
+
+- **Environment:** XAMPP (Apache + MariaDB/MySQL), database `software_evo_assignment`.
+- **Method:** Exercised against the running app over HTTP using per-user session cookies, with the database inspected directly to confirm persistence. Destructive lifecycle cases (close task, hard delete task, delete submission) were verified on a disposable task during the Phase 7 runtime run and are intentionally NOT re-run on the preserved evidence task so the screenshot data (task 2, submissions 3 & 4) stays intact.
+- **Preserved evidence data (do not delete):**
+  - Task — `task_id = 2` ("Logo design for Artizo coffee brand"), poster User A, `task_state = open`.
+  - User B submission — `submission_id = 3` (`solution_2_3_*.jpg`).
+  - User C submission — `submission_id = 4` (`solution_2_4_*.jpg`).
+- **Test accounts used:**
+  - User A — `user_id = 2` (`userA`), poster.
+  - User B — `user_id = 3` (`userB`), submitter.
+  - User C — `user_id = 4` (`userC`), second submitter.
+  - Admin — `user_id = 1` (`admin`), admin login `admin` / `Admin@123` via `admin_login.php`.
+  - Normal-user password for A/B/C: `Test@1234`.
+- **Result:** All 19 cases (TC70-TC88) passed.
 
 ## Latest Regression Fix Testing Evidence
 
@@ -300,6 +341,25 @@ This section records the live runtime verification of the latest regression fixe
 | TC67 | `TC67_support_tracking_wrong_email_blocked.png` |
 | TC68 | `TC68_full_database_setup_legacy_removed.png` |
 | TC69 | `TC69_regression_migration_legacy_removed.png` |
+| TC70 | `TC70_multi_user_task_still_open_after_first_submission.png` |
+| TC71 | `TC71_userB_accept_submit_task.png` |
+| TC72 | `TC72_userC_can_see_task_after_userB_submission.png` |
+| TC73 | `TC73_userC_accept_submit_same_task.png` |
+| TC74 | `TC74_poster_views_multiple_submissions.png` |
+| TC75 | `TC75_userB_blocked_from_userC_submission.png` |
+| TC76 | `TC76_userC_blocked_from_userB_submission.png` |
+| TC77 | `TC77_admin_views_all_submissions.png` |
+| TC78 | `TC78_poster_edit_own_task.png` |
+| TC79 | `TC79_other_user_cannot_edit_task.png` |
+| TC80 | `TC80_poster_close_task.png` |
+| TC81 | `TC81_poster_delete_task_safely.png` |
+| TC82 | `TC82_submitter_edit_own_submission.png` |
+| TC83 | `TC83_other_user_cannot_edit_submission.png` |
+| TC84 | `TC84_submitter_delete_submission_task_remains.png` |
+| TC85 | `TC85_submission_summary_email_hidden.png` |
+| TC86 | `TC86_submission_detail_email_poster_admin_only.png` |
+| TC87 | `TC87_task_board_open_state_filter.png` |
+| TC88 | `TC88_saved_accepted_my_task_pages_work.png` |
 
 ## Required Project Screenshot Evidence Checklist
 
@@ -379,3 +439,27 @@ Capture the following screenshots for submission. The underlying behaviour for e
 ### Support response in tracking (final fix — Issue 6)
 - [ ] `TC66_support_tracking_admin_response.png` — admin response + date shown when tracking with correct email.
 - [ ] `TC67_support_tracking_wrong_email_blocked.png` — wrong email cannot view the ticket.
+
+### Multi-user task workflow refactor (TC70-TC88)
+
+Preserved evidence data: task `id = 2`, User B submission `id = 3`, User C submission `id = 4` (do not delete).
+
+- [ ] `TC70_multi_user_task_still_open_after_first_submission.png` — task stays open after the first submission.
+- [ ] `TC71_userB_accept_submit_task.png` — User B accepts and submits.
+- [ ] `TC72_userC_can_see_task_after_userB_submission.png` — User C still sees the task after User B submits.
+- [ ] `TC73_userC_accept_submit_same_task.png` — User C accepts and submits the same task.
+- [ ] `TC74_poster_views_multiple_submissions.png` — poster sees both User B and User C submissions.
+- [ ] `TC75_userB_blocked_from_userC_submission.png` — User B blocked from User C's submission detail.
+- [ ] `TC76_userC_blocked_from_userB_submission.png` — User C blocked from User B's submission detail.
+- [ ] `TC77_admin_views_all_submissions.png` — admin views all submissions.
+- [ ] `TC78_poster_edit_own_task.png` — poster edits own task.
+- [ ] `TC79_other_user_cannot_edit_task.png` — other user cannot edit someone else's task.
+- [ ] `TC80_poster_close_task.png` — poster closes own task (use a throwaway task to preserve the evidence task).
+- [ ] `TC81_poster_delete_task_safely.png` — poster hard-deletes own task safely (use a throwaway task).
+- [ ] `TC82_submitter_edit_own_submission.png` — submitter edits own submission.
+- [ ] `TC83_other_user_cannot_edit_submission.png` — other user cannot edit someone else's submission.
+- [ ] `TC84_submitter_delete_submission_task_remains.png` — submitter deletes own submission, task remains (use a throwaway submission).
+- [ ] `TC85_submission_summary_email_hidden.png` — submission summary card hides email.
+- [ ] `TC86_submission_detail_email_poster_admin_only.png` — submission detail shows email only to poster/admin.
+- [ ] `TC87_task_board_open_state_filter.png` — task board filters using `task_state='open'`.
+- [ ] `TC88_saved_accepted_my_task_pages_work.png` — Saved Task, Accepted Task, and My Task pages work after the `task_acceptances` refactor.

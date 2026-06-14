@@ -18,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['task_id']) || !isset
 $task_id = intval($_POST['task_id']);
 $message = trim($_POST['message'] ?? "");
 
-// Only the user who accepted this task may submit work for it.
-$taskStmt = $conn->prepare("SELECT accepted_user_id, task_status FROM task WHERE task_id = ? LIMIT 1");
+// The task must exist and still be open.
+$taskStmt = $conn->prepare("SELECT post_user_id, task_state FROM task WHERE task_id = ? LIMIT 1");
 $taskStmt->bind_param("i", $task_id);
 $taskStmt->execute();
 $task = $taskStmt->get_result()->fetch_assoc();
@@ -30,8 +30,30 @@ if (!$task) {
     exit();
 }
 
-if (intval($task['accepted_user_id']) !== $uid) {
-    $_SESSION['feedback'] = "You can only submit work for a task you accepted.";
+if ($task['task_state'] !== 'open') {
+    $_SESSION['feedback'] = "This task is no longer open for submissions.";
+    header("Location: task_detail.php?id=" . $task_id);
+    exit();
+}
+
+// The user must currently hold an 'accepted' acceptance for this task.
+$accStmt = $conn->prepare("SELECT status FROM task_acceptances WHERE task_id = ? AND user_id = ? LIMIT 1");
+$accStmt->bind_param("ii", $task_id, $uid);
+$accStmt->execute();
+$acceptance = $accStmt->get_result()->fetch_assoc();
+
+if (!$acceptance || $acceptance['status'] !== 'accepted') {
+    $_SESSION['feedback'] = "You must accept this task before submitting.";
+    header("Location: task_detail.php?id=" . $task_id);
+    exit();
+}
+
+// Block a duplicate submission (one active submission per user per task).
+$dupStmt = $conn->prepare("SELECT submission_id FROM task_submissions WHERE task_id = ? AND submitter_user_id = ? LIMIT 1");
+$dupStmt->bind_param("ii", $task_id, $uid);
+$dupStmt->execute();
+if ($dupStmt->get_result()->fetch_assoc()) {
+    $_SESSION['feedback'] = "You have already submitted to this task. Edit your existing submission instead.";
     header("Location: task_detail.php?id=" . $task_id);
     exit();
 }
@@ -73,7 +95,7 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
     exit();
 }
 
-// Save a submission record so the task poster (and admin) can review it.
+// Save the submission record (per user).
 $insertStmt = $conn->prepare(
     "INSERT INTO task_submissions (task_id, submitter_user_id, file_path, message, status)
      VALUES (?, ?, ?, ?, 'submitted')"
@@ -81,15 +103,16 @@ $insertStmt = $conn->prepare(
 $insertStmt->bind_param("iiss", $task_id, $uid, $filename, $message);
 
 if (!$insertStmt->execute()) {
+    @unlink($targetPath);
     $_SESSION['feedback'] = "Unable to save submission.";
     header("Location: task_detail.php?id=" . $task_id);
     exit();
 }
 
-// Keep the legacy task_solution column and status in sync for compatibility.
-$updateStmt = $conn->prepare("UPDATE task SET task_solution = ?, task_status = 'submitted' WHERE task_id = ?");
-$updateStmt->bind_param("si", $filename, $task_id);
-$updateStmt->execute();
+// Mark this user's acceptance as submitted (does NOT affect other users or the task board).
+$updateAcc = $conn->prepare("UPDATE task_acceptances SET status = 'submitted' WHERE task_id = ? AND user_id = ?");
+$updateAcc->bind_param("ii", $task_id, $uid);
+$updateAcc->execute();
 
 $_SESSION['feedback'] = "Submission uploaded successfully.";
 header("Location: task_detail.php?id=" . $task_id);

@@ -38,9 +38,9 @@ if (!$submission) {
 }
 
 // Access control: only the task poster, the submitter, or an admin may view.
-$canView = ($isAdmin)
-    || ($uid === intval($submission['post_user_id']))
-    || ($uid === intval($submission['submitter_user_id']));
+$isPoster = ($uid === intval($submission['post_user_id']));
+$isSubmitter = ($uid === intval($submission['submitter_user_id']));
+$canView = ($isAdmin) || $isPoster || $isSubmitter;
 
 if (!$canView) {
     include("navbar.php");
@@ -76,6 +76,13 @@ include("navbar.php");
         <h1 class="inter-bold-44 mb-2 mt-3">Submission Detail</h1>
         <p class="inter-extralight-24 mb-4">Task: <strong><?php echo htmlspecialchars($submission['task_title']); ?></strong></p>
 
+        <?php if (isset($_SESSION['feedback'])): ?>
+            <div class="alert alert-info inter-extralight-24" role="status">
+                <?php echo htmlspecialchars($_SESSION['feedback']); ?>
+            </div>
+            <?php unset($_SESSION['feedback']); ?>
+        <?php endif; ?>
+
         <div class="row gx-4 gy-4">
             <div class="col-12 col-lg-8">
                 <?php if ($isImage): ?>
@@ -96,7 +103,9 @@ include("navbar.php");
                 <div class="card_border" style="padding: 30px;">
                     <h5 class="inter-bold-24 mb-3">Submitted by</h5>
                     <p class="inter-extralight-24 mb-1"><?php echo htmlspecialchars($submission['submitter_name']); ?></p>
-                    <p class="inter-extralight-15 mb-3"><?php echo htmlspecialchars($submission['submitter_email']); ?></p>
+                    <?php if ($isPoster || $isAdmin): ?>
+                        <p class="inter-extralight-15 mb-3"><?php echo htmlspecialchars($submission['submitter_email']); ?></p>
+                    <?php endif; ?>
                     <h5 class="inter-bold-24 mb-2">Status</h5>
                     <p class="inter-extralight-24 mb-3"><?php echo htmlspecialchars(ucfirst($submission['status'])); ?></p>
                     <h5 class="inter-bold-24 mb-2">Submitted at</h5>
@@ -105,6 +114,17 @@ include("navbar.php");
                     <p class="inter-extralight-24 mb-0">
                         <?php echo !empty($submission['message']) ? nl2br(htmlspecialchars($submission['message'])) : 'No message provided.'; ?>
                     </p>
+
+                    <?php if ($isSubmitter): ?>
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a href="edit_submission.php?id=<?php echo intval($submission['submission_id']); ?>"
+                            class="btn btn-outline-black inter-medium-25 border_black">Edit Submission</a>
+                        <form method="POST" action="delete_submission.php" onsubmit="return confirm('Delete your submission? This removes your file but keeps the task; you can submit again later.');">
+                            <input type="hidden" name="submission_id" value="<?php echo intval($submission['submission_id']); ?>">
+                            <button type="submit" class="btn btn-outline-black inter-medium-25 border_black">Delete Submission</button>
+                        </form>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
