@@ -27,12 +27,12 @@ function sendSignupOtpEmail($email, $otpCode)
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'chanjiajun321@gmail.com';
-    $mail->Password = 'dhzt vlda byqz qbmn';
+    $mail->Username = 'artizoartworksharing@gmail.com';
+    $mail->Password = 'colr esiz ywoe loqs';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
-    $mail->setFrom('chanjiajun321@gmail.com', 'Artizo');
+    $mail->setFrom('artizoartworksharing@gmail.com', 'Artizo');
     $mail->addAddress($email);
     $mail->isHTML(true);
     $mail->Subject = 'Artizo Account Verification OTP';

@@ -18,13 +18,13 @@ function sendResetEmail($email, $resetLink)
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com'; // Use your email provider's SMTP server
         $mail->SMTPAuth = true;
-        $mail->Username = 'chanjiajun321@gmail.com'; // Your email
-        $mail->Password = 'dhzt vlda byqz qbmn'; // Your email password
+        $mail->Username = 'artizoartworksharing@gmail.com'; // Your email
+        $mail->Password = 'colr esiz ywoe loqs'; // Your email password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
         // Recipients
-        $mail->setFrom('chanjiajun321@gmail.com', 'Artizo');
+        $mail->setFrom('artizoartworksharing@gmail.com', 'Artizo');
         $mail->addAddress($email); // Add recipient email
 
         // Content
